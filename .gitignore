@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# MUTI
+/uploads
+!/uploads/.gitkeep
+.env
+.env.local
+/src/generated
+playwright-report/
+test-results/
+prisma/seed.mjs

@@ -1,0 +1,46 @@
+# Local development stack. Production runs on Coolify, which provides its own
+# Postgres service and builds the Dockerfile directly (section 12).
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: muti
+      POSTGRES_PASSWORD: muti_dev_pass
+      POSTGRES_DB: muti
+    ports:
+      - "5432:5432"
+    volumes:
+      - muti-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U muti -d muti"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://muti:muti_dev_pass@postgres:5432/muti?schema=public
+      AUTH_SECRET: dev-only-secret-change-in-production-0123456789abcdef
+      AUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      ADMIN_EMAIL: mymensinghultrasound@gmail.com
+      ADMIN_PASSWORD: ChangeMe123!
+      UPLOAD_DIR: /app/uploads
+      NOTIFY_EMAIL: mymensinghultrasound@gmail.com
+    ports:
+      - "3000:3000"
+    volumes:
+      - muti-uploads:/app/uploads
+
+volumes:
+  muti-postgres:
+  muti-uploads:

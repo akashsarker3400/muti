@@ -1,26 +1,307 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+  MUTI design system — LIGHT THEME ONLY.
+  There is no dark mode and no theme toggle by design (section 1 & 4 of the spec).
+  Palette derives from the logo: navy ring, red ring, yellow star.
+*/
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --font-sans: var(--font-bangla), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-bangla: var(--font-hind-siliguri);
+  --font-latin: var(--font-inter);
+  --font-heading: var(--font-sans);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Brand */
+  --color-brand: var(--brand);
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-soft: var(--brand-soft);
+  --color-accent-red: var(--accent-red);
+  --color-highlight: var(--highlight);
+  --color-whatsapp: var(--whatsapp);
+  --color-bg-soft: var(--bg-soft);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+
+  /* shadcn tokens */
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
+  --radius-3xl: 1.5rem;
+  --radius-4xl: 2rem;
+
+  --shadow-card: 0 1px 2px 0 rgb(27 42 107 / 0.04), 0 1px 3px 0 rgb(27 42 107 / 0.06);
+  --shadow-card-hover: 0 8px 24px -6px rgb(27 42 107 / 0.16);
+
+  --container-content: 1200px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  color-scheme: light;
+
+  /* Brand palette (section 4) */
+  --brand: #1b2a6b;
+  --brand-dark: #12204f;
+  --brand-soft: #eef1f9;
+  --accent-red: #d62828;
+  --highlight: #f4c20d;
+  --whatsapp: #25d366;
+  --bg-soft: #f5f7fb;
+  --success: #1e8e3e;
+  --warning: #b26a00;
+  --error: #c62828;
+
+  /* shadcn semantic tokens mapped onto the brand palette */
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #1b2a6b;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f7fb;
+  --secondary-foreground: #1b2a6b;
+  --muted: #f5f7fb;
+  --muted-foreground: #5b6472;
+  --accent: #eef1f9;
+  --accent-foreground: #1b2a6b;
+  --destructive: #c62828;
+  --border: #e3e7ee;
+  --input: #e3e7ee;
+  --ring: #1b2a6b;
+
+  --chart-1: #1b2a6b;
+  --chart-2: #3b56b8;
+  --chart-3: #d62828;
+  --chart-4: #f4c20d;
+  --chart-5: #5b6472;
+
+  --radius: 0.625rem;
+
+  --sidebar: #12204f;
+  --sidebar-foreground: #e8ebf5;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #12204f;
+  --sidebar-accent: #24356f;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #2b3c78;
+  --sidebar-ring: #f4c20d;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans antialiased;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* Bangla glyphs need extra leading to avoid clipping (section 4). */
+    line-height: 1.7;
+  }
+
+  /* Latin-only surfaces (fees, codes, English UI) get Inter metrics. */
+  :lang(en) body,
+  .font-latin {
+    font-family: var(--font-latin), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply text-balance font-semibold tracking-tight text-[color:var(--brand)];
+    line-height: 1.35;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-[color:var(--brand)];
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--brand) 18%, white);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* Shared page shell: 1200px max content width (section 4) */
+  .container-content {
+    width: 100%;
+    max-width: var(--container-content);
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .container-content {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  /* Section rhythm: 40px mobile / 64px desktop (section 4) */
+  .section {
+    padding-block: 2.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .section {
+      padding-block: 4rem;
+    }
+  }
+
+  /* Type scale (section 4) */
+  .h1 {
+    font-size: 1.75rem;
+    line-height: 2.25rem;
+  }
+
+  .h2 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  .h3 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .h1 {
+      font-size: 2.25rem;
+      line-height: 2.75rem;
+    }
+    .h2 {
+      font-size: 1.75rem;
+      line-height: 2.25rem;
+    }
+    .h3 {
+      font-size: 1.375rem;
+      line-height: 1.875rem;
+    }
+  }
+
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--muted-foreground)];
+  }
+
+  /* Rich-text (Tiptap HTML) rendering for notices, courses, blog, pages */
+  .prose-muti {
+    @apply text-[color:var(--foreground)];
+  }
+  .prose-muti > * + * {
+    margin-top: 1rem;
+  }
+  .prose-muti h2 {
+    font-size: 1.375rem;
+    line-height: 1.9rem;
+    margin-top: 1.75rem;
+  }
+  .prose-muti h3 {
+    font-size: 1.125rem;
+    line-height: 1.7rem;
+    margin-top: 1.5rem;
+  }
+  .prose-muti p {
+    @apply text-base;
+  }
+  .prose-muti a {
+    @apply font-medium text-[color:var(--brand)] underline underline-offset-2;
+  }
+  .prose-muti ul,
+  .prose-muti ol {
+    @apply ps-6;
+  }
+  .prose-muti ul {
+    list-style: disc;
+  }
+  .prose-muti ol {
+    list-style: decimal;
+  }
+  .prose-muti li + li {
+    margin-top: 0.35rem;
+  }
+  .prose-muti blockquote {
+    @apply border-s-4 border-[color:var(--highlight)] bg-[color:var(--bg-soft)] px-4 py-2 italic;
+  }
+  .prose-muti table {
+    @apply w-full border-collapse text-sm;
+  }
+  .prose-muti th,
+  .prose-muti td {
+    @apply border border-[color:var(--border)] px-3 py-2 text-start;
+  }
+  .prose-muti th {
+    @apply bg-[color:var(--bg-soft)] font-semibold;
+  }
+  .prose-muti img {
+    @apply h-auto max-w-full rounded-xl;
+  }
+}
+
+@layer utilities {
+  /* Tabular figures for fee tables and counters */
+  .nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Respect reduced-motion for the counters and carousels */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
