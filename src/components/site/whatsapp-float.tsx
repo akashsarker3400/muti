@@ -1,40 +1,48 @@
-import { getTranslations } from "next-intl/server";
+"use client";
+
+import { useTranslations } from "next-intl";
 
 import { WhatsAppIcon } from "@/components/site/icons";
-import type { Locale } from "@/i18n/routing";
-import { pick } from "@/lib/format";
-import type { SiteSettings } from "@/lib/site-settings";
+import { usePathname } from "@/i18n/navigation";
+import { cn } from "cn";
 import { waLink } from "@/lib/whatsapp";
 
 /**
  * Floating WhatsApp button, bottom-right on every public page (section 4).
- * Course pages override the prefilled text through `message`.
+ *
+ * It lives in the layout so it appears exactly once, and picks the prefilled
+ * message from the current path: course pages get "আমি {course} কোর্স সম্পর্কে
+ * জানতে চাই", everything else gets the default message from Site Settings.
  */
-export async function WhatsAppFloat({
-  settings,
-  locale,
-  message,
+export function WhatsAppFloat({
+  phone,
+  defaultMessage,
+  courseMessages,
 }: {
-  settings: SiteSettings;
-  locale: Locale;
-  message?: string;
+  phone: string;
+  defaultMessage: string;
+  /** slug -> prefilled message, built server-side from the published courses. */
+  courseMessages: Record<string, string>;
 }) {
-  const t = await getTranslations("common");
-  const text =
-    message ??
-    pick(
-      locale,
-      settings.whatsapp.defaultMessageBn,
-      settings.whatsapp.defaultMessageEn,
-    );
+  const t = useTranslations("common");
+  const pathname = usePathname();
+
+  const slug = pathname.match(/^\/courses\/([^/]+)\/?$/)?.[1];
+  const message = (slug && courseMessages[slug]) || defaultMessage;
+  // Course detail pages have their own sticky WhatsApp button on small
+  // screens, so the float would be a duplicate there.
+  const hiddenOnMobile = Boolean(slug);
 
   return (
     <a
-      href={waLink(settings.contact.whatsapp, text)}
+      href={waLink(phone, message)}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={t("whatsapp")}
-      className="fixed end-4 bottom-4 z-40 grid size-14 place-items-center rounded-full bg-[color:var(--whatsapp)] text-white shadow-lg transition hover:scale-105 hover:bg-[color-mix(in_oklab,var(--whatsapp),black_12%)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--whatsapp)] print:hidden"
+      className={cn(
+        "fixed end-4 bottom-4 z-40 grid size-14 place-items-center rounded-full bg-[color:var(--whatsapp)] text-white shadow-lg transition hover:scale-105 hover:bg-[color-mix(in_oklab,var(--whatsapp),black_12%)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--whatsapp)] print:hidden",
+        hiddenOnMobile && "hidden md:grid",
+      )}
     >
       <WhatsAppIcon className="size-7" />
     </a>

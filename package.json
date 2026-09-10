@@ -57,6 +57,7 @@
     "react-dom": "19.2.8",
     "react-hook-form": "^7.87.0",
     "recharts": "^3.10.1",
+    "sanitize-html": "^2.17.5",
     "shadcn": "^4.21.0",
     "sharp": "^0.35.4",
     "sonner": "^2.0.8",
@@ -65,6 +66,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
@@ -72,6 +74,7 @@
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sanitize-html": "^2.16.1",
     "@vitejs/plugin-react": "^6.1.1",
     "dotenv": "^17.4.2",
     "esbuild": "^0.28.2",

@@ -10,8 +10,9 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
-      // Generated Prisma client — not our code to lint.
+      // Generated / bundled artefacts — not our code to lint.
       "src/generated/**",
+      "prisma/seed.mjs",
     ],
   },
   {

@@ -97,10 +97,11 @@ export default async function SiteLayout({
   }
   setRequestLocale(locale);
 
-  const [settings, courses, t] = await Promise.all([
+  const [settings, courses, t, courseT] = await Promise.all([
     getSiteSettings(),
     getPublishedCourses(),
     getTranslations("common"),
+    getTranslations("course"),
   ]);
 
   return (
@@ -122,7 +123,22 @@ export default async function SiteLayout({
           </main>
 
           <SiteFooter settings={settings} locale={locale} courses={courses} />
-          <WhatsAppFloat settings={settings} locale={locale} />
+          <WhatsAppFloat
+            phone={settings.contact.whatsapp}
+            defaultMessage={pick(
+              locale,
+              settings.whatsapp.defaultMessageBn,
+              settings.whatsapp.defaultMessageEn,
+            )}
+            courseMessages={Object.fromEntries(
+              courses.map((course) => [
+                course.slug,
+                courseT("whatsappPrefill", {
+                  course: pick(locale, course.nameBn, course.nameEn),
+                }),
+              ]),
+            )}
+          />
           <Toaster position="top-center" richColors />
         </NextIntlClientProvider>
 

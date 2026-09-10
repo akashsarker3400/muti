@@ -74,7 +74,7 @@ export async function SiteHeader({
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className="flex min-h-9 items-center rounded-md px-2.5 text-sm font-medium text-[color:var(--foreground)] transition hover:bg-[color:var(--bg-soft)] hover:text-[color:var(--brand)]"
+                  className="flex min-h-9 items-center rounded-md px-2.5 text-sm font-medium whitespace-nowrap text-[color:var(--foreground)] transition hover:bg-[color:var(--bg-soft)] hover:text-[color:var(--brand)]"
                 >
                   {nav(item.labelKey)}
                 </Link>
