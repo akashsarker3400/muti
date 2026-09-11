@@ -122,6 +122,14 @@ with no cache to purge.
 5. Health check: `GET /api/health` (it verifies the database too).
 6. Put Cloudflare in front for TLS and caching.
 
+**Step-by-step, in Bangla, including DNS, backups and a troubleshooting
+table: [`docs/deploy-coolify-bn.md`](docs/deploy-coolify-bn.md).**
+
+Two things are easy to miss and expensive to get wrong: `NEXT_PUBLIC_SITE_URL`
+must be ticked as a _build_ variable (it is inlined at build time, so fixing it
+later needs a full rebuild), and without the `/app/uploads` volume every
+uploaded image is lost on the next deploy.
+
 On start the container runs `prisma migrate deploy`, then the seed — which
 only creates content when the `User` table is empty, so a redeploy never
 resurrects notices or courses that staff deleted.

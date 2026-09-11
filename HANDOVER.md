@@ -20,6 +20,10 @@ variable, or a file in the repository.
 
 ## 1. Must be done before launch
 
+The deployment itself is written up step by step in
+[`docs/deploy-coolify-bn.md`](docs/deploy-coolify-bn.md); rows 1.2–1.6 below are
+the values that guide asks for.
+
 | #   | What                                    | Where                                                                   | Why it matters                                                                                                                                                    |
 | --- | --------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1.1 | **Domain name**                         | Buy it, then point Cloudflare at Coolify                                | The spec notes the poster domain "MUTI.Ultrasound.com" is not a valid domain. `mutibd.com` was suggested but not bought.                                          |
