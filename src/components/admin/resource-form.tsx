@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -19,6 +19,25 @@ import { cn } from "cn";
 export type SaveResult =
   | { ok: true; id?: string }
   | { ok: false; errors?: Record<string, string>; error?: string };
+
+type Lang = "bn" | "en";
+
+/** Where each field lives, so a validation error can be brought into view. */
+type FieldPlace = { sectionId: string; lang?: Lang; label: string };
+
+function indexFields(sections: FormSection[]): Map<string, FieldPlace> {
+  const places = new Map<string, FieldPlace>();
+  for (const section of sections) {
+    for (const field of section.fields) {
+      places.set(field.name, {
+        sectionId: section.id,
+        lang: field.lang,
+        label: field.label,
+      });
+    }
+  }
+  return places;
+}
 
 /**
  * Renders an admin form from field definitions (section 7). Bilingual fields
@@ -45,6 +64,11 @@ export function ResourceForm({
   const [values, setValues] = useState<FormValues>(defaultValues);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, startTransition] = useTransition();
+  // Both tab levels are controlled so a failed save can open the tab that
+  // holds the offending field — an error under a closed tab is invisible.
+  const [section, setSection] = useState(sections[0]!.id);
+  const [lang, setLang] = useState<Lang>("bn");
+  const places = useMemo(() => indexFields(sections), [sections]);
 
   function setValue(name: string, value: FormValues[string]) {
     setValues((current) => ({ ...current, [name]: value }));
@@ -70,7 +94,7 @@ export function ResourceForm({
 
       if (result.errors) {
         setErrors(result.errors);
-        toast.error("কিছু ফিল্ড ঠিক করতে হবে।");
+        revealErrors(result.errors);
         return;
       }
 
@@ -78,24 +102,72 @@ export function ResourceForm({
     });
   }
 
+  /**
+   * Name the fields that failed, open the tab holding the first one and put
+   * the cursor there. Field order follows the form, not the server's object.
+   */
+  function revealErrors(fieldErrors: Record<string, string>) {
+    const failed = [...places.entries()].filter(([name]) => fieldErrors[name]);
+    // Errors on fields this form does not render (e.g. a unique-slug clash
+    // reported under another key) still need to be surfaced somewhere.
+    const unplaced = Object.keys(fieldErrors).filter((name) => !places.has(name));
+
+    const lines = [
+      ...failed.map(([name, place]) => `${place.label}: ${fieldErrors[name]}`),
+      ...unplaced.map((name) => `${name}: ${fieldErrors[name]}`),
+    ];
+
+    toast.error("কিছু ফিল্ড ঠিক করতে হবে।", {
+      description: (
+        <ul className="mt-1 list-disc space-y-0.5 ps-4">
+          {lines.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+      ),
+      duration: 8000,
+    });
+
+    const first = failed[0];
+    if (!first) return;
+    const [name, place] = first;
+    setSection(place.sectionId);
+    if (place.lang) setLang(place.lang);
+
+    // The tab content mounts on the next frame; only then can it be focused.
+    requestAnimationFrame(() => {
+      const wrapper = document.querySelector<HTMLElement>(`[data-field="${name}"]`);
+      wrapper?.scrollIntoView({ block: "center", behavior: "smooth" });
+      document.getElementById(`field-${name}`)?.focus({ preventScroll: true });
+    });
+  }
+
+  const sectionErrorCount = (sectionId: string) =>
+    [...places.entries()].filter(
+      ([name, place]) => place.sectionId === sectionId && errors[name],
+    ).length;
+
   const multiSection = sections.length > 1;
 
   const body = multiSection ? (
-    <Tabs defaultValue={sections[0]!.id}>
+    <Tabs value={section} onValueChange={setSection}>
       <TabsList className="mb-4 flex-wrap">
-        {sections.map((section) => (
-          <TabsTrigger key={section.id} value={section.id}>
-            {section.label}
+        {sections.map((item) => (
+          <TabsTrigger key={item.id} value={item.id}>
+            {item.label}
+            <ErrorDot count={sectionErrorCount(item.id)} />
           </TabsTrigger>
         ))}
       </TabsList>
-      {sections.map((section) => (
-        <TabsContent key={section.id} value={section.id}>
+      {sections.map((item) => (
+        <TabsContent key={item.id} value={item.id}>
           <SectionBody
-            section={section}
+            section={item}
             values={values}
             errors={errors}
             setValue={setValue}
+            lang={lang}
+            setLang={setLang}
           />
         </TabsContent>
       ))}
@@ -106,6 +178,8 @@ export function ResourceForm({
       values={values}
       errors={errors}
       setValue={setValue}
+      lang={lang}
+      setLang={setLang}
     />
   );
 
@@ -134,18 +208,37 @@ export function ResourceForm({
   );
 }
 
+/** Red badge on a tab trigger so a hidden error is still visible. */
+function ErrorDot({ count }: { count: number }) {
+  if (count === 0) return null;
+  return (
+    <span
+      className="ms-1.5 inline-flex min-w-4 items-center justify-center rounded-full bg-[color:var(--error)] px-1 font-latin text-[10px] leading-4 font-bold text-white"
+      aria-label={`${count} ভুল`}
+    >
+      {count}
+    </span>
+  );
+}
+
 function SectionBody({
   section,
   values,
   errors,
   setValue,
+  lang,
+  setLang,
 }: {
   section: FormSection;
   values: FormValues;
   errors: Record<string, string>;
   setValue: (name: string, value: FormValues[string]) => void;
+  lang: Lang;
+  setLang: (lang: Lang) => void;
 }) {
   const bilingual = section.fields.filter((field) => field.lang);
+  const langErrorCount = (which: Lang) =>
+    bilingual.filter((field) => field.lang === which && errors[field.name]).length;
   const plain = section.fields.filter((field) => !field.lang);
   // The BN/EN block sits where the first bilingual field was declared.
   const bilingualIndex = section.fields.findIndex((field) => field.lang);
@@ -164,10 +257,16 @@ function SectionBody({
       <FieldGrid fields={before} values={values} errors={errors} setValue={setValue} />
 
       {bilingual.length > 0 && (
-        <Tabs defaultValue="bn">
+        <Tabs value={lang} onValueChange={(value) => setLang(value as Lang)}>
           <TabsList className="mb-3">
-            <TabsTrigger value="bn">বাংলা</TabsTrigger>
-            <TabsTrigger value="en">English</TabsTrigger>
+            <TabsTrigger value="bn">
+              বাংলা
+              <ErrorDot count={langErrorCount("bn")} />
+            </TabsTrigger>
+            <TabsTrigger value="en">
+              English
+              <ErrorDot count={langErrorCount("en")} />
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="bn">
             <FieldGrid
@@ -250,7 +349,10 @@ function FieldControl({
     // `min-w-0` lets the cell shrink below its content's intrinsic width —
     // without it a grid item's default `min-width: auto` pushes the whole
     // form wider than a phone screen.
-    <div className={cn("min-w-0 space-y-1.5", wide && "md:col-span-2")}>
+    <div
+      data-field={field.name}
+      className={cn("min-w-0 space-y-1.5", wide && "md:col-span-2")}
+    >
       {field.type !== "checkbox" && (
         <Label htmlFor={id}>
           {field.label}
