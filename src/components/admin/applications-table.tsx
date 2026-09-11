@@ -12,7 +12,8 @@ import {
 } from "@/app/actions/admin-applications";
 import { setApplicationSource } from "@/app/actions/admin-leads";
 import { AdminBadge } from "@/components/admin/ui";
-import { LEAD_SOURCE_LABELS_BN } from "@/lib/lead-source";
+import { LEAD_SOURCE_LABELS } from "@/lib/lead-source";
+import { langOf } from "@/lib/lang";
 import {
   APPLICATION_STATUS_LABELS,
   ApplicationStatusSelect,
@@ -64,15 +65,15 @@ export type AdminApplication = {
 };
 
 const EMPLOYMENT_LABELS: Record<string, string> = {
-  GOVT: "সরকারি",
-  PRIVATE: "বেসরকারি",
-  OTHER: "অন্যান্য",
+  GOVT: "Government",
+  PRIVATE: "Private",
+  OTHER: "Other",
 };
 
 const TYPE_LABELS: Record<string, string> = {
-  ADMISSION: "ভর্তি আবেদন",
-  FREE_CLASS: "ফ্রি ক্লাস",
-  CONTACT: "যোগাযোগ",
+  ADMISSION: "Admission application",
+  FREE_CLASS: "Free class",
+  CONTACT: "Contact",
 };
 
 /** Applications inbox with selection, bulk status change and a detail view. */
@@ -97,11 +98,11 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
     startTransition(async () => {
       const result = await bulkSetStatus([...selected], status);
       if (result.ok) {
-        toast.success(`${result.count} টি আবেদনের অবস্থা পরিবর্তন হয়েছে।`);
+        toast.success(`Status changed for ${result.count} applications.`);
         setSelected(new Set());
         router.refresh();
       } else {
-        toast.error(result.error ?? "পরিবর্তন করা যায়নি।");
+        toast.error(result.error ?? "The change could not be saved.");
       }
     });
   }
@@ -110,11 +111,11 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
     startTransition(async () => {
       const result = await deleteApplication(id);
       if (result.ok) {
-        toast.success("মুছে ফেলা হয়েছে।");
+        toast.success("Deleted.");
         setDetail(null);
         router.refresh();
       } else {
-        toast.error(result.error ?? "মুছে ফেলা যায়নি।");
+        toast.error(result.error ?? "Could not delete.");
       }
     });
   }
@@ -123,10 +124,8 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
     <>
       {selected.size > 0 && (
         <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-[color:var(--brand)]/20 bg-[color:var(--brand-soft)] p-3 text-sm">
-          <span className="font-medium">{selected.size} টি বাছাই করা হয়েছে</span>
-          <span className="text-[color:var(--muted-foreground)]">
-            অবস্থা পরিবর্তন করুন:
-          </span>
+          <span className="font-medium">{selected.size} selected</span>
+          <span className="text-[color:var(--muted-foreground)]">Change status:</span>
           {Object.entries(APPLICATION_STATUS_LABELS).map(([value, label]) => (
             <Button
               key={value}
@@ -150,7 +149,7 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
               <th scope="col" className="w-10 px-3 py-3">
                 <input
                   type="checkbox"
-                  aria-label="সব বাছাই করুন"
+                  aria-label="Select all"
                   checked={allSelected}
                   onChange={(event) =>
                     setSelected(
@@ -163,34 +162,34 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                 />
               </th>
               <th scope="col" className="px-4 py-3 text-start font-semibold">
-                নাম ও ফোন
+                Name & phone
               </th>
               <th scope="col" className="px-4 py-3 text-start font-semibold">
-                ধরন
+                Type
               </th>
               <th
                 scope="col"
                 className="hidden px-4 py-3 text-start font-semibold lg:table-cell"
               >
-                কোর্স
+                Course
               </th>
               <th
                 scope="col"
                 className="hidden px-4 py-3 text-start font-semibold lg:table-cell"
               >
-                সোর্স
+                Source
               </th>
               <th
                 scope="col"
                 className="hidden px-4 py-3 text-start font-semibold sm:table-cell"
               >
-                তারিখ
+                Date
               </th>
               <th scope="col" className="px-4 py-3 text-start font-semibold">
-                অবস্থা
+                Status
               </th>
               <th scope="col" className="px-4 py-3 text-end font-semibold">
-                কাজ
+                Actions
               </th>
             </tr>
           </thead>
@@ -200,14 +199,16 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                 <td className="px-3 py-2.5">
                   <input
                     type="checkbox"
-                    aria-label={`${row.name} বাছাই করুন`}
+                    aria-label={`Select ${row.name}`}
                     checked={selected.has(row.id)}
                     onChange={() => toggle(row.id)}
                     className="size-4 accent-[color:var(--brand)]"
                   />
                 </td>
                 <td className="px-4 py-2.5">
-                  <p className="font-medium">{row.name}</p>
+                  <p className="font-medium" lang={langOf(row.name)}>
+                    {row.name}
+                  </p>
                   <p className="font-latin text-xs text-[color:var(--muted-foreground)]">
                     {displayPhone(row.phone)}
                   </p>
@@ -221,8 +222,8 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                 <td className="hidden px-4 py-2.5 lg:table-cell">
                   {row.source ? (
                     <AdminBadge tone="neutral">
-                      {LEAD_SOURCE_LABELS_BN[
-                        row.source as keyof typeof LEAD_SOURCE_LABELS_BN
+                      {LEAD_SOURCE_LABELS[
+                        row.source as keyof typeof LEAD_SOURCE_LABELS
                       ] ?? row.source}
                     </AdminBadge>
                   ) : (
@@ -230,7 +231,7 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                   )}
                 </td>
                 <td className="hidden px-4 py-2.5 whitespace-nowrap sm:table-cell">
-                  {formatDate(row.createdAt, "bn")}
+                  {formatDate(row.createdAt, "en")}
                 </td>
                 <td className="px-4 py-2.5">
                   <ApplicationStatusSelect id={row.id} status={row.status} />
@@ -241,12 +242,12 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                       type="button"
                       variant="ghost"
                       size="icon-sm"
-                      aria-label="বিস্তারিত"
+                      aria-label="Details"
                       onClick={() => setDetail(row)}
                     >
                       <Eye className="size-4" aria-hidden="true" />
                     </Button>
-                    <Button asChild variant="ghost" size="icon-sm" aria-label="কল">
+                    <Button asChild variant="ghost" size="icon-sm" aria-label="Call">
                       <a href={telHref(row.phone)}>
                         <Phone className="size-4" aria-hidden="true" />
                       </a>
@@ -278,68 +279,71 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
           {detail && (
             <>
               <DialogHeader>
-                <DialogTitle>{detail.name}</DialogTitle>
+                <DialogTitle lang={langOf(detail.name)}>{detail.name}</DialogTitle>
               </DialogHeader>
 
               <dl className="space-y-2.5 text-sm">
-                <Row label="ধরন" value={TYPE_LABELS[detail.type] ?? detail.type} />
-                <Row label="ফোন" value={displayPhone(detail.phone)} latin />
+                <Row label="Type" value={TYPE_LABELS[detail.type] ?? detail.type} />
+                <Row label="Phone" value={displayPhone(detail.phone)} latin />
                 {detail.whatsapp && (
                   <Row label="WhatsApp" value={displayPhone(detail.whatsapp)} latin />
                 )}
-                {detail.email && <Row label="ইমেইল" value={detail.email} latin />}
-                {detail.courseName && <Row label="কোর্স" value={detail.courseName} />}
-                {detail.batchName && <Row label="ব্যাচ" value={detail.batchName} />}
+                {detail.email && <Row label="Email" value={detail.email} latin />}
+                {detail.courseName && <Row label="Course" value={detail.courseName} />}
+                {detail.batchName && <Row label="Batch" value={detail.batchName} />}
                 {detail.qualification && (
-                  <Row label="যোগ্যতা" value={detail.qualification} />
+                  <Row label="Qualification" value={detail.qualification} />
                 )}
                 {detail.fatherName && (
-                  <Row label="পিতার নাম" value={detail.fatherName} />
+                  <Row label="Father's name" value={detail.fatherName} />
                 )}
                 {detail.motherName && (
-                  <Row label="মাতার নাম" value={detail.motherName} />
+                  <Row label="Mother's name" value={detail.motherName} />
                 )}
                 {detail.dateOfBirth && (
-                  <Row label="জন্মতারিখ" value={formatDate(detail.dateOfBirth, "bn")} />
+                  <Row
+                    label="Date of birth"
+                    value={formatDate(detail.dateOfBirth, "en")}
+                  />
                 )}
-                {detail.religion && <Row label="ধর্ম" value={detail.religion} />}
+                {detail.religion && <Row label="Religion" value={detail.religion} />}
                 {detail.bloodGroup && (
-                  <Row label="রক্তের গ্রুপ" value={detail.bloodGroup} latin />
+                  <Row label="Blood group" value={detail.bloodGroup} latin />
                 )}
                 {detail.employment && (
                   <Row
-                    label="পেশা"
+                    label="Employment"
                     value={EMPLOYMENT_LABELS[detail.employment] ?? detail.employment}
                   />
                 )}
                 {detail.nationalId && (
-                  <Row label="জাতীয় পরিচয়পত্র" value={detail.nationalId} latin />
+                  <Row label="National ID" value={detail.nationalId} latin />
                 )}
                 {detail.presentAddress && (
-                  <Row label="বর্তমান ঠিকানা" value={detail.presentAddress} />
+                  <Row label="Present address" value={detail.presentAddress} />
                 )}
                 {detail.permanentAddress &&
                   detail.permanentAddress !== detail.presentAddress && (
-                    <Row label="স্থায়ী ঠিকানা" value={detail.permanentAddress} />
+                    <Row label="Permanent address" value={detail.permanentAddress} />
                   )}
                 {detail.medicalCollege && (
-                  <Row label="মেডিকেল কলেজ" value={detail.medicalCollege} />
+                  <Row label="Medical college" value={detail.medicalCollege} />
                 )}
                 {detail.bmdc && <Row label="BMDC" value={detail.bmdc} latin />}
                 {detail.education.length > 0 && (
                   <div>
                     <dt className="text-xs text-[color:var(--muted-foreground)]">
-                      শিক্ষাগত যোগ্যতা
+                      Education
                     </dt>
                     <dd className="mt-1 overflow-x-auto">
                       <table className="w-full text-xs">
                         <thead>
                           <tr className="text-start text-[color:var(--muted-foreground)]">
-                            <th className="pe-3 text-start font-medium">পরীক্ষা</th>
-                            <th className="pe-3 text-start font-medium">সাল</th>
+                            <th className="pe-3 text-start font-medium">Exam</th>
+                            <th className="pe-3 text-start font-medium">Year</th>
                             <th className="pe-3 text-start font-medium">GPA</th>
                             <th className="text-start font-medium">
-                              বোর্ড/বিশ্ববিদ্যালয়
+                              Board / university
                             </th>
                           </tr>
                         </thead>
@@ -357,23 +361,23 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                     </dd>
                   </div>
                 )}
-                {detail.location && <Row label="এলাকা" value={detail.location} />}
+                {detail.location && <Row label="Area" value={detail.location} />}
                 {detail.preferredDate && (
                   <Row
-                    label="পছন্দের তারিখ"
-                    value={formatDate(detail.preferredDate, "bn")}
+                    label="Preferred date"
+                    value={formatDate(detail.preferredDate, "en")}
                   />
                 )}
-                <Row label="জমা" value={formatDate(detail.createdAt, "bn")} />
+                <Row label="Submitted" value={formatDate(detail.createdAt, "en")} />
                 {detail.referralCode && (
-                  <Row label="রেফারেল কোড" value={detail.referralCode} latin />
+                  <Row label="Referral code" value={detail.referralCode} latin />
                 )}
                 {detail.campaign && (
-                  <Row label="ক্যাম্পেইন" value={detail.campaign} latin />
+                  <Row label="Campaign" value={detail.campaign} latin />
                 )}
                 {detail.message && (
                   <div>
-                    <dt className="text-[color:var(--muted-foreground)]">মেসেজ</dt>
+                    <dt className="text-[color:var(--muted-foreground)]">Message</dt>
                     <dd className="mt-1 rounded-lg bg-[color:var(--bg-soft)] p-3 whitespace-pre-wrap">
                       {detail.message}
                     </dd>
@@ -407,7 +411,7 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                 <Button asChild variant="outline" size="cta">
                   <a href={telHref(detail.phone)}>
                     <Phone className="size-4" aria-hidden="true" />
-                    কল করুন
+                    Call
                   </a>
                 </Button>
                 <Button
@@ -419,7 +423,7 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                   onClick={() => remove(detail.id)}
                 >
                   <Trash2 className="size-4" aria-hidden="true" />
-                  মুছে ফেলুন
+                  Delete
                 </Button>
               </div>
             </>
@@ -465,7 +469,7 @@ function SourceEditor({
         htmlFor={`source-${id}`}
         className="text-sm font-medium text-[color:var(--muted-foreground)]"
       >
-        সোর্স
+        Source
       </label>
       <select
         id={`source-${id}`}
@@ -476,17 +480,17 @@ function SourceEditor({
           startTransition(async () => {
             const result = await setApplicationSource(id, next);
             if (result.ok) {
-              toast.success("সোর্স পরিবর্তন হয়েছে।");
+              toast.success("Source changed.");
               onSaved();
             } else {
-              toast.error(result.error ?? "পরিবর্তন করা যায়নি।");
+              toast.error(result.error ?? "The change could not be saved.");
             }
           });
         }}
         className="mt-1 h-11 w-full rounded-lg border border-[color:var(--input)] bg-white px-3 text-sm focus-visible:border-[color:var(--brand)] focus-visible:outline-none"
       >
-        <option value="">— জানা নেই —</option>
-        {Object.entries(LEAD_SOURCE_LABELS_BN).map(([value, label]) => (
+        <option value="">— unknown —</option>
+        {Object.entries(LEAD_SOURCE_LABELS).map(([value, label]) => (
           <option key={value} value={value}>
             {label}
           </option>
@@ -514,14 +518,14 @@ function NoteEditor({
         htmlFor={`note-${id}`}
         className="text-sm font-medium text-[color:var(--muted-foreground)]"
       >
-        অফিস নোট
+        Office note
       </label>
       <Textarea
         id={`note-${id}`}
         value={note}
         rows={3}
         onChange={(event) => setNote(event.target.value)}
-        placeholder="কী কথা হয়েছে, পরবর্তী ধাপ ইত্যাদি লিখে রাখুন"
+        placeholder="What was discussed, next steps, etc."
         className="mt-1"
       />
       <Button
@@ -534,15 +538,15 @@ function NoteEditor({
           startTransition(async () => {
             const result = await setApplicationNote(id, note);
             if (result.ok) {
-              toast.success("নোট সংরক্ষিত হয়েছে।");
+              toast.success("Note saved.");
               onSaved();
             } else {
-              toast.error(result.error ?? "সংরক্ষণ করা যায়নি।");
+              toast.error(result.error ?? "Could not save.");
             }
           })
         }
       >
-        নোট সংরক্ষণ করুন
+        Save note
       </Button>
     </div>
   );

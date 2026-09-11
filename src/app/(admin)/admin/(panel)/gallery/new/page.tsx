@@ -5,14 +5,14 @@ import { albumFormSections, albumToForm } from "@/lib/admin/album-form";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "নতুন অ্যালবাম" };
+export const metadata = { title: "New album" };
 
 export default function NewAlbumPage() {
   return (
     <>
       <AdminPageHeader
-        title="নতুন অ্যালবাম"
-        description="অ্যালবাম তৈরি করার পর ছবি যোগ করা যাবে।"
+        title="New album"
+        description="Photos can be added once the album is created."
       />
       <ResourceForm
         sections={albumFormSections}

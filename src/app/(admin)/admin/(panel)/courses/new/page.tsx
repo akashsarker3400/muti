@@ -5,14 +5,14 @@ import { courseFormSections, courseToForm } from "@/lib/admin/course-form";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "নতুন কোর্স" };
+export const metadata = { title: "New course" };
 
 export default function NewCoursePage() {
   return (
     <>
       <AdminPageHeader
-        title="নতুন কোর্স"
-        description="কোর্স তৈরি করার পর ক্লাস রুটিন যোগ করা যাবে।"
+        title="New course"
+        description="The class routine can be added once the course is created."
       />
       <ResourceForm
         sections={courseFormSections}

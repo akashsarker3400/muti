@@ -20,7 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { LEAD_SOURCE_LABELS_BN } from "@/lib/lead-source";
+import { LEAD_SOURCE_LABELS } from "@/lib/lead-source";
 
 const CONTROL =
   "h-11 w-full rounded-lg border border-[color:var(--input)] bg-white px-3 text-sm focus-visible:border-[color:var(--brand)] focus-visible:outline-none";
@@ -51,14 +51,14 @@ export function OfficeApplicationButton({
       const result = await createOfficeApplication(Object.fromEntries(form.entries()));
 
       if (result.ok) {
-        toast.success("আবেদনটি যোগ করা হয়েছে।");
+        toast.success("Application added.");
         setOpen(false);
         router.refresh();
         return;
       }
 
       if (result.errors) setErrors(result.errors);
-      else toast.error(result.error ?? "সংরক্ষণ করা যায়নি।");
+      else toast.error(result.error ?? "Could not save.");
     });
   }
 
@@ -67,30 +67,30 @@ export function OfficeApplicationButton({
       <DialogTrigger asChild>
         <Button variant="brand" size="cta">
           <UserPlus className="size-4" aria-hidden="true" />
-          অফিসে আসা আবেদন
+          Walk-in application
         </Button>
       </DialogTrigger>
 
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
         <form onSubmit={submit}>
           <DialogHeader>
-            <DialogTitle>অফিসে আসা আবেদন যোগ করুন</DialogTitle>
+            <DialogTitle>Add a walk-in application</DialogTitle>
             <DialogDescription>
-              সরাসরি অফিসে এসে বা ফোনে করা অনুসন্ধান এখানে যোগ করুন, যাতে সব আবেদন এক
-              জায়গায় থাকে।
+              Add enquiries made in person or by phone here so every application is in
+              one place.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label htmlFor="office-name">নাম</Label>
+              <Label htmlFor="office-name">Name</Label>
               <Input id="office-name" name="name" required className="h-11" />
               {errors.name && <FieldError>{errors.name}</FieldError>}
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="office-phone">মোবাইল নম্বর</Label>
+                <Label htmlFor="office-phone">Mobile number</Label>
                 <Input
                   id="office-phone"
                   name="phone"
@@ -104,14 +104,14 @@ export function OfficeApplicationButton({
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="office-source">সোর্স</Label>
+                <Label htmlFor="office-source">Source</Label>
                 <select
                   id="office-source"
                   name="source"
                   defaultValue="WALK_IN"
                   className={CONTROL}
                 >
-                  {Object.entries(LEAD_SOURCE_LABELS_BN).map(([value, label]) => (
+                  {Object.entries(LEAD_SOURCE_LABELS).map(([value, label]) => (
                     <option key={value} value={value}>
                       {label}
                     </option>
@@ -122,9 +122,9 @@ export function OfficeApplicationButton({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="office-course">কোর্স</Label>
+                <Label htmlFor="office-course">Course</Label>
                 <select id="office-course" name="courseId" className={CONTROL}>
-                  <option value="">— বাছাই করুন —</option>
+                  <option value="">— select —</option>
                   {courses.map((course) => (
                     <option key={course.id} value={course.id}>
                       {course.label}
@@ -134,9 +134,9 @@ export function OfficeApplicationButton({
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="office-batch">ব্যাচ</Label>
+                <Label htmlFor="office-batch">Batch</Label>
                 <select id="office-batch" name="batchId" className={CONTROL}>
-                  <option value="">— বাছাই করুন —</option>
+                  <option value="">— select —</option>
                   {batches.map((batch) => (
                     <option key={batch.id} value={batch.id}>
                       {batch.label}
@@ -148,7 +148,7 @@ export function OfficeApplicationButton({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="office-qualification">শিক্ষাগত যোগ্যতা</Label>
+                <Label htmlFor="office-qualification">Qualification</Label>
                 <Input
                   id="office-qualification"
                   name="qualification"
@@ -158,18 +158,18 @@ export function OfficeApplicationButton({
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="office-medical-college">মেডিকেল কলেজ</Label>
+                <Label htmlFor="office-medical-college">Medical college</Label>
                 <Input
                   id="office-medical-college"
                   name="medicalCollege"
-                  placeholder="যেমন: ময়মনসিংহ মেডিকেল কলেজ"
+                  placeholder="e.g. Mymensingh Medical College"
                   className="h-11"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="office-message">নোট</Label>
+              <Label htmlFor="office-message">Note</Label>
               <Textarea id="office-message" name="message" rows={3} />
             </div>
           </div>
@@ -177,14 +177,14 @@ export function OfficeApplicationButton({
           <DialogFooter>
             <DialogClose asChild>
               <Button type="button" variant="outline" size="cta">
-                বাতিল
+                Cancel
               </Button>
             </DialogClose>
             <Button type="submit" variant="brand" size="cta" disabled={pending}>
               {pending && (
                 <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               )}
-              যোগ করুন
+              Add
             </Button>
           </DialogFooter>
         </form>

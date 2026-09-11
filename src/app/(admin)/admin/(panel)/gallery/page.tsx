@@ -9,7 +9,7 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "গ্যালারি" };
+export const metadata = { title: "Gallery" };
 
 export default async function GalleryAlbumsPage() {
   const albums = await prisma.galleryAlbum.findMany({
@@ -20,15 +20,15 @@ export default async function GalleryAlbumsPage() {
   return (
     <>
       <AdminPageHeader
-        title="গ্যালারি"
-        description="অ্যালবাম তৈরি করে তার ভেতরে ছবি যোগ করুন।"
-        action={<NewButton href="/admin/gallery/new" label="নতুন অ্যালবাম" />}
+        title="Gallery"
+        description="Create an album and add photos to it."
+        action={<NewButton href="/admin/gallery/new" label="New album" />}
       />
 
       {albums.length === 0 ? (
         <EmptyState
-          title="এখনো কোনো অ্যালবাম নেই।"
-          description="প্রথম অ্যালবামটি তৈরি করে ছবি যোগ করুন।"
+          title="No albums yet."
+          description="Create the first album and add photos."
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -62,7 +62,7 @@ export default async function GalleryAlbumsPage() {
                     {album.titleBn || album.title}
                   </Link>
                   <p className="nums text-xs text-[color:var(--muted-foreground)]">
-                    {album._count.images} টি ছবি · /{album.slug}
+                    {album._count.images} photos · /{album.slug}
                   </p>
                 </div>
 

@@ -43,7 +43,7 @@ export async function GET(request: Request) {
   XLSX.utils.book_append_sheet(workbook, data, entity.labelEn.slice(0, 30));
 
   const instructions = XLSX.utils.aoa_to_sheet([
-    ["Column", "Required", "বাংলা", "English", "Example"],
+    ["Column", "Required", "Bangla", "English", "Example"],
     ...entity.columns.map((c) => [
       c.key,
       c.required ? "YES" : "",
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
     [
       "",
       "",
-      `একই ${entity.matchKey.join("+")} থাকলে ইমপোর্টের সময় “বাদ” বা “আপডেট” বেছে নিতে পারবেন।`,
+      `Rows with an existing ${entity.matchKey.join("+")} can be skipped or updated at import time.`,
       `Rows with an existing ${entity.matchKey.join("+")} can be skipped or updated at import time.`,
     ],
   ]);

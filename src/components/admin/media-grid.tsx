@@ -26,17 +26,17 @@ export function MediaGrid({ files }: { files: MediaFile[] }) {
     <>
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <FilterButton active={filter === "all"} onClick={() => setFilter("all")}>
-          সব ({files.length})
+          All ({files.length})
         </FilterButton>
         <FilterButton active={filter === "unused"} onClick={() => setFilter("unused")}>
-          অব্যবহৃত ({unusedCount})
+          Unused ({unusedCount})
         </FilterButton>
       </div>
 
       {visible.length === 0 ? (
         <Panel>
           <p className="py-6 text-center text-sm text-[color:var(--muted-foreground)]">
-            কোনো ফাইল পাওয়া যায়নি।
+            No files found.
           </p>
         </Panel>
       ) : (
@@ -71,9 +71,9 @@ export function MediaGrid({ files }: { files: MediaFile[] }) {
               <div className="space-y-2 p-3">
                 <div className="flex items-center gap-2">
                   {file.used ? (
-                    <AdminBadge tone="success">ব্যবহৃত</AdminBadge>
+                    <AdminBadge tone="success">In use</AdminBadge>
                   ) : (
-                    <AdminBadge tone="warning">অব্যবহৃত</AdminBadge>
+                    <AdminBadge tone="warning">Unused</AdminBadge>
                   )}
                   <span className="nums font-latin text-xs text-[color:var(--muted-foreground)]">
                     {formatSize(file.size)}
@@ -84,7 +84,7 @@ export function MediaGrid({ files }: { files: MediaFile[] }) {
                   {file.url}
                 </p>
                 <p className="text-xs text-[color:var(--muted-foreground)]">
-                  {formatDate(file.modified, "bn")}
+                  {formatDate(file.modified, "en")}
                 </p>
 
                 <div className="flex items-center gap-1">
@@ -95,36 +95,36 @@ export function MediaGrid({ files }: { files: MediaFile[] }) {
                     onClick={async () => {
                       try {
                         await navigator.clipboard.writeText(file.url);
-                        toast.success("লিংক কপি হয়েছে।");
+                        toast.success("Link copied.");
                       } catch {
-                        toast.error("কপি করা যায়নি।");
+                        toast.error("Could not copy.");
                       }
                     }}
                   >
                     <Copy className="size-3.5" aria-hidden="true" />
-                    লিংক
+                    Link
                   </Button>
 
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    aria-label="ফাইল মুছুন"
+                    aria-label="Delete file"
                     className="ms-auto"
                     disabled={pending || file.used}
                     title={
                       file.used
-                        ? "এই ফাইলটি ব্যবহৃত হচ্ছে, তাই মোছা যাবে না।"
+                        ? "This file is in use and cannot be deleted."
                         : undefined
                     }
                     onClick={() =>
                       startTransition(async () => {
                         const result = await deleteMediaFile(file.url);
                         if (result.ok) {
-                          toast.success("ফাইল মুছে ফেলা হয়েছে।");
+                          toast.success("File deleted.");
                           router.refresh();
                         } else {
-                          toast.error(result.error ?? "মুছে ফেলা যায়নি।");
+                          toast.error(result.error ?? "Could not delete.");
                         }
                       })
                     }

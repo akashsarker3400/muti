@@ -22,16 +22,16 @@ export const PERMISSIONS = [
 export type Permission = (typeof PERMISSIONS)[number];
 
 export const PERMISSION_LABELS: Record<Permission, string> = {
-  "certificates.manage": "সার্টিফিকেট যোগ/সম্পাদনা/বাতিল",
-  "results.manage": "বোর্ড ফলাফল যোগ/সম্পাদনা",
-  "results.publish": "ফলাফল প্রকাশ করা",
-  "import.run": "CSV/Excel ইমপোর্ট চালানো",
-  "leadership.manage": "নেতৃত্বের বক্তব্য সম্পাদনা",
-  "advisors.manage": "উপদেষ্টা মণ্ডলী সম্পাদনা",
-  "banners.manage": "হিরো ব্যানার সম্পাদনা",
-  "verification.logs.view": "যাচাই লগ দেখা",
-  "health.manage": "স্বাস্থ্যসেবার সেটিংস ও লেখা",
-  "health.appointments": "স্বাস্থ্যসেবার সিরিয়াল দেখা ও আপডেট",
+  "certificates.manage": "Add/edit/revoke certificates",
+  "results.manage": "Add/edit board results",
+  "results.publish": "Publish results",
+  "import.run": "Run CSV/Excel imports",
+  "leadership.manage": "Edit leadership messages",
+  "advisors.manage": "Edit the advisory board",
+  "banners.manage": "Edit hero banners",
+  "verification.logs.view": "View the verification log",
+  "health.manage": "Health service settings and texts",
+  "health.appointments": "View and update health service serials",
 };
 
 /**

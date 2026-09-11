@@ -35,18 +35,21 @@ export async function uploadsHealth(): Promise<UploadsHealth> {
       referenced.set(value, where);
     }
   };
-  add(settings.branding.logo, "সাইট সেটিংস → ব্র্যান্ডিং → লোগো");
-  add(settings.branding.favicon, "সাইট সেটিংস → ব্র্যান্ডিং → ফেভিকন");
-  add(settings.homepage.heroImage, "সাইট সেটিংস → হোমপেজ → হিরো ছবি (পুরনো একক ঘর)");
+  add(settings.branding.logo, "Site settings → Branding → Logo");
+  add(settings.branding.favicon, "Site settings → Branding → Favicon");
+  add(
+    settings.homepage.heroImage,
+    "Site settings → Homepage → Hero image (legacy single field)",
+  );
   settings.homepage.heroImages.forEach((url, index) =>
-    add(url, `সাইট সেটিংস → হোমপেজ → হিরো ছবি (স্লাইডশো) #${index + 1}`),
+    add(url, `Site settings → Homepage → Hero images (slideshow) #${index + 1}`),
   );
   add(
     settings.homepage.practicalImage,
-    "সাইট সেটিংস → হোমপেজ → প্র্যাকটিক্যাল সেকশনের ছবি",
+    "Site settings → Homepage → Practical section image",
   );
-  add(settings.health.heroImage, "সাইট সেটিংস → স্বাস্থ্যসেবা → পাতার ছবি");
-  add(settings.health.ogImage, "সাইট সেটিংস → স্বাস্থ্যসেবা → সোশ্যাল শেয়ার কার্ড");
+  add(settings.health.heroImage, "Site settings → Health service → Page image");
+  add(settings.health.ogImage, "Site settings → Health service → Social share card");
 
   // A handful of the most recent uploads from the content tables as well.
   try {
@@ -67,9 +70,9 @@ export async function uploadsHealth(): Promise<UploadsHealth> {
         take: 5,
       }),
     ]);
-    courses.forEach((c) => add(c.image, "কোর্সের ছবি"));
-    banners.forEach((b) => add(b.image, "হিরো ব্যানার"));
-    images.forEach((i) => add(i.url, "গ্যালারি"));
+    courses.forEach((c) => add(c.image, "Course image"));
+    banners.forEach((b) => add(b.image, "Hero banners"));
+    images.forEach((i) => add(i.url, "Gallery"));
   } catch {
     // Diagnostics only; never let this break the dashboard.
   }

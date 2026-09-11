@@ -27,7 +27,7 @@ export async function setApplicationSource(
 
   const value = source ? (source as LeadSource) : null;
   if (value && !SOURCES.includes(value)) {
-    return { ok: false, error: "অজানা সোর্স।" };
+    return { ok: false, error: "Unknown source." };
   }
 
   try {
@@ -37,13 +37,13 @@ export async function setApplicationSource(
     return { ok: true };
   } catch (error) {
     console.error("setApplicationSource failed", error);
-    return { ok: false, error: "পরিবর্তন করা যায়নি।" };
+    return { ok: false, error: "The change could not be saved." };
   }
 }
 
 const officeApplicationSchema = z.object({
-  name: z.string().trim().min(2, "নাম আবশ্যক"),
-  phone: z.string().trim().min(1, "মোবাইল নম্বর আবশ্যক"),
+  name: z.string().trim().min(2, "Name is required"),
+  phone: z.string().trim().min(1, "Mobile number is required"),
   courseId: z.string().trim().default(""),
   batchId: z.string().trim().default(""),
   qualification: z.string().trim().default(""),
@@ -80,7 +80,7 @@ export async function createOfficeApplication(
   if (!phone) {
     return {
       ok: false,
-      errors: { phone: "সঠিক বাংলাদেশি মোবাইল নম্বর লিখুন" },
+      errors: { phone: "Enter a valid Bangladeshi mobile number" },
     };
   }
 
@@ -110,6 +110,6 @@ export async function createOfficeApplication(
     return { ok: true, id: application.id };
   } catch (error) {
     console.error("createOfficeApplication failed", error);
-    return { ok: false, error: "আবেদনটি সংরক্ষণ করা যায়নি।" };
+    return { ok: false, error: "The application could not be saved." };
   }
 }

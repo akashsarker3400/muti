@@ -33,7 +33,7 @@ export function AdminPagination({
     .sort((a, b) => a - b);
 
   return (
-    <nav className="mt-4 flex flex-wrap items-center gap-1.5" aria-label="পৃষ্ঠা">
+    <nav className="mt-4 flex flex-wrap items-center gap-1.5" aria-label="Page">
       {visible.map((number, index) => (
         <span key={number} className="flex items-center gap-1.5">
           {index > 0 && visible[index - 1]! < number - 1 && (

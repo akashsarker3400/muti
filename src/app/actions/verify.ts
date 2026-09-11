@@ -51,12 +51,12 @@ function shape(row: {
   status: "VALID" | "REVOKED";
   revokedReason: string | null;
   student: { name: string };
-  course: { fullNameEn: string; fullNameBn: string };
+  course: { fullNameEn: string; fullNameBn: string | null };
 }): VerifiedCertificate {
   return {
     name: row.student.name,
     course: row.course.fullNameEn,
-    courseBn: row.course.fullNameBn,
+    courseBn: row.course.fullNameBn ?? row.course.fullNameEn,
     batch: row.batchName,
     session: row.session,
     certificateNo: row.certificateNo,

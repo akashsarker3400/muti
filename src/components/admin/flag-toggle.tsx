@@ -33,7 +33,7 @@ export function FlagToggle({
           setOptimistic(next);
           const result = await onToggle(next);
           if (!result.ok) {
-            toast.error(result.error ?? "পরিবর্তন করা যায়নি।");
+            toast.error(result.error ?? "The change could not be saved.");
           }
           router.refresh();
         });

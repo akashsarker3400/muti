@@ -52,7 +52,7 @@ export function RichTextEditor({
         link: { openOnClick: false, autolink: true },
       }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
-      Placeholder.configure({ placeholder: placeholder ?? "এখানে লিখুন…" }),
+      Placeholder.configure({ placeholder: placeholder ?? "Write here…" }),
     ],
     content: value,
     onUpdate: ({ editor: instance }) => {
@@ -99,21 +99,21 @@ function Toolbar({ editor }: { editor: Editor }) {
   return (
     <div className="flex flex-wrap items-center gap-0.5 border-b border-[color:var(--border)] bg-[color:var(--bg-soft)] p-1.5">
       <ToolButton
-        label="বোল্ড"
+        label="Bold"
         active={editor.isActive("bold")}
         onClick={() => editor.chain().focus().toggleBold().run()}
       >
         <Bold className="size-4" />
       </ToolButton>
       <ToolButton
-        label="ইটালিক"
+        label="Italic"
         active={editor.isActive("italic")}
         onClick={() => editor.chain().focus().toggleItalic().run()}
       >
         <Italic className="size-4" />
       </ToolButton>
       <ToolButton
-        label="আন্ডারলাইন"
+        label="Underline"
         active={editor.isActive("underline")}
         onClick={() => editor.chain().focus().toggleUnderline().run()}
       >
@@ -123,14 +123,14 @@ function Toolbar({ editor }: { editor: Editor }) {
       <Divider />
 
       <ToolButton
-        label="হেডিং ২"
+        label="Heading 2"
         active={editor.isActive("heading", { level: 2 })}
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
       >
         <Heading2 className="size-4" />
       </ToolButton>
       <ToolButton
-        label="হেডিং ৩"
+        label="Heading 3"
         active={editor.isActive("heading", { level: 3 })}
         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
       >
@@ -140,21 +140,21 @@ function Toolbar({ editor }: { editor: Editor }) {
       <Divider />
 
       <ToolButton
-        label="বুলেট তালিকা"
+        label="Bullet list"
         active={editor.isActive("bulletList")}
         onClick={() => editor.chain().focus().toggleBulletList().run()}
       >
         <List className="size-4" />
       </ToolButton>
       <ToolButton
-        label="সংখ্যাযুক্ত তালিকা"
+        label="Numbered list"
         active={editor.isActive("orderedList")}
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
       >
         <ListOrdered className="size-4" />
       </ToolButton>
       <ToolButton
-        label="উদ্ধৃতি"
+        label="Quote"
         active={editor.isActive("blockquote")}
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
       >
@@ -164,21 +164,21 @@ function Toolbar({ editor }: { editor: Editor }) {
       <Divider />
 
       <ToolButton
-        label="বাঁয়ে"
+        label="Left"
         active={editor.isActive({ textAlign: "left" })}
         onClick={() => editor.chain().focus().setTextAlign("left").run()}
       >
         <AlignLeft className="size-4" />
       </ToolButton>
       <ToolButton
-        label="মাঝে"
+        label="Center"
         active={editor.isActive({ textAlign: "center" })}
         onClick={() => editor.chain().focus().setTextAlign("center").run()}
       >
         <AlignCenter className="size-4" />
       </ToolButton>
       <ToolButton
-        label="ডানে"
+        label="Right"
         active={editor.isActive({ textAlign: "right" })}
         onClick={() => editor.chain().focus().setTextAlign("right").run()}
       >
@@ -188,11 +188,11 @@ function Toolbar({ editor }: { editor: Editor }) {
       <Divider />
 
       <ToolButton
-        label="লিংক যোগ করুন"
+        label="Add link"
         active={editor.isActive("link")}
         onClick={() => {
           const previous = editor.getAttributes("link").href as string | undefined;
-          const href = window.prompt("লিংক (URL)", previous ?? "https://");
+          const href = window.prompt("Link (URL)", previous ?? "https://");
           if (href === null) return;
           if (!href.trim()) {
             editor.chain().focus().unsetLink().run();
@@ -204,7 +204,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <Link2 className="size-4" />
       </ToolButton>
       <ToolButton
-        label="লিংক সরান"
+        label="Remove link"
         disabled={!editor.isActive("link")}
         onClick={() => editor.chain().focus().unsetLink().run()}
       >
@@ -213,14 +213,14 @@ function Toolbar({ editor }: { editor: Editor }) {
 
       <div className="ms-auto flex gap-0.5">
         <ToolButton
-          label="আনডু"
+          label="Undo"
           disabled={!editor.can().undo()}
           onClick={() => editor.chain().focus().undo().run()}
         >
           <Undo2 className="size-4" />
         </ToolButton>
         <ToolButton
-          label="রিডু"
+          label="Redo"
           disabled={!editor.can().redo()}
           onClick={() => editor.chain().focus().redo().run()}
         >

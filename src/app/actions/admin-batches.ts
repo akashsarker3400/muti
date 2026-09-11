@@ -10,7 +10,7 @@ import { prisma } from "@/lib/prisma";
 /** Batch clone (addendum 2, A2). */
 
 const cloneSchema = z.object({
-  name: z.string().trim().min(1, "ব্যাচের নাম আবশ্যক"),
+  name: z.string().trim().min(1, "Batch name is required"),
   startDate: z.string().trim().default(""),
   /**
    * An empty field means "keep the source batch's seat count". It has to be
@@ -45,7 +45,7 @@ export async function cloneBatch(
 
   try {
     const source = await prisma.batch.findUnique({ where: { id: sourceId } });
-    if (!source) return { ok: false, error: "ব্যাচটি পাওয়া যায়নি।" };
+    if (!source) return { ok: false, error: "Batch not found." };
 
     const startDate = parsed.data.startDate
       ? new Date(`${parsed.data.startDate}T00:00:00.000Z`)
@@ -82,9 +82,9 @@ export async function cloneBatch(
         ? String((error as { code: unknown }).code)
         : "";
     if (code === "P2002") {
-      return { ok: false, errors: { name: "এই নামে একটি ব্যাচ ইতিমধ্যে আছে।" } };
+      return { ok: false, errors: { name: "A batch with this name already exists." } };
     }
     console.error("cloneBatch failed", error);
-    return { ok: false, error: "ব্যাচ কপি করা যায়নি।" };
+    return { ok: false, error: "The batch could not be cloned." };
   }
 }

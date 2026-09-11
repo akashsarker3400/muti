@@ -6,7 +6,7 @@ import { getSiteSettings } from "@/lib/site-settings";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "সাইট সেটিংস" };
+export const metadata = { title: "Site settings" };
 
 export default async function SiteSettingsPage() {
   const settings = await getSiteSettings();
@@ -14,14 +14,14 @@ export default async function SiteSettingsPage() {
   return (
     <>
       <AdminPageHeader
-        title="সাইট সেটিংস"
-        description="প্রতিষ্ঠানের নাম, ঠিকানা, ফোন, হোমপেজ ও SEO সংক্রান্ত সব তথ্য এখান থেকে পরিবর্তন করুন।"
+        title="Site settings"
+        description="Institute name, address, phones, homepage and SEO settings."
       />
       <ResourceForm
         sections={settingsFormSections}
         defaultValues={settingsToForm(settings)}
         cancelHref="/admin"
-        submitLabel="সেটিংস সংরক্ষণ করুন"
+        submitLabel="Save settings"
         onSave={async (values) => {
           "use server";
           return saveSiteSettings(values);

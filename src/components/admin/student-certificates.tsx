@@ -19,19 +19,19 @@ export async function StudentCertificates({ studentId }: { studentId: string }) 
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 text-base font-semibold">
           <Award className="size-4 text-[color:var(--brand)]" aria-hidden="true" />
-          সার্টিফিকেট
+          Certificates
         </h2>
         <Button asChild variant="outline" size="sm">
           <Link href="/admin/certificates/new">
             <Plus className="size-4" aria-hidden="true" />
-            নতুন সার্টিফিকেট
+            New certificate
           </Link>
         </Button>
       </div>
 
       {certificates.length === 0 ? (
         <p className="text-sm text-[color:var(--muted-foreground)]">
-          এই শিক্ষার্থীর কোনো সার্টিফিকেট রেকর্ড নেই।
+          This student has no certificate records.
         </p>
       ) : (
         <ul className="divide-y divide-[color:var(--border)] text-sm">
@@ -47,11 +47,11 @@ export async function StudentCertificates({ studentId }: { studentId: string }) 
                 {certificate.course.code}
                 {certificate.session ? ` · ${certificate.session}` : ""}
                 {certificate.issuedAt
-                  ? ` · ${formatDate(certificate.issuedAt, "bn")}`
+                  ? ` · ${formatDate(certificate.issuedAt, "en")}`
                   : ""}
               </span>
               <AdminBadge tone={certificate.status === "VALID" ? "success" : "danger"}>
-                {certificate.status === "VALID" ? "বৈধ" : "বাতিল"}
+                {certificate.status === "VALID" ? "Valid" : "Cancel"}
               </AdminBadge>
             </li>
           ))}

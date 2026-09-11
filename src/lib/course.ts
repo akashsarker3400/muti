@@ -62,7 +62,7 @@ export function courseFeeLabel(
 export function durationLabel(
   course: {
     durationMonths: number;
-    durationLabelBn: string;
+    durationLabelBn: string | null;
     durationLabelEn: string;
   },
   locale: Locale,

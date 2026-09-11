@@ -35,7 +35,7 @@ export async function saveSiteSettings(
       ok: false,
       errors,
       error:
-        Object.keys(errors).length === 0 ? "সেটিংস সংরক্ষণ করা যায়নি।" : undefined,
+        Object.keys(errors).length === 0 ? "Settings could not be saved." : undefined,
     };
   }
 
@@ -55,6 +55,6 @@ export async function saveSiteSettings(
     return { ok: true };
   } catch (error) {
     console.error("saveSiteSettings failed", error);
-    return { ok: false, error: "সেটিংস সংরক্ষণ করা যায়নি।" };
+    return { ok: false, error: "Settings could not be saved." };
   }
 }

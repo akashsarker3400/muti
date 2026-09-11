@@ -13,8 +13,8 @@ import { prisma } from "@/lib/prisma";
 /** Staff accounts — SUPER_ADMIN only (section 7.12). */
 
 const userSchema = z.object({
-  name: z.string().trim().min(2, "নাম আবশ্যক"),
-  email: z.string().trim().email("সঠিক ইমেইল দিন"),
+  name: z.string().trim().min(2, "Name is required"),
+  email: z.string().trim().email("Enter a valid email"),
   role: z.enum(["SUPER_ADMIN", "STAFF"]),
   password: z.string().default(""),
   active: z.boolean().default(true),
@@ -47,10 +47,16 @@ export async function saveUser(
 
   // A password is required when creating; on edit an empty field means "keep".
   if (!id && password.length < 8) {
-    return { ok: false, errors: { password: "পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে" } };
+    return {
+      ok: false,
+      errors: { password: "Password must be at least 8 characters" },
+    };
   }
   if (id && password && password.length < 8) {
-    return { ok: false, errors: { password: "পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে" } };
+    return {
+      ok: false,
+      errors: { password: "Password must be at least 8 characters" },
+    };
   }
 
   // Never let the last active super admin lock everyone out.
@@ -61,7 +67,7 @@ export async function saveUser(
     if (others === 0) {
       return {
         ok: false,
-        error: "অন্তত একজন সক্রিয় সুপার অ্যাডমিন থাকতেই হবে।",
+        error: "At least one active super admin must remain.",
       };
     }
   }
@@ -103,10 +109,10 @@ export async function saveUser(
         ? String((error as { code: unknown }).code)
         : "";
     if (code === "P2002") {
-      return { ok: false, errors: { email: "এই ইমেইল ইতিমধ্যে ব্যবহৃত হয়েছে।" } };
+      return { ok: false, errors: { email: "This email is already in use." } };
     }
     console.error("saveUser failed", error);
-    return { ok: false, error: "সংরক্ষণ করা যায়নি।" };
+    return { ok: false, error: "Could not save." };
   }
 }
 
@@ -114,14 +120,14 @@ export async function deleteUser(id: string): Promise<SaveResult> {
   const admin = await requireSuperAdmin();
 
   if (admin.id === id) {
-    return { ok: false, error: "নিজের অ্যাকাউন্ট মুছে ফেলা যাবে না।" };
+    return { ok: false, error: "You cannot delete your own account." };
   }
 
   const remaining = await prisma.user.count({
     where: { role: "SUPER_ADMIN", active: true, id: { not: id } },
   });
   if (remaining === 0) {
-    return { ok: false, error: "অন্তত একজন সক্রিয় সুপার অ্যাডমিন থাকতেই হবে।" };
+    return { ok: false, error: "At least one active super admin must remain." };
   }
 
   try {
@@ -131,6 +137,6 @@ export async function deleteUser(id: string): Promise<SaveResult> {
     return { ok: true };
   } catch (error) {
     console.error("deleteUser failed", error);
-    return { ok: false, error: "মুছে ফেলা যায়নি।" };
+    return { ok: false, error: "Could not delete." };
   }
 }

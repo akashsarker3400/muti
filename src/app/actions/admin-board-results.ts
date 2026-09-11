@@ -10,7 +10,7 @@ import { normalizeRoll } from "@/lib/verify";
 /** Board result rows for one exam (addendum 3, §2). */
 
 const rowSchema = z.object({
-  roll: z.string().trim().min(1, "রোল আবশ্যক"),
+  roll: z.string().trim().min(1, "Roll is required"),
   registrationNo: z.string().trim().default(""),
   studentName: z.string().trim().default(""),
   status: z.enum(["PASS", "FAIL", "WITHHELD", "ABSENT"]).default("PASS"),
@@ -34,7 +34,7 @@ function toGpa(value: string): { gpa: number | null; error?: string } {
   if (!value) return { gpa: null };
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed < 0 || parsed > 5) {
-    return { gpa: null, error: "GPA ০ থেকে ৫ এর মধ্যে হতে হবে" };
+    return { gpa: null, error: "GPA must be between 0 and 5" };
   }
   return { gpa: Math.round(parsed * 100) / 100 };
 }
@@ -50,7 +50,7 @@ export async function saveBoardResultRows(
   const admin = await requirePermission("results.manage");
 
   const exam = await prisma.boardExam.findUnique({ where: { id: examId } });
-  if (!exam) return { ok: false, error: "পরীক্ষাটি পাওয়া যায়নি।" };
+  if (!exam) return { ok: false, error: "Exam not found." };
 
   const errors: Array<{ row: number; message: string }> = [];
   const rows: Array<
@@ -62,13 +62,13 @@ export async function saveBoardResultRows(
     if (!parsed.success) {
       errors.push({
         row: index + 1,
-        message: parsed.error.issues[0]?.message ?? "ভুল সারি",
+        message: parsed.error.issues[0]?.message ?? "Invalid rows",
       });
       return;
     }
     const rollNormalized = normalizeRoll(parsed.data.roll);
     if (rollNormalized.length < 4) {
-      errors.push({ row: index + 1, message: "রোল সংখ্যা হতে হবে" });
+      errors.push({ row: index + 1, message: "Roll must be numeric" });
       return;
     }
     const { gpa, error } = toGpa(parsed.data.gpa);
@@ -80,7 +80,7 @@ export async function saveBoardResultRows(
   });
 
   if (rows.length === 0) {
-    return { ok: false, error: "সংরক্ষণ করার মতো কোনো সঠিক সারি নেই।", errors };
+    return { ok: false, error: "No valid rows to save.", errors };
   }
 
   const [students, existing] = await Promise.all([

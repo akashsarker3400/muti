@@ -75,7 +75,7 @@ export function ImportWizard({
 
   async function onFile(file: File) {
     if (file.size > MAX_FILE_BYTES) {
-      toast.error("ফাইল ৫ MB-এর বেশি।");
+      toast.error("The file is larger than 5 MB.");
       return;
     }
     try {
@@ -92,7 +92,7 @@ export function ImportWizard({
         table = parseCsv((await file.text()).replace(/^﻿/, ""));
       }
       if (table.length - 1 > MAX_ROWS) {
-        toast.error(`সর্বোচ্চ ${MAX_ROWS.toLocaleString()} সারি।`);
+        toast.error(`At most ${MAX_ROWS.toLocaleString()} rows.`);
         return;
       }
       const parsed = rowsToRecords(entity, table);
@@ -104,11 +104,11 @@ export function ImportWizard({
 
       const gaps = missingColumns(entity, parsed.headers.map(String));
       if (gaps.length > 0) {
-        toast.error(`আবশ্যক কলাম নেই: ${gaps.join(", ")}`);
+        toast.error(`Missing required columns: ${gaps.join(", ")}`);
         return;
       }
       if (parsed.records.length === 0) {
-        toast.error("ফাইলে কোনো তথ্যের সারি নেই।");
+        toast.error("The file has no data rows.");
         return;
       }
       startTransition(async () => {
@@ -118,7 +118,7 @@ export function ImportWizard({
           context,
         });
         if (!result.ok) {
-          toast.error(result.error ?? "যাচাই করা যায়নি।");
+          toast.error(result.error ?? "Validation failed.");
           return;
         }
         setPreview(result);
@@ -126,7 +126,7 @@ export function ImportWizard({
       });
     } catch (error) {
       console.error(error);
-      toast.error("ফাইলটি পড়া যায়নি — .csv বা .xlsx হতে হবে।");
+      toast.error("The file could not be read. It must be .csv or .xlsx.");
     } finally {
       if (fileInput.current) fileInput.current.value = "";
     }
@@ -136,7 +136,7 @@ export function ImportWizard({
     if (!preview) return;
     if (preview.issues.length > 0 && !skipInvalid) {
       toast.error(
-        "ভুল সারিগুলো ঠিক করে আবার আপলোড করুন, অথবা “ভুল সারি বাদ দিয়ে বাকিটা ইমপোর্ট” বেছে নিন।",
+        "Fix the invalid rows and upload again, or choose “Skip invalid rows and import the rest”.",
       );
       return;
     }
@@ -146,7 +146,7 @@ export function ImportWizard({
         { mode, fileName },
       );
       if (!result.ok) {
-        toast.error(result.error ?? "ইমপোর্ট করা যায়নি।");
+        toast.error(result.error ?? "Import failed.");
         return;
       }
       setSummary(result);
@@ -171,10 +171,10 @@ export function ImportWizard({
     <div className="space-y-5">
       {/* ---- Step 1: entity + template ------------------------------------ */}
       <Panel>
-        <h2 className="mb-3 text-base font-semibold">১. কী ইমপোর্ট করবেন</h2>
+        <h2 className="mb-3 text-base font-semibold">1. What to import</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor="import-entity">ডেটার ধরন</Label>
+            <Label htmlFor="import-entity">Data type</Label>
             <select
               id="import-entity"
               value={entityKey}
@@ -187,7 +187,7 @@ export function ImportWizard({
             >
               {Object.values(IMPORT_ENTITIES).map((item) => (
                 <option key={item.key} value={item.key}>
-                  {item.labelBn}
+                  {item.labelEn}
                 </option>
               ))}
             </select>
@@ -195,7 +195,7 @@ export function ImportWizard({
 
           {entity.needsContext === "examId" && (
             <div className="space-y-1.5">
-              <Label htmlFor="import-exam">কোন পরীক্ষার ফলাফল</Label>
+              <Label htmlFor="import-exam">Which exam</Label>
               <select
                 id="import-exam"
                 value={examId}
@@ -203,7 +203,7 @@ export function ImportWizard({
                 className={SELECT}
                 disabled={step !== "choose"}
               >
-                <option value="">— বাছাই করুন —</option>
+                <option value="">— select —</option>
                 {exams.map((exam) => (
                   <option key={exam.id} value={exam.id}>
                     {exam.label}
@@ -216,7 +216,7 @@ export function ImportWizard({
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <span className="text-sm text-[color:var(--muted-foreground)]">
-            টেমপ্লেট:
+            Template:
           </span>
           <Button asChild variant="outline" size="cta">
             <a href={`/api/admin/import/template?entity=${entity.key}&format=xlsx`}>
@@ -233,7 +233,7 @@ export function ImportWizard({
         </div>
 
         <details className="mt-4 text-sm">
-          <summary className="cursor-pointer font-medium">কলামগুলো</summary>
+          <summary className="cursor-pointer font-medium">Columns</summary>
           <ul className="mt-2 grid gap-1 sm:grid-cols-2">
             {entity.columns.map((column) => (
               <li key={column.key} className="flex gap-2">
@@ -244,7 +244,7 @@ export function ImportWizard({
                   )}
                 </code>
                 <span className="text-[color:var(--muted-foreground)]">
-                  {column.bn}
+                  {column.en}
                 </span>
               </li>
             ))}
@@ -255,7 +255,7 @@ export function ImportWizard({
       {/* ---- Step 2: file ------------------------------------------------- */}
       {step === "choose" && (
         <Panel>
-          <h2 className="mb-3 text-base font-semibold">২. ফাইল আপলোড</h2>
+          <h2 className="mb-3 text-base font-semibold">2. Upload the file</h2>
           <input
             ref={fileInput}
             type="file"
@@ -278,15 +278,15 @@ export function ImportWizard({
             ) : (
               <Upload className="size-4" aria-hidden="true" />
             )}
-            .csv / .xlsx বাছাই করুন
+            Choose a .csv / .xlsx file
           </Button>
           <p className="mt-2 text-xs text-[color:var(--muted-foreground)]">
-            সর্বোচ্চ ৫ MB, {MAX_ROWS.toLocaleString("bn-BD")} সারি। হেডারের নাম বড়/ছোট
-            হাতের বা স্পেস/আন্ডারস্কোরে পার্থক্য ধরা হয় না। বাংলা সংখ্যা চলবে।
+            Up to 5 MB and {MAX_ROWS.toLocaleString("en")} rows. Header names are
+            matched ignoring case, spaces and underscores. Bangla digits are accepted.
           </p>
           {missing.length > 0 && (
             <p className="mt-2 text-sm font-medium text-[color:var(--error)]">
-              আবশ্যক কলাম নেই: {missing.join(", ")}
+              Missing required columns: {missing.join(", ")}
             </p>
           )}
         </Panel>
@@ -295,39 +295,39 @@ export function ImportWizard({
       {/* ---- Step 3: preview ---------------------------------------------- */}
       {step === "preview" && preview && (
         <Panel>
-          <h2 className="mb-3 text-base font-semibold">৩. যাচাই — {fileName}</h2>
+          <h2 className="mb-3 text-base font-semibold">3. Review: {fileName}</h2>
           <div className="mb-4 flex flex-wrap gap-2 text-sm">
-            <AdminBadge tone="neutral">মোট {preview.total}</AdminBadge>
-            <AdminBadge tone="success">সঠিক {preview.valid}</AdminBadge>
-            <AdminBadge tone="warning">আগে থেকে আছে {preview.duplicates}</AdminBadge>
+            <AdminBadge tone="neutral">Total {preview.total}</AdminBadge>
+            <AdminBadge tone="success">Valid {preview.valid}</AdminBadge>
+            <AdminBadge tone="warning">Already exist {preview.duplicates}</AdminBadge>
             <AdminBadge tone={preview.issues.length ? "danger" : "neutral"}>
-              ভুল {preview.issues.length}
+              Invalid {preview.issues.length}
             </AdminBadge>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="import-mode">আগে থেকে থাকা সারি</Label>
+              <Label htmlFor="import-mode">Rows that already exist</Label>
               <select
                 id="import-mode"
                 value={mode}
                 onChange={(event) => setMode(event.target.value as DuplicateMode)}
                 className={SELECT}
               >
-                <option value="skip">বাদ দিন (Skip duplicates)</option>
-                <option value="update">আপডেট করুন (Update existing)</option>
+                <option value="skip">Skip duplicates</option>
+                <option value="update">Update existing</option>
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="import-invalid">ভুল সারি</Label>
+              <Label htmlFor="import-invalid">Invalid rows</Label>
               <select
                 id="import-invalid"
                 value={skipInvalid ? "skip" : "stop"}
                 onChange={(event) => setSkipInvalid(event.target.value === "skip")}
                 className={SELECT}
               >
-                <option value="skip">ভুল সারি বাদ দিয়ে বাকিটা ইমপোর্ট</option>
-                <option value="stop">ঠিক করে আবার আপলোড করব</option>
+                <option value="skip">Skip invalid rows and import the rest</option>
+                <option value="stop">Fix and re-upload</option>
               </select>
             </div>
           </div>
@@ -336,12 +336,12 @@ export function ImportWizard({
             <div className="mt-4 rounded-lg border border-[color:var(--error)]/30 bg-[color:var(--error)]/5 p-3 text-sm">
               <p className="mb-1 flex items-center gap-1.5 font-medium text-[color:var(--error)]">
                 <AlertTriangle className="size-4" aria-hidden="true" />
-                {preview.issues.length}টি সারিতে সমস্যা
+                {preview.issues.length} rows have problems
               </p>
               <ul className="max-h-40 space-y-0.5 overflow-y-auto font-latin text-xs">
                 {preview.issues.slice(0, 100).map((issue) => (
                   <li key={`${issue.row}-${issue.message}`}>
-                    সারি {issue.row}: <span className="font-sans">{issue.message}</span>
+                    Row {issue.row}: <span className="font-sans">{issue.message}</span>
                   </li>
                 ))}
               </ul>
@@ -388,7 +388,7 @@ export function ImportWizard({
             </table>
             {records.length > previewRows.length && (
               <p className="px-2 py-1.5 text-xs text-[color:var(--muted-foreground)]">
-                প্রথম {previewRows.length}টি সারি দেখানো হচ্ছে; মোট {records.length}।
+                Showing the first {previewRows.length} rows of {records.length}.
               </p>
             )}
           </div>
@@ -404,7 +404,7 @@ export function ImportWizard({
               {pending && (
                 <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               )}
-              ৪. ইমপোর্ট করুন
+              4. Import
             </Button>
             <Button
               type="button"
@@ -413,7 +413,7 @@ export function ImportWizard({
               onClick={reset}
               disabled={pending}
             >
-              অন্য ফাইল
+              Another file
             </Button>
           </div>
         </Panel>
@@ -427,18 +427,18 @@ export function ImportWizard({
               className="size-5 text-[color:var(--success)]"
               aria-hidden="true"
             />
-            ইমপোর্ট সম্পন্ন
+            Import complete
           </h2>
           <dl className="grid gap-3 text-sm sm:grid-cols-4">
-            <Stat label="মোট সারি" value={summary.total} />
-            <Stat label="নতুন" value={summary.created} />
-            <Stat label="আপডেট" value={summary.updated} />
-            <Stat label="বাদ" value={summary.skipped} />
+            <Stat label="Total rows" value={summary.total} />
+            <Stat label="New" value={summary.created} />
+            <Stat label="Updated" value={summary.updated} />
+            <Stat label="Skipped" value={summary.skipped} />
           </dl>
           {summary.issues.length > 0 && (
             <div className="mt-4 text-sm">
               <p className="font-medium text-[color:var(--error)]">
-                {summary.issues.length}টি সারি ভুলের কারণে বাদ পড়েছে।
+                {summary.issues.length} rows were skipped because of errors.
               </p>
               <IssuesDownload issues={summary.issues} fileName={fileName} />
             </div>
@@ -450,7 +450,7 @@ export function ImportWizard({
             className="mt-4"
             onClick={reset}
           >
-            আরেকটি ফাইল ইমপোর্ট
+            Import another file
           </Button>
         </Panel>
       )}
@@ -486,7 +486,7 @@ function IssuesDownload({
       className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[color:var(--brand)] underline"
     >
       <Download className="size-3.5" aria-hidden="true" />
-      ভুলের তালিকা CSV
+      Error list (CSV)
     </a>
   );
 }

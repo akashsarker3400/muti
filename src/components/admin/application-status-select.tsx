@@ -8,10 +8,10 @@ import { setApplicationStatus } from "@/app/actions/admin-applications";
 import { cn } from "cn";
 
 export const APPLICATION_STATUS_LABELS: Record<string, string> = {
-  NEW: "নতুন",
-  CONTACTED: "যোগাযোগ হয়েছে",
-  ADMITTED: "ভর্তি হয়েছে",
-  CLOSED: "বন্ধ",
+  NEW: "New",
+  CONTACTED: "Contacted",
+  ADMITTED: "Admitted",
+  CLOSED: "Closed",
 };
 
 const TONE: Record<string, string> = {
@@ -40,13 +40,13 @@ export function ApplicationStatusSelect({
     <select
       value={optimistic}
       disabled={pending}
-      aria-label="আবেদনের অবস্থা"
+      aria-label="Application status"
       onChange={(event) => {
         const next = event.target.value;
         startTransition(async () => {
           setOptimistic(next);
           const result = await setApplicationStatus(id, next);
-          if (!result.ok) toast.error(result.error ?? "পরিবর্তন করা যায়নি।");
+          if (!result.ok) toast.error(result.error ?? "The change could not be saved.");
           router.refresh();
         });
       }}

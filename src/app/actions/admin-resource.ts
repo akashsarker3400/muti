@@ -39,7 +39,7 @@ export async function saveResource(
   values: Record<string, unknown>,
 ): Promise<SaveResult> {
   const resource = getResource(resourceKey);
-  if (!resource) return { ok: false, error: "অজানা রিসোর্স।" };
+  if (!resource) return { ok: false, error: "Unknown resource." };
   if (resource.permission) await requirePermission(resource.permission);
   else await requireAdmin();
 
@@ -85,7 +85,7 @@ export async function deleteResource(
   id: string,
 ): Promise<SaveResult> {
   const resource = getResource(resourceKey);
-  if (!resource) return { ok: false, error: "অজানা রিসোর্স।" };
+  if (!resource) return { ok: false, error: "Unknown resource." };
   const admin = resource.permission
     ? await requirePermission(resource.permission)
     : await requireAdmin();
@@ -120,7 +120,7 @@ export async function setResourceFlag(
   value: boolean,
 ): Promise<SaveResult> {
   const resource = getResource(resourceKey);
-  if (!resource) return { ok: false, error: "অজানা রিসোর্স।" };
+  if (!resource) return { ok: false, error: "Unknown resource." };
   const admin = resource.permission
     ? await requirePermission(resource.permission)
     : await requireAdmin();
@@ -161,13 +161,13 @@ function describePrismaError(error: unknown): string {
 
   switch (code) {
     case "P2002":
-      return "এই মানটি ইতিমধ্যে ব্যবহৃত হয়েছে (যেমন slug, রোল বা কোড)। অন্য একটি দিন।";
+      return "This value is already in use (slug, roll or code). Choose another.";
     case "P2003":
-      return "সম্পর্কিত রেকর্ড পাওয়া যায়নি। কোর্স বা ব্যাচ ঠিকভাবে বাছাই করুন।";
+      return "A related record was not found. Check the course or batch selection.";
     case "P2025":
-      return "রেকর্ডটি পাওয়া যায়নি — সম্ভবত এটি আগেই মুছে ফেলা হয়েছে।";
+      return "Record not found. It may already have been deleted.";
     default:
       console.error("Admin resource action failed", error);
-      return "সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।";
+      return "Could not save. Please try again.";
   }
 }

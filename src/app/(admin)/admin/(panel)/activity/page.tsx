@@ -5,21 +5,21 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "কার্যক্রম লগ" };
+export const metadata = { title: "Activity log" };
 
 const PAGE_SIZE = 50;
 
 const ACTION_LABELS: Record<string, string> = {
-  create: "তৈরি",
-  update: "পরিবর্তন",
-  delete: "মুছে ফেলা",
-  duplicate: "কপি",
-  reorder: "ক্রম পরিবর্তন",
-  routine: "রুটিন সংরক্ষণ",
-  upload: "আপলোড",
-  "export-csv": "CSV এক্সপোর্ট",
-  "delete-media": "ফাইল মুছে ফেলা",
-  "import-students": "শিক্ষার্থী ইমপোর্ট",
+  create: "Created",
+  update: "Change",
+  delete: "Delete",
+  duplicate: "Copy",
+  reorder: "Reorder",
+  routine: "Save routine",
+  upload: "Upload",
+  "export-csv": "Export CSV",
+  "delete-media": "Delete file",
+  "import-students": "Import students",
 };
 
 export default async function ActivityLogPage({
@@ -43,12 +43,12 @@ export default async function ActivityLogPage({
   return (
     <>
       <AdminPageHeader
-        title="কার্যক্রম লগ"
-        description="কে কখন কী পরিবর্তন করেছেন তার রেকর্ড।"
+        title="Activity log"
+        description="A record of who changed what, and when."
       />
 
       {logs.length === 0 ? (
-        <EmptyState title="এখনো কোনো কার্যক্রম রেকর্ড হয়নি।" />
+        <EmptyState title="No activity recorded yet." />
       ) : (
         <Panel padded={false} className="overflow-hidden">
           <div className="overflow-x-auto">
@@ -56,16 +56,16 @@ export default async function ActivityLogPage({
               <thead>
                 <tr className="border-b border-[color:var(--border)] bg-[color:var(--bg-soft)]">
                   <th scope="col" className="px-4 py-3 text-start font-semibold">
-                    সময়
+                    Time
                   </th>
                   <th scope="col" className="px-4 py-3 text-start font-semibold">
-                    ব্যবহারকারী
+                    User
                   </th>
                   <th scope="col" className="px-4 py-3 text-start font-semibold">
-                    কাজ
+                    Actions
                   </th>
                   <th scope="col" className="px-4 py-3 text-start font-semibold">
-                    কোথায়
+                    Where
                   </th>
                 </tr>
               </thead>
@@ -73,7 +73,7 @@ export default async function ActivityLogPage({
                 {logs.map((log) => (
                   <tr key={log.id}>
                     <td className="px-4 py-2.5 whitespace-nowrap">
-                      {formatDateTime(log.createdAt, "bn")}
+                      {formatDateTime(log.createdAt, "en")}
                     </td>
                     <td className="px-4 py-2.5">{log.user.name}</td>
                     <td className="px-4 py-2.5">

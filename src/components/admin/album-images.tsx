@@ -84,9 +84,9 @@ export function AlbumImages({
         const response = await fetch("/api/admin/upload", { method: "POST", body });
         const data = (await response.json()) as { url?: string; error?: string };
         if (response.ok && data.url) urls.push(data.url);
-        else toast.error(`${file.name}: ${data.error ?? "আপলোড ব্যর্থ"}`);
+        else toast.error(`${file.name}: ${data.error ?? "upload failed"}`);
       } catch {
-        toast.error(`${file.name}: আপলোড ব্যর্থ`);
+        toast.error(`${file.name}: upload failed`);
       }
       setProgress({ done: index + 1, total: images.length });
     }
@@ -94,10 +94,10 @@ export function AlbumImages({
     if (urls.length > 0) {
       const result = await addAlbumImages(albumId, urls);
       if (result.ok) {
-        toast.success(`${urls.length} টি ছবি যোগ হয়েছে।`);
+        toast.success(`${urls.length} photos added.`);
         router.refresh();
       } else {
-        toast.error(result.error ?? "ছবি যোগ করা যায়নি।");
+        toast.error(result.error ?? "Photos could not be added.");
       }
     }
 
@@ -122,7 +122,7 @@ export function AlbumImages({
         next.map((item) => item.id),
       );
       if (!result.ok) {
-        toast.error(result.error ?? "ক্রম সংরক্ষণ করা যায়নি।");
+        toast.error(result.error ?? "The order could not be saved.");
         setItems(images);
       }
     });
@@ -132,16 +132,16 @@ export function AlbumImages({
     <Panel>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 className="text-base font-semibold">ছবি</h2>
+          <h2 className="text-base font-semibold">Photos</h2>
           <p className="text-xs text-[color:var(--muted-foreground)]">
-            একসাথে অনেকগুলো ছবি টেনে এনে ছাড়ুন, অথবা বাটন থেকে বাছাই করুন। ছবি টেনে
-            ক্রম পরিবর্তন করা যায়।
+            Drop many photos at once, or pick them with the button. Drag photos to
+            reorder them.
           </p>
         </div>
         {pending && (
           <span className="flex items-center gap-1.5 text-xs text-[color:var(--muted-foreground)]">
             <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-            সংরক্ষণ হচ্ছে…
+            Saving…
           </span>
         )}
       </div>
@@ -177,12 +177,12 @@ export function AlbumImages({
         {uploading ? (
           <p className="flex items-center justify-center gap-2 text-sm">
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-            আপলোড হচ্ছে… {progress.done}/{progress.total}
+            Uploading… {progress.done}/{progress.total}
           </p>
         ) : (
           <>
             <p className="text-sm text-[color:var(--muted-foreground)]">
-              ছবিগুলো এখানে টেনে আনুন
+              Drop photos here
             </p>
             <Button
               type="button"
@@ -192,7 +192,7 @@ export function AlbumImages({
               onClick={() => inputRef.current?.click()}
             >
               <Upload className="size-4" aria-hidden="true" />
-              ছবি বাছাই করুন
+              Choose photos
             </Button>
           </>
         )}
@@ -200,7 +200,7 @@ export function AlbumImages({
 
       {items.length === 0 ? (
         <p className="text-center text-sm text-[color:var(--muted-foreground)]">
-          এই অ্যালবামে এখনো কোনো ছবি নেই।
+          No photos in this album yet.
         </p>
       ) : (
         <DndContext
@@ -273,7 +273,7 @@ function SortableImage({
 
         <button
           type="button"
-          aria-label="ক্রম পরিবর্তন করুন"
+          aria-label="Reorder"
           className="absolute start-2 top-2 grid size-8 cursor-grab touch-none place-items-center rounded-lg bg-white/90 text-[color:var(--foreground)] active:cursor-grabbing"
           {...attributes}
           {...listeners}
@@ -283,7 +283,7 @@ function SortableImage({
 
         {isCover && (
           <span className="absolute end-2 top-2 rounded-full bg-[color:var(--highlight)] px-2 py-0.5 text-[11px] font-semibold text-[color:var(--brand-dark)]">
-            কভার
+            Cover
           </span>
         )}
       </div>
@@ -296,11 +296,11 @@ function SortableImage({
             if ((image.caption ?? "") === caption) return;
             startTransition(async () => {
               const result = await updateAlbumImage(image.id, caption);
-              if (!result.ok) toast.error(result.error ?? "সংরক্ষণ করা যায়নি।");
+              if (!result.ok) toast.error(result.error ?? "Could not save.");
             });
           }}
-          placeholder="ক্যাপশন"
-          aria-label="ক্যাপশন"
+          placeholder="Caption"
+          aria-label="Caption"
           className="h-9 text-sm"
         />
 
@@ -314,33 +314,33 @@ function SortableImage({
               startTransition(async () => {
                 const result = await setAlbumCover(albumId, image.url);
                 if (result.ok) {
-                  toast.success("কভার সেট হয়েছে।");
+                  toast.success("Cover set.");
                   router.refresh();
                 } else {
-                  toast.error(result.error ?? "সেট করা যায়নি।");
+                  toast.error(result.error ?? "Could not set.");
                 }
               })
             }
           >
             <Star className="size-3.5" aria-hidden="true" />
-            কভার
+            Cover
           </Button>
 
           <Button
             type="button"
             variant="ghost"
             size="icon-sm"
-            aria-label="ছবি মুছুন"
+            aria-label="Delete photo"
             className="ms-auto"
             disabled={pending}
             onClick={() =>
               startTransition(async () => {
                 const result = await deleteAlbumImage(image.id);
                 if (result.ok) {
-                  toast.success("ছবি মুছে ফেলা হয়েছে।");
+                  toast.success("Photo deleted.");
                   onRemoved();
                 } else {
-                  toast.error(result.error ?? "মুছে ফেলা যায়নি।");
+                  toast.error(result.error ?? "Could not delete.");
                 }
               })
             }

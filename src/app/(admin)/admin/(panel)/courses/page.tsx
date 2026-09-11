@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "কোর্স" };
+export const metadata = { title: "Course" };
 
 export default async function AdminCoursesPage() {
   const courses = await prisma.course.findMany({
@@ -28,15 +28,15 @@ export default async function AdminCoursesPage() {
   return (
     <>
       <AdminPageHeader
-        title="কোর্স"
-        description="সারি টেনে ক্রম পরিবর্তন করুন — ওয়েবসাইটেও একই ক্রমে দেখাবে।"
-        action={<NewButton href="/admin/courses/new" label="নতুন কোর্স" />}
+        title="Course"
+        description="Drag rows to reorder; the website shows the same order."
+        action={<NewButton href="/admin/courses/new" label="New course" />}
       />
 
       {rows.length === 0 ? (
         <EmptyState
-          title="এখনো কোনো কোর্স যোগ করা হয়নি।"
-          description="উপরের বাটন থেকে প্রথম কোর্সটি যোগ করুন।"
+          title="No courses added yet."
+          description="Add the first course with the button above."
         />
       ) : (
         <CoursesTable courses={rows} />

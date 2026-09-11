@@ -43,29 +43,29 @@ export default async function HealthAdminPage({
   return (
     <>
       <AdminPageHeader
-        title="স্বাস্থ্যসেবা — সিরিয়াল"
-        description="বিনামূল্যে আল্ট্রাসাউন্ড সেবার দিনের তালিকা। রোগী দেখা হলে অবস্থা “দেখা হয়েছে” করুন; দিনের শেষে হিসাব বসান।"
+        title="Health service: serials"
+        description="The day’s list for the free ultrasound service. Mark a patient “Seen” after the visit; enter the day’s count at the end."
         action={
           <div className="flex flex-wrap items-center gap-2">
             {!settings.health.published && (
-              <AdminBadge tone="warning">সাইটে অপ্রকাশিত</AdminBadge>
+              <AdminBadge tone="warning">Unpublished on the site</AdminBadge>
             )}
             <Button asChild variant="outline" size="cta">
               <Link href="/admin/settings?tab=health">
                 <Settings2 className="size-4" aria-hidden="true" />
-                সেটিংস
+                Settings
               </Link>
             </Button>
             <Button asChild variant="outline" size="cta">
               <Link href="/admin/health-services">
                 <ListChecks className="size-4" aria-hidden="true" />
-                সেবার তালিকা
+                Service list
               </Link>
             </Button>
             <Button asChild variant="outline" size="cta">
               <Link href="/admin/gallery">
                 <Images className="size-4" aria-hidden="true" />
-                গ্যালারি অ্যালবাম
+                Gallery album
               </Link>
             </Button>
           </div>
@@ -75,7 +75,7 @@ export default async function HealthAdminPage({
       <form className="mb-4 flex flex-wrap items-end gap-3" method="get">
         <label className="space-y-1 text-sm">
           <span className="block text-xs text-[color:var(--muted-foreground)]">
-            তারিখ
+            Date
           </span>
           <input
             type="date"
@@ -86,26 +86,26 @@ export default async function HealthAdminPage({
         </label>
         <label className="space-y-1 text-sm">
           <span className="block text-xs text-[color:var(--muted-foreground)]">
-            অবস্থা
+            Status
           </span>
           <select
             name="status"
             defaultValue={status ?? "ALL"}
             className="h-10 rounded-lg border border-[color:var(--input)] bg-white px-3 text-sm"
           >
-            <option value="ALL">সব</option>
-            <option value="REQUESTED">অনুরোধ</option>
-            <option value="CONFIRMED">নিশ্চিত</option>
-            <option value="SEEN">দেখা হয়েছে</option>
-            <option value="CANCELLED">বাতিল</option>
+            <option value="ALL">All</option>
+            <option value="REQUESTED">Requested</option>
+            <option value="CONFIRMED">Confirmed</option>
+            <option value="SEEN">Seen</option>
+            <option value="CANCELLED">Cancelled</option>
           </select>
         </label>
         <Button type="submit" variant="brand" size="cta">
-          দেখুন
+          Show
         </Button>
         {date !== today && (
           <Button asChild variant="outline" size="cta">
-            <Link href="/admin/health">আজ</Link>
+            <Link href="/admin/health">Today</Link>
           </Button>
         )}
       </form>

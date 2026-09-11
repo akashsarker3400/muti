@@ -17,7 +17,7 @@ export async function setHealthAppointmentStatus(
   note?: string,
 ): Promise<{ ok: boolean; error?: string }> {
   const admin = await requirePermission("health.appointments");
-  if (!STATUSES.includes(status)) return { ok: false, error: "ভুল অবস্থা।" };
+  if (!STATUSES.includes(status)) return { ok: false, error: "Invalid status." };
   try {
     await prisma.healthAppointment.update({
       where: { id },
@@ -28,7 +28,7 @@ export async function setHealthAppointmentStatus(
     return { ok: true };
   } catch (error) {
     console.error("setHealthAppointmentStatus failed", error);
-    return { ok: false, error: "পরিবর্তন করা যায়নি।" };
+    return { ok: false, error: "The change could not be saved." };
   }
 }
 
@@ -45,7 +45,8 @@ export async function saveHealthDailyCount(
 ): Promise<{ ok: boolean; error?: string }> {
   const admin = await requirePermission("health.appointments");
   const parsed = countSchema.safeParse(raw);
-  if (!parsed.success) return { ok: false, error: "সংখ্যা ০ থেকে ১০০০ এর মধ্যে দিন।" };
+  if (!parsed.success)
+    return { ok: false, error: "Enter a number between 0 and 1000." };
   const { date, patients, reports, consultations } = parsed.data;
   try {
     await prisma.healthDailyCount.upsert({
@@ -60,7 +61,7 @@ export async function saveHealthDailyCount(
     return { ok: true };
   } catch (error) {
     console.error("saveHealthDailyCount failed", error);
-    return { ok: false, error: "সংরক্ষণ করা যায়নি।" };
+    return { ok: false, error: "Could not save." };
   }
 }
 
@@ -77,8 +78,8 @@ export async function createHealthAppointmentAtDesk(raw: {
   const { nextSerial } = await import("@/lib/health");
   const name = raw.name.trim();
   const phone = normalizePhone(raw.phone);
-  if (name.length < 2) return { ok: false, error: "নাম আবশ্যক।" };
-  if (!phone) return { ok: false, error: "সঠিক মোবাইল নম্বর দিন।" };
+  if (name.length < 2) return { ok: false, error: "Name is required." };
+  if (!phone) return { ok: false, error: "Enter a valid mobile number." };
   const age = raw.age?.trim() ? Number(raw.age) : null;
   const serialDate = dhakaDateKey();
   const serialNo = await nextSerial(serialDate);

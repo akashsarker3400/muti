@@ -168,14 +168,14 @@ model Course {
   code String @unique
 
   nameEn     String
-  nameBn     String
+  nameBn     String?
   fullNameEn String
-  fullNameBn String
+  fullNameBn String?
 
   level           CourseLevel
   durationMonths  Int
   durationLabelEn String
-  durationLabelBn String
+  durationLabelBn String?
 
   courseFee    Int
   examFee      Int?
@@ -482,15 +482,15 @@ model ImportJob {
 model LeadershipMessage {
   id              String  @id @default(cuid())
   key             String  @unique
-  roleTitleBn     String
+  roleTitleBn     String?
   roleTitleEn     String
   personName      String
   personNameBn    String?
   degrees         String?
   designationLine String?
   photo           String?
-  messageBn       String  @db.Text
-  messageEn       String? @db.Text
+  messageBn       String?  @db.Text
+  messageEn       String @db.Text
   excerptBn       String?
   excerptEn       String?
   signatureImage  String?
@@ -547,10 +547,10 @@ model Result {
 model Notice {
   id      String  @id @default(cuid())
   slug    String  @unique
-  titleBn String
-  titleEn String?
-  bodyBn  String  @db.Text
-  bodyEn  String? @db.Text
+  titleBn String?
+  titleEn String
+  bodyBn  String?  @db.Text
+  bodyEn  String @db.Text
 
   category    NoticeCategory @default(GENERAL)
   pinned      Boolean        @default(false)
@@ -626,10 +626,10 @@ model GalleryImage {
 
 model Faq {
   id         String  @id @default(cuid())
-  questionBn String
-  questionEn String?
-  answerBn   String  @db.Text
-  answerEn   String? @db.Text
+  questionBn String?
+  questionEn String
+  answerBn   String?  @db.Text
+  answerEn   String @db.Text
   courseId   String?
   course     Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
   sortOrder  Int     @default(0)
@@ -644,11 +644,11 @@ model Faq {
 model Post {
   id          String    @id @default(cuid())
   slug        String    @unique
-  titleBn     String
-  titleEn     String?
+  titleBn     String?
+  titleEn     String
   excerpt     String?
-  bodyBn      String    @db.Text
-  bodyEn      String?   @db.Text
+  bodyBn      String?    @db.Text
+  bodyEn      String   @db.Text
   cover       String?
   tags        String[]
   published   Boolean   @default(false)
@@ -664,10 +664,10 @@ model Post {
 model Page {
   id        String  @id @default(cuid())
   slug      String  @unique
-  titleBn   String
-  titleEn   String?
-  bodyBn    String  @db.Text
-  bodyEn    String? @db.Text
+  titleBn   String?
+  titleEn   String
+  bodyBn    String?  @db.Text
+  bodyEn    String @db.Text
   published Boolean @default(true)
 
   createdAt DateTime @default(now())
@@ -741,8 +741,8 @@ model ContentItem {
   icon    String?
   titleBn String?
   titleEn String?
-  bodyBn  String  @db.Text
-  bodyEn  String? @db.Text
+  bodyBn  String?  @db.Text
+  bodyEn  String @db.Text
 
   sortOrder Int     @default(0)
   published Boolean @default(true)

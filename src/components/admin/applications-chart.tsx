@@ -51,7 +51,7 @@ export function ApplicationsChart({
               fontSize: 12,
             }}
             labelFormatter={(label) => String(label)}
-            formatter={(value) => [Number(value ?? 0), "আবেদন"]}
+            formatter={(value) => [Number(value ?? 0), "Applications"]}
           />
           <Area
             type="monotone"

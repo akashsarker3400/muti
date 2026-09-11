@@ -17,6 +17,7 @@ import {
   Panel,
 } from "@/components/admin/ui";
 import { requireAdmin, requirePermission } from "@/lib/admin-auth";
+import { langOf } from "@/lib/lang";
 import { getResource, type ResourceColumn } from "@/lib/admin/resources";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
@@ -103,7 +104,7 @@ export default async function ResourceListPage({
               <Button asChild variant="outline" size="cta">
                 <Link href={`/admin/import?entity=${resource.importEntity}`}>
                   <Upload className="size-4" aria-hidden="true" />
-                  ইমপোর্ট
+                  Import
                 </Link>
               </Button>
             )}
@@ -113,15 +114,17 @@ export default async function ResourceListPage({
       />
 
       <div className="mb-4">
-        <SearchBox placeholder={`${resource.title} খুঁজুন…`} />
+        <SearchBox placeholder={`Search ${resource.title.toLowerCase()}…`} />
       </div>
 
       {rows.length === 0 ? (
         <EmptyState
           title={
-            q ? "কিছু পাওয়া যায়নি।" : `এখনো কোনো ${resource.singular} যোগ করা হয়নি।`
+            q ? "Nothing found." : `No ${resource.singular.toLowerCase()} added yet.`
           }
-          description={q ? "অন্য শব্দ দিয়ে খুঁজে দেখুন।" : "উপরের বাটন থেকে যোগ করুন।"}
+          description={
+            q ? "Try a different search term." : "Add one with the button above."
+          }
         />
       ) : (
         <Panel padded={false} className="overflow-hidden">
@@ -143,11 +146,11 @@ export default async function ResourceListPage({
                   ))}
                   {flagField && (
                     <th scope="col" className="px-4 py-3 text-start font-semibold">
-                      {flagField === "active" ? "সক্রিয়" : "প্রকাশিত"}
+                      {flagField === "active" ? "Active" : "Published"}
                     </th>
                   )}
                   <th scope="col" className="px-4 py-3 text-end font-semibold">
-                    কাজ
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -192,7 +195,7 @@ export default async function ResourceListPage({
                             >
                               <Link href={`/admin/board-exams/${id}/results`}>
                                 <ListChecks className="size-4" aria-hidden="true" />
-                                ফলাফল
+                                Results
                               </Link>
                             </Button>
                           )}
@@ -253,17 +256,17 @@ function Cell({
 
     case "bool":
       return value ? (
-        <Check className="size-4 text-[color:var(--success)]" aria-label="হ্যাঁ" />
+        <Check className="size-4 text-[color:var(--success)]" aria-label="Yes" />
       ) : (
         <Minus
           className="size-4 text-[color:var(--muted-foreground)]"
-          aria-label="না"
+          aria-label="No"
         />
       );
 
     case "date":
       return value instanceof Date ? (
-        <span className="whitespace-nowrap">{formatDate(value, "bn")}</span>
+        <span className="whitespace-nowrap">{formatDate(value, "en")}</span>
       ) : (
         <span className="text-[color:var(--muted-foreground)]">—</span>
       );
@@ -280,7 +283,7 @@ function Cell({
 
     default:
       return (
-        <span className="line-clamp-2 max-w-md">
+        <span className="line-clamp-2 max-w-md" lang={langOf(value)}>
           {value == null || value === "" ? (
             <span className="text-[color:var(--muted-foreground)]">—</span>
           ) : (

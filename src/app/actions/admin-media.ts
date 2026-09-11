@@ -12,12 +12,12 @@ export async function deleteMediaFile(
   const admin = await requireAdmin();
 
   if (!url.startsWith("/uploads/")) {
-    return { ok: false, error: "শুধু আপলোড করা ফাইল মোছা যাবে।" };
+    return { ok: false, error: "Only uploaded files can be deleted." };
   }
 
   const key = url.slice("/uploads/".length);
   if (!isSafeKey(key)) {
-    return { ok: false, error: "ফাইলের নাম সঠিক নয়।" };
+    return { ok: false, error: "Invalid file name." };
   }
 
   try {
@@ -27,6 +27,6 @@ export async function deleteMediaFile(
     return { ok: true };
   } catch (error) {
     console.error("deleteMediaFile failed", error);
-    return { ok: false, error: "ফাইলটি মুছে ফেলা যায়নি।" };
+    return { ok: false, error: "The file could not be deleted." };
   }
 }

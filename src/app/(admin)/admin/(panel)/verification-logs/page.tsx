@@ -9,12 +9,12 @@ export const dynamic = "force-dynamic";
 const PAGE_SIZE = 50;
 
 const TYPE_LABELS: Record<string, string> = {
-  certificate: "সার্টিফিকেট নম্বর",
+  certificate: "Certificate number",
   bmdc: "BMDC",
-  token: "QR টোকেন",
-  roll: "রোল",
-  registration: "রেজিস্ট্রেশন",
-  "result-bmdc": "ফলাফল — BMDC",
+  token: "QR token",
+  roll: "Roll",
+  registration: "Registration",
+  "result-bmdc": "Results: BMDC",
 };
 
 /**
@@ -49,21 +49,21 @@ export default async function VerificationLogsPage({
   return (
     <>
       <AdminPageHeader
-        title="যাচাই লগ"
-        description={`গত ২৪ ঘণ্টায় ${last24h}টি খোঁজ, তার মধ্যে ${misses24h}টি পাওয়া যায়নি। একই IP থেকে অনেক “পাওয়া যায়নি” মানে কেউ নম্বর অনুমান করে খুঁজছে।`}
+        title="Verification log"
+        description={`${last24h} lookups in the last 24 hours, ${misses24h} not found. Many “not found” from one IP means someone is guessing numbers.`}
       />
 
       {rows.length === 0 ? (
-        <EmptyState title="এখনো কোনো খোঁজ হয়নি।" />
+        <EmptyState title="No lookups yet." />
       ) : (
         <Panel className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead className="bg-[color:var(--bg-soft)] text-xs text-[color:var(--muted-foreground)]">
               <tr>
-                <th className="px-4 py-2 text-start font-medium">সময়</th>
-                <th className="px-4 py-2 text-start font-medium">ধরন</th>
-                <th className="px-4 py-2 text-start font-medium">খোঁজা হয়েছে</th>
-                <th className="px-4 py-2 text-start font-medium">ফল</th>
+                <th className="px-4 py-2 text-start font-medium">Time</th>
+                <th className="px-4 py-2 text-start font-medium">Type</th>
+                <th className="px-4 py-2 text-start font-medium">Query</th>
+                <th className="px-4 py-2 text-start font-medium">Result</th>
                 <th className="px-4 py-2 text-start font-medium">IP</th>
               </tr>
             </thead>
@@ -71,7 +71,7 @@ export default async function VerificationLogsPage({
               {rows.map((row) => (
                 <tr key={row.id}>
                   <td className="px-4 py-2 whitespace-nowrap">
-                    {formatDate(row.createdAt, "bn")}{" "}
+                    {formatDate(row.createdAt, "en")}{" "}
                     <span className="font-latin text-xs text-[color:var(--muted-foreground)]">
                       {row.createdAt.toISOString().slice(11, 16)} UTC
                     </span>
@@ -80,7 +80,7 @@ export default async function VerificationLogsPage({
                   <td className="px-4 py-2 font-latin">{row.query}</td>
                   <td className="px-4 py-2">
                     <AdminBadge tone={row.found ? "success" : "warning"}>
-                      {row.found ? "পাওয়া গেছে" : "পাওয়া যায়নি"}
+                      {row.found ? "Found" : "Not found"}
                     </AdminBadge>
                   </td>
                   <td className="px-4 py-2 font-latin text-xs">{row.ip ?? "—"}</td>

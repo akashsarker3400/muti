@@ -4,9 +4,9 @@ import type { FormSection, FormValues } from "@/lib/admin/fields";
 export const albumFormSections: FormSection[] = [
   {
     id: "main",
-    label: "অ্যালবাম",
+    label: "Album",
     fields: [
-      { name: "titleBn", label: "শিরোনাম (বাংলা)", type: "text", lang: "bn" },
+      { name: "titleBn", label: "Title (Bangla)", type: "text", lang: "bn" },
       {
         name: "title",
         label: "Title (English)",
@@ -20,20 +20,20 @@ export const albumFormSections: FormSection[] = [
         label: "URL slug",
         type: "text",
         latin: true,
-        hint: "ফাঁকা রাখলে ইংরেজি শিরোনাম থেকে তৈরি হবে।",
+        hint: "Leave empty to generate from the English title.",
       },
-      { name: "sortOrder", label: "ক্রম (ছোট আগে)", type: "number" },
+      { name: "sortOrder", label: "Order (lowest first)", type: "number" },
       {
         name: "cover",
-        label: "কভার ছবি",
+        label: "Cover image",
         type: "image",
-        hint: "ছবি তালিকা থেকেও “কভার” বাটনে ক্লিক করে সেট করা যায়।",
+        hint: "Can also be set with the “Cover” button in the photo list.",
       },
       {
         name: "isHealthService",
-        label: "স্বাস্থ্যসেবা অ্যালবাম (ছবিগুলো /health-service পাতায় দেখাবে)",
+        label: "Health service album (photos shown on /health-service)",
         type: "checkbox",
-        hint: "রোগীর ছবি শুধু লিখিত সম্মতিতে, মুখ ঝাপসা করে বা মুখ ছাড়া।",
+        hint: "Patient photos only with written consent, faces blurred or absent.",
       },
     ],
   },

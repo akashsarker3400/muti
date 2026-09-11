@@ -52,89 +52,89 @@ type NavGroup = { title: string; items: NavEntry[] };
 /** Sidebar structure follows the order of section 7 in the spec. */
 const NAV: NavGroup[] = [
   {
-    title: "সাধারণ",
+    title: "General",
     items: [
-      { href: "/admin", label: "ড্যাশবোর্ড", icon: LayoutDashboard },
-      { href: "/admin/applications", label: "আবেদন", icon: Inbox },
+      { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/admin/applications", label: "Applications", icon: Inbox },
     ],
   },
   {
-    title: "একাডেমিক",
+    title: "Academic",
     items: [
-      { href: "/admin/courses", label: "কোর্স", icon: BookOpen },
-      { href: "/admin/batches", label: "ব্যাচ", icon: CalendarRange },
-      { href: "/admin/students", label: "শিক্ষার্থী", icon: GraduationCap },
-      { href: "/admin/certificates", label: "সার্টিফিকেট", icon: Award },
-      { href: "/admin/board-exams", label: "বোর্ড ফলাফল", icon: Trophy },
-      { href: "/admin/results", label: "ফলাফল (নোটিশ)", icon: Trophy },
-      { href: "/admin/import", label: "ইমপোর্ট (CSV/Excel)", icon: Upload },
-      { href: "/admin/verification-logs", label: "যাচাই লগ", icon: BadgeCheck },
+      { href: "/admin/courses", label: "Courses", icon: BookOpen },
+      { href: "/admin/batches", label: "Batches", icon: CalendarRange },
+      { href: "/admin/students", label: "Students", icon: GraduationCap },
+      { href: "/admin/certificates", label: "Certificates", icon: Award },
+      { href: "/admin/board-exams", label: "Board results", icon: Trophy },
+      { href: "/admin/results", label: "Results (notices)", icon: Trophy },
+      { href: "/admin/import", label: "Import (CSV/Excel)", icon: Upload },
+      { href: "/admin/verification-logs", label: "Verification log", icon: BadgeCheck },
     ],
   },
   {
-    title: "স্বাস্থ্যসেবা",
+    title: "Health service",
     items: [
-      { href: "/admin/health", label: "সিরিয়াল ও দিনের হিসাব", icon: HeartPulse },
+      { href: "/admin/health", label: "Serials & daily count", icon: HeartPulse },
       {
         href: "/admin/health-services",
-        label: "আমরা যা দিই (তালিকা)",
+        label: "What we provide (list)",
         icon: ListOrdered,
       },
       {
         href: "/admin/settings",
-        label: "সেটিংস (সাইট সেটিংস → স্বাস্থ্যসেবা)",
+        label: "Health settings",
         icon: Settings,
       },
     ],
   },
   {
-    title: "কনটেন্ট",
+    title: "Content",
     items: [
-      { href: "/admin/banners", label: "হিরো ব্যানার", icon: Images },
-      { href: "/admin/notices", label: "নোটিশ", icon: Newspaper },
+      { href: "/admin/banners", label: "Hero banners", icon: Images },
+      { href: "/admin/notices", label: "Notices", icon: Newspaper },
       {
         href: "/admin/leadership",
-        label: "নেতৃত্বের বক্তব্য",
+        label: "Leadership messages",
         icon: MessageSquareQuote,
       },
-      { href: "/admin/advisors", label: "উপদেষ্টা মণ্ডলী", icon: Users },
-      { href: "/admin/faculty", label: "শিক্ষকমণ্ডলী", icon: Users },
-      { href: "/admin/testimonials", label: "অভিমত", icon: MessageSquareQuote },
-      { href: "/admin/faq", label: "সাধারণ প্রশ্ন", icon: ScrollText },
-      { href: "/admin/partners", label: "অনুমোদন ও সহযোগী", icon: Handshake },
-      { href: "/admin/gallery", label: "গ্যালারি", icon: Images },
-      { href: "/admin/downloads", label: "ডাউনলোড", icon: FileText },
-      { href: "/admin/blog", label: "ব্লগ", icon: NotebookPen },
-      { href: "/admin/pages", label: "পেজ", icon: FolderOpen },
+      { href: "/admin/advisors", label: "Advisory board", icon: Users },
+      { href: "/admin/faculty", label: "Faculty", icon: Users },
+      { href: "/admin/testimonials", label: "Testimonials", icon: MessageSquareQuote },
+      { href: "/admin/faq", label: "FAQ", icon: ScrollText },
+      { href: "/admin/partners", label: "Affiliations & partners", icon: Handshake },
+      { href: "/admin/gallery", label: "Gallery", icon: Images },
+      { href: "/admin/downloads", label: "Downloads", icon: FileText },
+      { href: "/admin/blog", label: "Blog", icon: NotebookPen },
+      { href: "/admin/pages", label: "Pages", icon: FolderOpen },
     ],
   },
   {
-    title: "সাইটের লেখা",
+    title: "Site texts",
     items: [
-      { href: "/admin/why-choose", label: "কেন MUTI", icon: Sparkles },
-      { href: "/admin/documents", label: "প্রয়োজনীয় কাগজপত্র", icon: FileCheck2 },
-      { href: "/admin/payment-policy", label: "পেমেন্ট নীতিমালা", icon: CreditCard },
-      { href: "/admin/admission-steps", label: "ভর্তির ধাপ", icon: ListOrdered },
-      { href: "/admin/values", label: "লক্ষ্য ও মূল্যবোধ", icon: Target },
+      { href: "/admin/why-choose", label: "Why MUTI", icon: Sparkles },
+      { href: "/admin/documents", label: "Required documents", icon: FileCheck2 },
+      { href: "/admin/payment-policy", label: "Payment policy", icon: CreditCard },
+      { href: "/admin/admission-steps", label: "Admission steps", icon: ListOrdered },
+      { href: "/admin/values", label: "Mission & values", icon: Target },
       {
         href: "/admin/certificate-types",
-        label: "প্রদত্ত সার্টিফিকেটের তালিকা",
+        label: "Certificates offered (list)",
         icon: Award,
       },
     ],
   },
   {
-    title: "সিস্টেম",
+    title: "System",
     items: [
-      { href: "/admin/settings", label: "সাইট সেটিংস", icon: Settings },
-      { href: "/admin/media", label: "মিডিয়া", icon: Images },
+      { href: "/admin/settings", label: "Site settings", icon: Settings },
+      { href: "/admin/media", label: "Media", icon: Images },
       {
         href: "/admin/users",
-        label: "ব্যবহারকারী",
+        label: "Users",
         icon: ShieldCheck,
         superAdminOnly: true,
       },
-      { href: "/admin/activity", label: "কার্যক্রম লগ", icon: BadgeCheck },
+      { href: "/admin/activity", label: "Activity log", icon: BadgeCheck },
     ],
   },
 ];
@@ -156,7 +156,7 @@ export function AdminShell({
       {open && (
         <button
           type="button"
-          aria-label="বন্ধ করুন"
+          aria-label="Close"
           onClick={() => setOpen(false)}
           className="fixed inset-0 z-40 bg-black/40 lg:hidden"
         />
@@ -178,7 +178,7 @@ export function AdminShell({
           <button
             type="button"
             onClick={() => setOpen(false)}
-            aria-label="মেনু বন্ধ করুন"
+            aria-label="Close menu"
             className="grid size-9 place-items-center rounded-lg hover:bg-white/10 lg:hidden"
           >
             <X className="size-5" aria-hidden="true" />
@@ -197,7 +197,7 @@ export function AdminShell({
                 <p className="px-3 pb-1.5 text-[11px] font-semibold tracking-wider text-white/40 uppercase">
                   {group.title}
                 </p>
-                <ul className="space-y-0.5">
+                <ul className="space-y-1">
                   {items.map((item) => (
                     <li key={item.href}>
                       <SidebarLink item={item} onNavigate={() => setOpen(false)} />
@@ -217,7 +217,7 @@ export function AdminShell({
             className="flex min-h-10 items-center gap-2 rounded-lg px-3 text-sm transition hover:bg-white/10"
           >
             <ExternalLink className="size-4" aria-hidden="true" />
-            সাইট দেখুন
+            View site
           </a>
         </div>
       </aside>
@@ -229,7 +229,7 @@ export function AdminShell({
             variant="outline"
             size="icon-cta"
             onClick={() => setOpen(true)}
-            aria-label="মেনু খুলুন"
+            aria-label="Open menu"
             className="lg:hidden"
           >
             <Menu className="size-5" aria-hidden="true" />
@@ -239,13 +239,13 @@ export function AdminShell({
             <div className="hidden text-end sm:block">
               <p className="text-sm leading-tight font-semibold">{user.name}</p>
               <p className="text-xs text-[color:var(--muted-foreground)]">
-                {user.role === "SUPER_ADMIN" ? "সুপার অ্যাডমিন" : "স্টাফ"}
+                {user.role === "SUPER_ADMIN" ? "Super admin" : "Staff"}
               </p>
             </div>
             <form action={signOutAction}>
               <Button type="submit" variant="outline" size="cta">
                 <LogOut className="size-4" aria-hidden="true" />
-                <span className="hidden sm:inline">লগআউট</span>
+                <span className="hidden sm:inline">Log out</span>
               </Button>
             </form>
           </div>
@@ -269,9 +269,9 @@ function SidebarLink({ item, onNavigate }: { item: NavEntry; onNavigate: () => v
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex min-h-10 items-center gap-2.5 rounded-lg px-3 text-sm transition",
+        "nav-text flex items-center gap-2.5 rounded-[10px] px-3 !py-3 transition",
         active
-          ? "bg-[color:var(--sidebar-accent)] font-medium text-white"
+          ? "bg-[color:var(--sidebar-accent)] text-white"
           : "text-white/75 hover:bg-white/10 hover:text-white",
       )}
     >

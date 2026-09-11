@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "ব্যবহারকারী" };
+export const metadata = { title: "Users" };
 
 export default async function AdminUsersPage() {
   await requireSuperAdmin();
@@ -19,9 +19,9 @@ export default async function AdminUsersPage() {
   return (
     <>
       <AdminPageHeader
-        title="ব্যবহারকারী"
-        description="অফিসের স্টাফদের অ্যাকাউন্ট তৈরি ও পরিচালনা করুন। শুধু সুপার অ্যাডমিন এই পাতা দেখতে পান।"
-        action={<NewButton href="/admin/users/new" label="নতুন ব্যবহারকারী" />}
+        title="Users"
+        description="Create and manage office staff accounts. Only super admins can see this page."
+        action={<NewButton href="/admin/users/new" label="New user" />}
       />
 
       <Panel padded={false} className="overflow-hidden">
@@ -30,22 +30,22 @@ export default async function AdminUsersPage() {
             <thead>
               <tr className="border-b border-[color:var(--border)] bg-[color:var(--bg-soft)]">
                 <th scope="col" className="px-4 py-3 text-start font-semibold">
-                  নাম
+                  Name
                 </th>
                 <th scope="col" className="px-4 py-3 text-start font-semibold">
-                  ইমেইল
+                  Email
                 </th>
                 <th scope="col" className="px-4 py-3 text-start font-semibold">
-                  ভূমিকা
+                  Role
                 </th>
                 <th
                   scope="col"
                   className="hidden px-4 py-3 text-start font-semibold sm:table-cell"
                 >
-                  যোগদান
+                  Joined
                 </th>
                 <th scope="col" className="px-4 py-3 text-end font-semibold">
-                  কাজ
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -54,18 +54,18 @@ export default async function AdminUsersPage() {
                 <tr key={user.id} className="hover:bg-[color:var(--bg-soft)]">
                   <td className="px-4 py-2.5">
                     <span className="font-medium">{user.name}</span>
-                    {!user.active && <AdminBadge tone="danger">নিষ্ক্রিয়</AdminBadge>}
+                    {!user.active && <AdminBadge tone="danger">Inactive</AdminBadge>}
                   </td>
                   <td className="px-4 py-2.5 font-latin">{user.email}</td>
                   <td className="px-4 py-2.5">
                     <AdminBadge
                       tone={user.role === "SUPER_ADMIN" ? "brand" : "neutral"}
                     >
-                      {user.role === "SUPER_ADMIN" ? "সুপার অ্যাডমিন" : "স্টাফ"}
+                      {user.role === "SUPER_ADMIN" ? "Super admin" : "Staff"}
                     </AdminBadge>
                   </td>
                   <td className="hidden px-4 py-2.5 whitespace-nowrap sm:table-cell">
-                    {formatDate(user.createdAt, "bn")}
+                    {formatDate(user.createdAt, "en")}
                   </td>
                   <td className="px-4 py-2.5">
                     <RowActions

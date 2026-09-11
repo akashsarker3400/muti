@@ -43,14 +43,14 @@ export function UploadField({
       const data = (await response.json()) as { url?: string; error?: string };
 
       if (!response.ok || !data.url) {
-        toast.error(data.error ?? "আপলোড করা যায়নি।");
+        toast.error(data.error ?? "Upload failed.");
         return;
       }
 
       onChange(data.url);
-      toast.success("আপলোড হয়েছে।");
+      toast.success("Uploaded.");
     } catch {
-      toast.error("আপলোড করা যায়নি।");
+      toast.error("Upload failed.");
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -85,7 +85,7 @@ export function UploadField({
             type="button"
             variant="destructive"
             size="icon-sm"
-            aria-label="সরান"
+            aria-label="Remove"
             onClick={() => onChange("")}
           >
             <Trash2 className="size-4" aria-hidden="true" />
@@ -116,7 +116,7 @@ export function UploadField({
           ) : (
             <Upload className="size-4" aria-hidden="true" />
           )}
-          {value ? "পরিবর্তন করুন" : "আপলোড করুন"}
+          {value ? "Change" : "Upload"}
         </Button>
 
         {/* Manual path entry, for files already on the volume. */}
@@ -125,14 +125,14 @@ export function UploadField({
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder="/uploads/…"
-          aria-label="ফাইলের পাথ"
+          aria-label="File path"
           dir="ltr"
           className="h-11 w-full min-w-0 font-latin text-xs sm:max-w-xs"
         />
       </div>
 
       <p className="text-xs break-words text-[color:var(--muted-foreground)]">
-        সর্বোচ্চ ১০ MB। ছবি স্বয়ংক্রিয়ভাবে webp-এ রূপান্তরিত হয় (সর্বোচ্চ ১৬০০px)।
+        Up to 10 MB. Images are converted to webp automatically (max 1600px).
       </p>
     </div>
   );

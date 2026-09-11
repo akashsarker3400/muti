@@ -11,7 +11,7 @@ import { prisma } from "@/lib/prisma";
 /** Gallery albums and images (section 7.9). */
 
 const albumSchema = z.object({
-  title: z.string().trim().min(1, "শিরোনাম আবশ্যক"),
+  title: z.string().trim().min(1, "Title is required"),
   titleBn: z.string().trim().default(""),
   slug: z.string().trim().default(""),
   cover: z.string().trim().default(""),
@@ -208,7 +208,7 @@ function describe(error: unknown): string {
       ? String((error as { code: unknown }).code)
       : "";
 
-  if (code === "P2002") return "এই slug ইতিমধ্যে ব্যবহৃত হয়েছে। অন্য একটি দিন।";
+  if (code === "P2002") return "This slug is already in use. Choose another.";
   console.error("Gallery action failed", error);
-  return "সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।";
+  return "Could not save. Please try again.";
 }

@@ -18,7 +18,7 @@ export async function setApplicationStatus(
   const admin = await requireAdmin();
 
   if (!STATUSES.includes(status as ApplicationStatus)) {
-    return { ok: false, error: "অজানা অবস্থা।" };
+    return { ok: false, error: "Unknown status." };
   }
 
   try {
@@ -47,7 +47,7 @@ export async function setApplicationStatus(
     return { ok: true };
   } catch (error) {
     console.error("setApplicationStatus failed", error);
-    return { ok: false, error: "পরিবর্তন করা যায়নি।" };
+    return { ok: false, error: "The change could not be saved." };
   }
 }
 
@@ -67,7 +67,7 @@ export async function setApplicationNote(
     return { ok: true };
   } catch (error) {
     console.error("setApplicationNote failed", error);
-    return { ok: false, error: "নোট সংরক্ষণ করা যায়নি।" };
+    return { ok: false, error: "The note could not be saved." };
   }
 }
 
@@ -84,7 +84,7 @@ export async function deleteApplication(
     return { ok: true };
   } catch (error) {
     console.error("deleteApplication failed", error);
-    return { ok: false, error: "মুছে ফেলা যায়নি।" };
+    return { ok: false, error: "Could not delete." };
   }
 }
 
@@ -96,9 +96,9 @@ export async function bulkSetStatus(
   const admin = await requireAdmin();
 
   if (!STATUSES.includes(status as ApplicationStatus)) {
-    return { ok: false, error: "অজানা অবস্থা।" };
+    return { ok: false, error: "Unknown status." };
   }
-  if (ids.length === 0) return { ok: false, error: "কোনো আবেদন বাছাই করা হয়নি।" };
+  if (ids.length === 0) return { ok: false, error: "No applications selected." };
 
   try {
     // Read the batches first so the seat counter only moves for applications
@@ -127,6 +127,6 @@ export async function bulkSetStatus(
     return { ok: true, count: result.count };
   } catch (error) {
     console.error("bulkSetStatus failed", error);
-    return { ok: false, error: "পরিবর্তন করা যায়নি।" };
+    return { ok: false, error: "The change could not be saved." };
   }
 }

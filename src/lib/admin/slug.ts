@@ -6,7 +6,7 @@
  *
  * Note the `\p{M}` in the keep-list: Bangla vowel signs and the hasanta are
  * Unicode *marks*, not letters, so matching on `\p{L}` alone would turn
- * "ভর্তি" into "ভর-ত". ZWNJ/ZWJ are kept for the same reason — they hold
+ * "Admission" into "ভর-ত". ZWNJ/ZWJ are kept for the same reason — they hold
  * conjuncts together.
  */
 export function slugify(input: string): string {

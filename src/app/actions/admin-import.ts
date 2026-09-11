@@ -89,24 +89,25 @@ const studentStatus = z.enum(["ACTIVE", "COMPLETED", "DROPPED"]);
 const validators: Record<string, Validator> = {
   students: (row, look) => {
     const roll = latinDigits(row.roll ?? "").trim();
-    if (!roll) return "roll ফাঁকা";
-    if (!row.name?.trim()) return "name ফাঁকা";
+    if (!roll) return "roll is empty";
+    if (!row.name?.trim()) return "name is empty";
     const phone = normalizePhone(row.phone ?? "");
-    if (!phone) return "phone সঠিক বাংলাদেশি নম্বর নয়";
+    if (!phone) return "phone is not a valid Bangladeshi number";
     const courseId = look.courses.get(upper(row.course_code));
-    if (!courseId) return `course_code “${row.course_code ?? ""}” পাওয়া যায়নি`;
+    if (!courseId) return `course_code “${row.course_code ?? ""}” not found`;
     const status = upper(row.status) || "ACTIVE";
-    if (!studentStatus.safeParse(status).success) return `status “${row.status}” ভুল`;
+    if (!studentStatus.safeParse(status).success)
+      return `status “${row.status}” is invalid`;
     const batchId = row.batch_name?.trim()
       ? (look.batches.get(row.batch_name.trim().toLowerCase()) ?? null)
       : null;
     if (row.batch_name?.trim() && !batchId)
-      return `batch_name “${row.batch_name}” পাওয়া যায়নি`;
+      return `batch_name “${row.batch_name}” not found`;
     const gender = upper(row.gender);
     if (gender && !["MALE", "FEMALE", "OTHER"].includes(gender))
-      return `gender “${row.gender}” ভুল`;
+      return `gender “${row.gender}” is invalid`;
     const boardRoll = row.board_roll?.trim() ? normalizeRoll(row.board_roll) : null;
-    if (boardRoll && boardRoll.length !== 10) return "board_roll ১০ সংখ্যার হতে হবে";
+    if (boardRoll && boardRoll.length !== 10) return "board_roll must be 10 digits";
     const bmdc = optional(row.bmdc);
     return {
       key: roll.toUpperCase(),
@@ -140,22 +141,22 @@ const validators: Record<string, Validator> = {
     const certificateNo = latinDigits(row.certificate_no ?? "")
       .replace(/\s+/g, "")
       .toUpperCase();
-    if (!certificateNo) return "certificate_no ফাঁকা";
+    if (!certificateNo) return "certificate_no is empty";
     const student =
       (row.roll?.trim() &&
         look.studentsByRoll.get(latinDigits(row.roll).trim().toUpperCase())) ||
       (row.bmdc?.trim() && look.studentsByBmdc.get(normalizeBmdc(row.bmdc)));
-    if (!student)
-      return "roll বা bmdc দিয়ে শিক্ষার্থী পাওয়া যায়নি (আগে শিক্ষার্থী ইমপোর্ট করুন)";
+    if (!student) return "no student found by roll or bmdc (import students first)";
     const courseId = row.course_code?.trim()
       ? look.courses.get(upper(row.course_code))
       : student.courseId;
-    if (!courseId) return `course_code “${row.course_code}” পাওয়া যায়নি`;
+    if (!courseId) return `course_code “${row.course_code}” not found`;
     const type = upper(row.type) || "COURSE";
     if (!["COURSE", "SEMESTER", "BOARD"].includes(type))
-      return `type “${row.type}” ভুল`;
+      return `type “${row.type}” is invalid`;
     const status = upper(row.status) || "VALID";
-    if (!["VALID", "REVOKED"].includes(status)) return `status “${row.status}” ভুল`;
+    if (!["VALID", "REVOKED"].includes(status))
+      return `status “${row.status}” is invalid`;
     return {
       key: certificateNo,
       data: {
@@ -174,17 +175,17 @@ const validators: Record<string, Validator> = {
   },
 
   "board-results": (row, _look, examId) => {
-    if (!examId) return "পরীক্ষা বাছাই করা হয়নি";
+    if (!examId) return "No exam selected";
     const roll = normalizeRoll(row.roll ?? "");
-    if (roll.length < 4) return "roll সংখ্যা হতে হবে";
+    if (roll.length < 4) return "roll must be numeric";
     const status = upper(row.status);
     if (!["PASS", "FAIL", "WITHHELD", "ABSENT"].includes(status))
-      return `status “${row.status}” ভুল`;
+      return `status “${row.status}” is invalid`;
     let gpa: number | null = null;
     if (row.gpa?.trim()) {
       gpa = Number(latinDigits(row.gpa));
       if (!Number.isFinite(gpa) || gpa < 0 || gpa > 5)
-        return "gpa ০–৫ এর মধ্যে হতে হবে";
+        return "gpa must be between 0 and 5";
       gpa = Math.round(gpa * 100) / 100;
     }
     return {
@@ -205,10 +206,10 @@ const validators: Record<string, Validator> = {
   },
 
   advisors: (row) => {
-    if (!row.name?.trim()) return "name ফাঁকা";
-    if (!row.designation?.trim()) return "designation ফাঁকা";
+    if (!row.name?.trim()) return "name is empty";
+    if (!row.designation?.trim()) return "designation is empty";
     const sortOrder = row.sort_order?.trim() ? Number(latinDigits(row.sort_order)) : 0;
-    if (!Number.isFinite(sortOrder)) return "sort_order সংখ্যা হতে হবে";
+    if (!Number.isFinite(sortOrder)) return "sort_order must be a number";
     return {
       key: row.name.trim().toLowerCase(),
       data: {
@@ -284,7 +285,7 @@ function prepare(entity: string, rows: Row[], look: Lookups, context: string) {
     if (seen.has(result.key)) {
       issues.push({
         row: line,
-        message: `ফাইলের ভেতরেই একই ${IMPORT_ENTITIES[entity]!.matchKey[0]} আবার এসেছে`,
+        message: `the same ${IMPORT_ENTITIES[entity]!.matchKey[0]} appears twice in the file`,
       });
       return;
     }
@@ -308,7 +309,7 @@ export async function previewImport(raw: unknown): Promise<ImportPreview> {
   if (!parsed.success || !IMPORT_ENTITIES[parsed.data.entity]) {
     return {
       ok: false,
-      error: "ফাইলটি পড়া যায়নি।",
+      error: "The file could not be read.",
       total: 0,
       valid: 0,
       duplicates: 0,
@@ -341,7 +342,7 @@ export async function runImport(
   if (!parsed.success || !IMPORT_ENTITIES[parsed.data.entity]) {
     return {
       ok: false,
-      error: "ফাইলটি পড়া যায়নি।",
+      error: "The file could not be read.",
       total: 0,
       created: 0,
       updated: 0,

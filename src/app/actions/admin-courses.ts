@@ -20,12 +20,12 @@ export type RoutineRow = {
 };
 
 const courseSchema = z.object({
-  code: z.string().trim().min(1, "কোড আবশ্যক"),
+  code: z.string().trim().min(1, "Code is required"),
   slug: z.string().trim().default(""),
-  nameEn: z.string().trim().min(1, "নাম (English) আবশ্যক"),
-  nameBn: z.string().trim().min(1, "নাম (বাংলা) আবশ্যক"),
-  fullNameEn: z.string().trim().min(1, "পূর্ণ নাম (English) আবশ্যক"),
-  fullNameBn: z.string().trim().min(1, "পূর্ণ নাম (বাংলা) আবশ্যক"),
+  nameEn: z.string().trim().min(1, "Name (English) is required"),
+  nameBn: z.string().trim().default(""),
+  fullNameEn: z.string().trim().min(1, "Full name (English) is required"),
+  fullNameBn: z.string().trim().default(""),
   level: z.enum(["CERTIFICATE", "DIPLOMA", "SPECIAL"]),
   durationMonths: z.coerce.number().int().min(0).default(0),
   durationLabelEn: z.string().trim().default(""),
@@ -88,13 +88,13 @@ export async function saveCourse(
     code: input.code,
     slug: slugify(input.slug || input.nameEn),
     nameEn: input.nameEn,
-    nameBn: input.nameBn,
+    nameBn: input.nameBn || null,
     fullNameEn: input.fullNameEn,
-    fullNameBn: input.fullNameBn,
+    fullNameBn: input.fullNameBn || null,
     level: input.level,
     durationMonths: input.durationMonths,
     durationLabelEn: input.durationLabelEn,
-    durationLabelBn: input.durationLabelBn,
+    durationLabelBn: input.durationLabelBn || null,
     courseFee: input.courseFee,
     examFee: optionalInt(input.examFee),
     formFee: optionalInt(input.formFee),
@@ -192,7 +192,7 @@ export async function duplicateCourse(id: string): Promise<SaveResult> {
       where: { id },
       include: { routines: { orderBy: { sortOrder: "asc" } } },
     });
-    if (!source) return { ok: false, error: "কোর্সটি পাওয়া যায়নি।" };
+    if (!source) return { ok: false, error: "Course not found." };
 
     const suffix = Date.now().toString(36).slice(-4);
     const {
@@ -209,7 +209,7 @@ export async function duplicateCourse(id: string): Promise<SaveResult> {
         code: `${source.code}-COPY-${suffix}`,
         slug: `${source.slug}-copy-${suffix}`,
         nameEn: `${source.nameEn} (Copy)`,
-        nameBn: `${source.nameBn} (কপি)`,
+        nameBn: source.nameBn ? `${source.nameBn} (কপি)` : null,
         // A copy always starts hidden so it cannot appear on the site by accident.
         published: false,
         featured: false,
@@ -281,11 +281,11 @@ function describe(error: unknown): string {
       : "";
 
   if (code === "P2002") {
-    return "এই কোড বা slug ইতিমধ্যে ব্যবহৃত হয়েছে। অন্য একটি দিন।";
+    return "This code or slug is already in use. Choose another.";
   }
   if (code === "P2003" || code === "P2014") {
-    return "এই কোর্সের সাথে শিক্ষার্থী বা ব্যাচ যুক্ত আছে, তাই মুছে ফেলা যাবে না। আগে সেগুলো সরান বা কোর্সটি অপ্রকাশিত করুন।";
+    return "Students or batches are linked to this course, so it cannot be deleted. Remove them first or unpublish the course.";
   }
   console.error("Course action failed", error);
-  return "সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।";
+  return "Could not save. Please try again.";
 }

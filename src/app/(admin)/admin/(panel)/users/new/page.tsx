@@ -6,14 +6,14 @@ import { userFormSections, userToForm } from "@/lib/admin/user-form";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "নতুন ব্যবহারকারী" };
+export const metadata = { title: "New user" };
 
 export default async function NewUserPage() {
   await requireSuperAdmin();
 
   return (
     <>
-      <AdminPageHeader title="নতুন ব্যবহারকারী" />
+      <AdminPageHeader title="New user" />
       <ResourceForm
         sections={userFormSections(true)}
         defaultValues={userToForm({})}

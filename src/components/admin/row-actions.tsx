@@ -36,18 +36,18 @@ export function RowActions({
     startTransition(async () => {
       const result = await onDelete();
       if (result.ok) {
-        toast.success("মুছে ফেলা হয়েছে।");
+        toast.success("Deleted.");
         setOpen(false);
         router.refresh();
       } else {
-        toast.error(result.error ?? "মুছে ফেলা যায়নি।");
+        toast.error(result.error ?? "Could not delete.");
       }
     });
   }
 
   return (
     <div className="flex items-center justify-end gap-1">
-      <Button asChild variant="ghost" size="icon-sm" aria-label="সম্পাদনা">
+      <Button asChild variant="ghost" size="icon-sm" aria-label="Edit">
         <Link href={editHref}>
           <Pencil className="size-4" aria-hidden="true" />
         </Link>
@@ -55,21 +55,21 @@ export function RowActions({
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button variant="ghost" size="icon-sm" aria-label="মুছে ফেলুন">
+          <Button variant="ghost" size="icon-sm" aria-label="Delete">
             <Trash2 className="size-4 text-[color:var(--error)]" aria-hidden="true" />
           </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>মুছে ফেলবেন?</DialogTitle>
+            <DialogTitle>Delete?</DialogTitle>
             <DialogDescription>
-              “{label}” স্থায়ীভাবে মুছে যাবে। এটি ফেরানো যাবে না।
+              “{label}” will be deleted permanently. This cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline" size="cta" type="button">
-                বাতিল
+                Cancel
               </Button>
             </DialogClose>
             <Button
@@ -82,7 +82,7 @@ export function RowActions({
               {pending && (
                 <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               )}
-              মুছে ফেলুন
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -5,7 +5,7 @@ import { currentAdmin } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "লগইন" };
+export const metadata = { title: "Sign in" };
 
 export default async function AdminLoginPage({
   searchParams,
@@ -26,9 +26,9 @@ export default async function AdminLoginPage({
           <span className="mx-auto grid size-12 place-items-center rounded-xl bg-[color:var(--brand)] text-lg font-bold text-white">
             M
           </span>
-          <h1 className="mt-4 text-xl font-semibold">MUTI অ্যাডমিন প্যানেল</h1>
+          <h1 className="mt-4 text-xl font-semibold">MUTI admin panel</h1>
           <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">
-            ওয়েবসাইটের কনটেন্ট পরিচালনা করতে লগইন করুন
+            Sign in to manage the website content
           </p>
         </div>
 

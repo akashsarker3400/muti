@@ -28,7 +28,7 @@ export const viewport: Viewport = {
  */
 export default function AdminRootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="bn" className={fontVariables}>
+    <html lang="en" className={fontVariables}>
       <body className="min-h-dvh bg-[color:var(--bg-soft)]">
         {children}
         <Toaster position="top-center" richColors />

@@ -45,7 +45,7 @@ export default async function EditResourcePage({
   return (
     <>
       <AdminPageHeader
-        title={`${resource.singular} সম্পাদনা`}
+        title={`Edit ${resource.singular.toLowerCase()}`}
         description={resource.description}
       />
       <ResourceForm

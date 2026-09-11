@@ -11,37 +11,37 @@ import { SearchBox } from "@/components/admin/search-box";
 import { AdminPageHeader, EmptyState, Panel } from "@/components/admin/ui";
 import { Button } from "@/components/ui/button";
 import { buildApplicationWhere } from "@/lib/admin/application-filters";
-import { LEAD_SOURCE_LABELS_BN } from "@/lib/lead-source";
+import { LEAD_SOURCE_LABELS } from "@/lib/lead-source";
 import { prisma } from "@/lib/prisma";
 import { cn } from "cn";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "আবেদন" };
+export const metadata = { title: "Applications" };
 
 const PAGE_SIZE = 25;
 
 const TYPES: Array<{ value: string; label: string }> = [
-  { value: "", label: "সব ধরন" },
-  { value: "ADMISSION", label: "ভর্তি আবেদন" },
-  { value: "FREE_CLASS", label: "ফ্রি ক্লাস" },
-  { value: "CONTACT", label: "যোগাযোগ" },
+  { value: "", label: "All types" },
+  { value: "ADMISSION", label: "Admission application" },
+  { value: "FREE_CLASS", label: "Free class" },
+  { value: "CONTACT", label: "Contact" },
 ];
 
 const SOURCES: Array<{ value: string; label: string }> = [
-  { value: "", label: "সব সোর্স" },
-  ...Object.entries(LEAD_SOURCE_LABELS_BN).map(([value, label]) => ({
+  { value: "", label: "All sources" },
+  ...Object.entries(LEAD_SOURCE_LABELS).map(([value, label]) => ({
     value,
     label,
   })),
 ];
 
 const STATUSES: Array<{ value: string; label: string }> = [
-  { value: "", label: "সব অবস্থা" },
-  { value: "NEW", label: "নতুন" },
-  { value: "CONTACTED", label: "যোগাযোগ হয়েছে" },
-  { value: "ADMITTED", label: "ভর্তি হয়েছে" },
-  { value: "CLOSED", label: "বন্ধ" },
+  { value: "", label: "All statuses" },
+  { value: "NEW", label: "New" },
+  { value: "CONTACTED", label: "Contacted" },
+  { value: "ADMITTED", label: "Admitted" },
+  { value: "CLOSED", label: "Closed" },
 ];
 
 export default async function ApplicationsPage({
@@ -135,8 +135,8 @@ export default async function ApplicationsPage({
   return (
     <>
       <AdminPageHeader
-        title="আবেদন"
-        description={`মোট ${total} টি আবেদন`}
+        title="Applications"
+        description={`${total} applications in total`}
         action={
           <div className="flex flex-wrap items-center gap-2">
             <Button asChild variant="outline" size="cta">
@@ -144,7 +144,7 @@ export default async function ApplicationsPage({
                 href={`/api/admin/applications/export${exportQuery ? `?${exportQuery}` : ""}`}
               >
                 <Download className="size-4" aria-hidden="true" />
-                CSV এক্সপোর্ট
+                Export CSV
               </a>
             </Button>
             <OfficeApplicationButton
@@ -163,7 +163,7 @@ export default async function ApplicationsPage({
 
       <Panel className="mb-4">
         <div className="flex flex-col gap-3">
-          <SearchBox placeholder="নাম, ফোন বা ইমেইল…" />
+          <SearchBox placeholder="Name, phone or email…" />
 
           <div className="flex flex-wrap gap-2">
             <FilterChips
@@ -185,7 +185,7 @@ export default async function ApplicationsPage({
             <FilterChips
               current={filters.course ?? ""}
               options={[
-                { value: "", label: "সব কোর্স" },
+                { value: "", label: "All courses" },
                 ...courses.map((course) => ({
                   value: course.id,
                   label: course.code,
@@ -208,8 +208,8 @@ export default async function ApplicationsPage({
 
       {applications.length === 0 ? (
         <EmptyState
-          title="কোনো আবেদন পাওয়া যায়নি।"
-          description="ফিল্টার পরিবর্তন করে আবার দেখুন।"
+          title="No applications found."
+          description="Change the filters and try again."
         />
       ) : (
         <ApplicationsTable rows={applications} />

@@ -30,10 +30,10 @@ import type { RoutineType } from "@/generated/prisma/enums";
 type Row = RoutineRow & { key: string };
 
 const TYPE_LABELS: Record<RoutineType, string> = {
-  LECTURE: "লেকচার",
-  PRACTICAL: "প্র্যাকটিক্যাল",
-  EXAM: "পরীক্ষা",
-  REVIEW: "রিভিউ",
+  LECTURE: "Lecture",
+  PRACTICAL: "Practical",
+  EXAM: "Exam",
+  REVIEW: "Review",
 };
 
 /**
@@ -98,8 +98,8 @@ export function RoutineEditor({
         courseId,
         rows.map(({ key: _key, ...row }) => row),
       );
-      if (result.ok) toast.success("রুটিন সংরক্ষণ করা হয়েছে।");
-      else toast.error(result.error ?? "সংরক্ষণ করা যায়নি।");
+      if (result.ok) toast.success("Routine saved.");
+      else toast.error(result.error ?? "Could not save.");
     });
   }
 
@@ -107,21 +107,21 @@ export function RoutineEditor({
     <Panel>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 className="text-base font-semibold">ক্লাস রুটিন / সিলেবাস</h2>
+          <h2 className="text-base font-semibold">Class routine / syllabus</h2>
           <p className="text-xs text-[color:var(--muted-foreground)]">
-            সারি টেনে ক্রম পরিবর্তন করুন। সেমিস্টার ফাঁকা রাখলে কোর্সটি এক তালিকায়
-            দেখাবে।
+            Drag rows to reorder. Leave the semester empty and the course shows as a
+            single list.
           </p>
         </div>
         <Button type="button" variant="outline" size="cta" onClick={addRow}>
           <Plus className="size-4" aria-hidden="true" />
-          সারি যোগ করুন
+          Add row
         </Button>
       </div>
 
       {rows.length === 0 ? (
         <p className="rounded-lg border border-dashed border-[color:var(--border)] p-6 text-center text-sm text-[color:var(--muted-foreground)]">
-          এখনো কোনো ক্লাস যোগ করা হয়নি।
+          No classes added yet.
         </p>
       ) : (
         <DndContext
@@ -158,7 +158,7 @@ export function RoutineEditor({
         disabled={pending}
       >
         {pending && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
-        রুটিন সংরক্ষণ করুন
+        Save routine
       </Button>
     </Panel>
   );
@@ -188,7 +188,7 @@ function SortableRow({
     >
       <button
         type="button"
-        aria-label="সরান"
+        aria-label="Remove"
         className="mt-1 cursor-grab touch-none text-[color:var(--muted-foreground)] active:cursor-grabbing"
         {...attributes}
         {...listeners}
@@ -199,15 +199,15 @@ function SortableRow({
       <Input
         value={row.semester}
         onChange={(event) => onChange({ semester: event.target.value })}
-        placeholder="সেমিস্টার"
-        aria-label="সেমিস্টার"
+        placeholder="Semester"
+        aria-label="Semester"
         className="h-10 text-sm"
       />
       <Input
         value={row.label}
         onChange={(event) => onChange({ label: event.target.value })}
         placeholder="Lecture 1"
-        aria-label="ক্লাস"
+        aria-label="Class"
         dir="ltr"
         className="h-10 font-latin text-sm"
       />
@@ -215,14 +215,14 @@ function SortableRow({
         value={row.title}
         onChange={(event) => onChange({ title: event.target.value })}
         placeholder="Basic Physics of Ultrasound"
-        aria-label="বিষয়"
+        aria-label="Subject"
         dir="ltr"
         className="h-10 font-latin text-sm"
       />
       <select
         value={row.type}
         onChange={(event) => onChange({ type: event.target.value as RoutineType })}
-        aria-label="ধরন"
+        aria-label="Type"
         className="h-10 rounded-lg border border-[color:var(--input)] bg-white px-2 text-sm"
       >
         {Object.entries(TYPE_LABELS).map(([value, label]) => (
@@ -236,7 +236,7 @@ function SortableRow({
         type="button"
         variant="ghost"
         size="icon-sm"
-        aria-label="সারি মুছুন"
+        aria-label="Delete row"
         onClick={onRemove}
         className="mt-0.5"
       >

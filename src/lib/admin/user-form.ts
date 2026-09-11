@@ -6,43 +6,43 @@ export function userFormSections(isNew: boolean): FormSection[] {
   return [
     {
       id: "main",
-      label: "ব্যবহারকারী",
+      label: "Users",
       fields: [
-        { name: "name", label: "নাম", type: "text", required: true },
+        { name: "name", label: "Name", type: "text", required: true },
         {
           name: "email",
-          label: "ইমেইল",
+          label: "Email",
           type: "text",
           required: true,
           latin: true,
         },
         {
           name: "role",
-          label: "ভূমিকা",
+          label: "Role",
           type: "select",
           required: true,
           options: [
-            { value: "STAFF", label: "স্টাফ" },
-            { value: "SUPER_ADMIN", label: "সুপার অ্যাডমিন" },
+            { value: "STAFF", label: "Staff" },
+            { value: "SUPER_ADMIN", label: "Super admin" },
           ],
         },
         {
           name: "password",
-          label: isNew ? "পাসওয়ার্ড" : "নতুন পাসওয়ার্ড",
+          label: isNew ? "Password" : "New password",
           type: "text",
           required: isNew,
           latin: true,
           hint: isNew
-            ? "কমপক্ষে ৮ অক্ষর।"
-            : "পাসওয়ার্ড পরিবর্তন করতে চাইলে তবেই লিখুন; ফাঁকা রাখলে আগেরটিই থাকবে।",
+            ? "At least 8 characters."
+            : "Fill in only to change the password; leave empty to keep the current one.",
         },
-        { name: "active", label: "সক্রিয়", type: "checkbox" },
+        { name: "active", label: "Active", type: "checkbox" },
         {
           name: "permissions",
-          label: "অতিরিক্ত অনুমতি (শুধু স্টাফের জন্য)",
+          label: "Extra permissions (staff only)",
           type: "multiselect",
           full: true,
-          hint: "সুপার অ্যাডমিন সব পারেন। স্টাফ ডিফল্টে সার্টিফিকেট, ফলাফল, ইমপোর্ট, নেতৃত্ব, উপদেষ্টা ও ব্যানার সম্পাদনা করতে পারেন; নিচেরগুলো আলাদাভাবে দিতে হয়।",
+          hint: "Super admins can do everything. Staff can edit certificates, results, imports, leadership, advisors and banners by default; the permissions below must be granted separately.",
           options: GRANTABLE.map((value) => ({
             value,
             label: PERMISSION_LABELS[value],

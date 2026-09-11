@@ -10,9 +10,9 @@ import { pick } from "@/lib/format";
 
 export type FaqEntry = {
   id: string;
-  questionBn: string;
+  questionBn: string | null;
   questionEn: string | null;
-  answerBn: string;
+  answerBn: string | null;
   answerEn: string | null;
 };
 

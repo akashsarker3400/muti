@@ -47,7 +47,7 @@ export type AdminCourse = {
   id: string;
   code: string;
   slug: string;
-  nameBn: string;
+  nameBn: string | null;
   nameEn: string;
   level: string;
   courseFee: number;
@@ -57,9 +57,9 @@ export type AdminCourse = {
 };
 
 const LEVELS: Record<string, string> = {
-  CERTIFICATE: "সার্টিফিকেট",
-  DIPLOMA: "ডিপ্লোমা",
-  SPECIAL: "স্পেশাল",
+  CERTIFICATE: "Certificates",
+  DIPLOMA: "Diploma",
+  SPECIAL: "Special",
 };
 
 /** Course list with drag-to-reorder, inline toggles and duplicate (7.3). */
@@ -87,9 +87,9 @@ export function CoursesTable({ courses }: { courses: AdminCourse[] }) {
 
     startTransition(async () => {
       const result = await reorderCourses(next.map((row) => row.id));
-      if (result.ok) toast.success("ক্রম সংরক্ষণ করা হয়েছে।");
+      if (result.ok) toast.success("Order saved.");
       else {
-        toast.error(result.error ?? "ক্রম সংরক্ষণ করা যায়নি।");
+        toast.error(result.error ?? "The order could not be saved.");
         setRows(courses);
       }
     });
@@ -121,7 +121,7 @@ export function CoursesTable({ courses }: { courses: AdminCourse[] }) {
       {pending && (
         <p className="mt-3 flex items-center gap-2 text-xs text-[color:var(--muted-foreground)]">
           <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-          ক্রম সংরক্ষণ হচ্ছে…
+          Saving order…
         </p>
       )}
 
@@ -131,17 +131,17 @@ export function CoursesTable({ courses }: { courses: AdminCourse[] }) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>কোর্সটি মুছে ফেলবেন?</DialogTitle>
+            <DialogTitle>Delete this course?</DialogTitle>
             <DialogDescription>
-              “{pendingDelete?.nameEn}” এবং এর রুটিন স্থায়ীভাবে মুছে যাবে। এই কোর্সে
-              শিক্ষার্থী বা ব্যাচ যুক্ত থাকলে মুছে ফেলা যাবে না — সেক্ষেত্রে কোর্সটি
-              অপ্রকাশিত করুন।
+              “{pendingDelete?.nameEn}” and its routine will be deleted permanently. If
+              students or batches are linked to it, deletion is refused; unpublish the
+              course instead.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <DialogClose asChild>
               <Button type="button" variant="outline" size="cta">
-                বাতিল
+                Cancel
               </Button>
             </DialogClose>
             <Button
@@ -154,17 +154,17 @@ export function CoursesTable({ courses }: { courses: AdminCourse[] }) {
                 startTransition(async () => {
                   const result = await deleteCourse(target.id);
                   if (result.ok) {
-                    toast.success("মুছে ফেলা হয়েছে।");
+                    toast.success("Deleted.");
                     setRows((current) => current.filter((row) => row.id !== target.id));
                     setPendingDelete(null);
                     router.refresh();
                   } else {
-                    toast.error(result.error ?? "মুছে ফেলা যায়নি।");
+                    toast.error(result.error ?? "Could not delete.");
                   }
                 });
               }}
             >
-              মুছে ফেলুন
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -188,7 +188,7 @@ function CourseRow({
   function toggle(field: "published" | "admissionOpen", value: boolean) {
     startTransition(async () => {
       const result = await setCourseFlag(course.id, field, value);
-      if (!result.ok) toast.error(result.error ?? "পরিবর্তন করা যায়নি।");
+      if (!result.ok) toast.error(result.error ?? "The change could not be saved.");
       router.refresh();
     });
   }
@@ -205,7 +205,7 @@ function CourseRow({
     >
       <button
         type="button"
-        aria-label="ক্রম পরিবর্তন করুন"
+        aria-label="Reorder"
         className="cursor-grab touch-none text-[color:var(--muted-foreground)] active:cursor-grabbing"
         {...attributes}
         {...listeners}
@@ -219,16 +219,21 @@ function CourseRow({
             href={`/admin/courses/${course.id}`}
             className="font-medium text-[color:var(--brand)] hover:underline"
           >
-            {course.nameBn}
+            {course.nameEn}
           </Link>
+          {course.nameBn && (
+            <span lang="bn" className="text-sm text-[color:var(--muted-foreground)]">
+              {course.nameBn}
+            </span>
+          )}
           <AdminBadge tone="brand">{course.code}</AdminBadge>
           <AdminBadge>{LEVELS[course.level] ?? course.level}</AdminBadge>
         </div>
         <p className="mt-0.5 text-xs text-[color:var(--muted-foreground)]">
           {course.courseFee > 0
-            ? formatMoney(course.courseFee, "bn")
-            : "ফি জানতে যোগাযোগ"}{" "}
-          · {course.routineCount} টি ক্লাস · /{course.slug}
+            ? formatMoney(course.courseFee, "en")
+            : "Contact for fee"}{" "}
+          · {course.routineCount} classes · /{course.slug}
         </p>
       </div>
 
@@ -237,9 +242,9 @@ function CourseRow({
           checked={course.admissionOpen}
           disabled={pending}
           onCheckedChange={(next) => toggle("admissionOpen", next)}
-          aria-label="ভর্তি চলছে"
+          aria-label="Admission open"
         />
-        ভর্তি
+        Admission
       </label>
 
       <label className="flex items-center gap-2 text-xs">
@@ -247,13 +252,13 @@ function CourseRow({
           checked={course.published}
           disabled={pending}
           onCheckedChange={(next) => toggle("published", next)}
-          aria-label="প্রকাশিত"
+          aria-label="Published"
         />
-        প্রকাশিত
+        Published
       </label>
 
       <div className="flex items-center gap-0.5">
-        <Button asChild variant="ghost" size="icon-sm" aria-label="সম্পাদনা">
+        <Button asChild variant="ghost" size="icon-sm" aria-label="Edit">
           <Link href={`/admin/courses/${course.id}`}>
             <Pencil className="size-4" aria-hidden="true" />
           </Link>
@@ -262,16 +267,16 @@ function CourseRow({
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="কপি করুন"
+          aria-label="Copy"
           disabled={pending}
           onClick={() =>
             startTransition(async () => {
               const result = await duplicateCourse(course.id);
               if (result.ok) {
-                toast.success("কোর্সটি কপি হয়েছে (অপ্রকাশিত অবস্থায়)।");
+                toast.success("Course copied (unpublished).");
                 router.push(`/admin/courses/${result.id}`);
               } else {
-                toast.error(result.error ?? "কপি করা যায়নি।");
+                toast.error(result.error ?? "Could not copy.");
               }
             })
           }
@@ -282,7 +287,7 @@ function CourseRow({
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="মুছে ফেলুন"
+          aria-label="Delete"
           onClick={onDelete}
         >
           <Trash2 className="size-4 text-[color:var(--error)]" aria-hidden="true" />

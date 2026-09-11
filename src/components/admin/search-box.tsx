@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 /** Writes the query into `?q=` so the list page can filter server-side. */
-export function SearchBox({ placeholder = "খুঁজুন…" }: { placeholder?: string }) {
+export function SearchBox({ placeholder = "Search…" }: { placeholder?: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -47,7 +47,7 @@ export function SearchBox({ placeholder = "খুঁজুন…" }: { placehold
         {value && (
           <button
             type="button"
-            aria-label="মুছুন"
+            aria-label="Delete"
             onClick={() => {
               setValue("");
               apply("");
@@ -59,7 +59,7 @@ export function SearchBox({ placeholder = "খুঁজুন…" }: { placehold
         )}
       </div>
       <Button type="submit" variant="outline" size="cta">
-        খুঁজুন
+        Search
       </Button>
     </form>
   );

@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const MESSAGES = {
-  invalid: "ইমেইল বা পাসওয়ার্ড সঠিক নয়।",
-  rateLimited: "অনেকবার চেষ্টা করা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।",
+  invalid: "Incorrect email or password.",
+  rateLimited: "Too many attempts. Please try again in a few minutes.",
 } as const;
 
 export function LoginForm({ next }: { next: string }) {
@@ -56,7 +56,7 @@ export function LoginForm({ next }: { next: string }) {
       )}
 
       <div className="space-y-1.5">
-        <Label htmlFor="email">ইমেইল</Label>
+        <Label htmlFor="email">Email</Label>
         <Input
           id="email"
           name="email"
@@ -69,7 +69,7 @@ export function LoginForm({ next }: { next: string }) {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="password">পাসওয়ার্ড</Label>
+        <Label htmlFor="password">Password</Label>
         <Input
           id="password"
           name="password"
@@ -88,7 +88,7 @@ export function LoginForm({ next }: { next: string }) {
         disabled={pending}
         className="w-full"
       >
-        {pending ? "লগইন হচ্ছে…" : "লগইন"}
+        {pending ? "Signing in…" : "Sign in"}
       </Button>
     </form>
   );

@@ -36,13 +36,13 @@ export default async function BoardExamResultsPage({
     <>
       <AdminPageHeader
         title={exam.title}
-        description={`${exam.session} · ${exam.results.length}টি সারি, ${pass} উত্তীর্ণ · ${exam.published ? "প্রকাশিত" : "অপ্রকাশিত"}`}
+        description={`${exam.session} · ${exam.results.length} rows, ${pass} passed · ${exam.published ? "Published" : "Unpublished"}`}
         action={
           <div className="flex flex-wrap items-center gap-2">
             <Button asChild variant="outline" size="cta">
               <Link href={`/admin/import?entity=board-results&examId=${exam.id}`}>
                 <Upload className="size-4" aria-hidden="true" />
-                ইমপোর্ট
+                Import
               </Link>
             </Button>
             <Button asChild variant="outline" size="cta">
@@ -52,7 +52,7 @@ export default async function BoardExamResultsPage({
               </a>
             </Button>
             <Button asChild variant="outline" size="cta">
-              <Link href={`/admin/board-exams/${exam.id}`}>পরীক্ষা সম্পাদনা</Link>
+              <Link href={`/admin/board-exams/${exam.id}`}>Edit exam</Link>
             </Button>
           </div>
         }
@@ -60,8 +60,8 @@ export default async function BoardExamResultsPage({
 
       {!exam.published && (
         <p className="mb-4 flex items-center gap-2 text-sm text-[color:var(--muted-foreground)]">
-          <AdminBadge tone="warning">অপ্রকাশিত</AdminBadge>
-          প্রকাশ না করা পর্যন্ত /results পাতায় এই ফলাফল খোঁজা যাবে না।
+          <AdminBadge tone="warning">Unpublished</AdminBadge>
+          These results cannot be searched on /results until the exam is published.
         </p>
       )}
 

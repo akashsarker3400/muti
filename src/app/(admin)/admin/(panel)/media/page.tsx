@@ -4,7 +4,7 @@ import { listMedia } from "@/lib/admin/media";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "মিডিয়া" };
+export const metadata = { title: "Media" };
 
 export default async function MediaPage() {
   const files = await listMedia();
@@ -12,8 +12,8 @@ export default async function MediaPage() {
   return (
     <>
       <AdminPageHeader
-        title="মিডিয়া"
-        description="আপলোড করা সব ছবি ও PDF। কোথাও ব্যবহৃত হচ্ছে না এমন ফাইল মুছে ফেলা যায়।"
+        title="Media"
+        description="Every uploaded image and PDF. Files not used anywhere can be deleted."
       />
       <MediaGrid files={files} />
     </>

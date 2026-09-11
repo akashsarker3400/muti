@@ -14,7 +14,8 @@ import { AdminPageHeader, Panel, StatCard } from "@/components/admin/ui";
 import { WhatsAppIcon } from "@/components/site/icons";
 import { Button } from "@/components/ui/button";
 import { requireAdmin } from "@/lib/admin-auth";
-import { formatDate, toBanglaDigits } from "@/lib/format";
+import { langOf } from "@/lib/lang";
+import { formatDate } from "@/lib/format";
 import { displayPhone, telHref } from "@/lib/phone";
 import { uploadsHealth } from "@/lib/admin/uploads-health";
 import { prisma } from "@/lib/prisma";
@@ -22,12 +23,12 @@ import { waLink } from "@/lib/whatsapp";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "ড্যাশবোর্ড" };
+export const metadata = { title: "Dashboard" };
 
 const APPLICATION_TYPE_LABELS: Record<string, string> = {
-  ADMISSION: "ভর্তি আবেদন",
-  FREE_CLASS: "ফ্রি ক্লাস",
-  CONTACT: "যোগাযোগ",
+  ADMISSION: "Admission application",
+  FREE_CLASS: "Free class",
+  CONTACT: "Contact",
 };
 
 export default async function AdminDashboard() {
@@ -68,8 +69,8 @@ export default async function AdminDashboard() {
   return (
     <>
       <AdminPageHeader
-        title={`স্বাগতম, ${admin.name}`}
-        description="ওয়েবসাইটের সর্বশেষ অবস্থা এক নজরে"
+        title={`Welcome, ${admin.name}`}
+        description="The website at a glance"
       />
 
       {(!uploads.writable || uploads.missing.length > 0) && (
@@ -80,28 +81,28 @@ export default async function AdminDashboard() {
         >
           <p className="flex items-center gap-2 font-semibold text-[color:var(--error)]">
             <AlertTriangle className="size-4" aria-hidden="true" />
-            আপলোড করা ফাইল সার্ভারে পাওয়া যাচ্ছে না
+            Uploaded files are missing from storage
           </p>
           <p className="mt-1">
             {!uploads.writable
               ? uploads.driver === "r2"
-                ? "Cloudflare R2 বাকেটে সংযোগ করা যাচ্ছে না — R2_* environment variable গুলো মিলিয়ে দেখুন। "
-                : "আপলোড ফোল্ডারে লেখা যাচ্ছে না। "
-              : `${uploads.checked}টি ফাইলের মধ্যে ${uploads.missing.length}টি নেই। `}
+                ? "Cannot connect to the Cloudflare R2 bucket. Check the R2_* environment variables. "
+                : "The upload folder is not writable. "
+              : `${uploads.missing.length} of ${uploads.checked} files are missing. `}
             {uploads.driver === "r2" ? (
               <>
-                ফাইলগুলো Cloudflare R2-তে রাখা হয়। যেগুলো নেই, সেগুলো হয় বাকেট থেকে
-                মুছে ফেলা হয়েছে, নয়তো R2 চালুর আগে সার্ভারে আপলোড হয়েছিল — আবার আপলোড
-                করুন।
+                Files are stored in Cloudflare R2. The missing ones were either deleted
+                from the bucket or uploaded to the server before R2 was enabled. Upload
+                them .
               </>
             ) : (
               <>
-                সাইটে লোগো, হিরো বা গ্যালারির ছবি ভাঙা দেখাচ্ছে? কারণ সাধারণত একটাই:
-                Coolify-তে অ্যাপের <strong>Storages</strong>-এ{" "}
-                <code className="font-latin">/app/uploads</code> পাথে persistent volume
-                যোগ করা নেই, তাই প্রতিটি redeploy-তে আপলোড মুছে যায়। সবচেয়ে নিরাপদ:
-                Cloudflare R2 চালু করুন (deploy guide ধাপ ৫), তারপর ছবিগুলো আবার আপলোড
-                করুন।
+                Broken logo, hero or gallery images on the site? There is usually one
+                cause: no persistent volume at{" "}
+                <code className="font-latin">/app/uploads</code> under the app’s
+                <strong>Storages</strong> in Coolify, so every redeploy wipes the
+                uploads. Safest fix: enable Cloudflare R2 (deploy guide step 5), then
+                upload the images .
               </>
             )}
           </p>
@@ -122,47 +123,47 @@ export default async function AdminDashboard() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="নতুন আবেদন (৭ দিন)"
-          value={toBanglaDigits(newApplications)}
+          label="New applications (7 days)"
+          value={String(newApplications)}
           icon={Inbox}
           href="/admin/applications"
         />
         <StatCard
-          label="মোট শিক্ষার্থী"
-          value={toBanglaDigits(totalStudents)}
+          label="Total students"
+          value={String(totalStudents)}
           icon={GraduationCap}
           href="/admin/students"
         />
         <StatCard
-          label="চলমান ব্যাচ"
-          value={toBanglaDigits(runningBatches)}
+          label="Running batches"
+          value={String(runningBatches)}
           icon={CalendarRange}
           href="/admin/batches"
         />
         <StatCard
-          label="প্রকাশিত নোটিশ"
-          value={toBanglaDigits(publishedNotices)}
+          label="Published notices"
+          value={String(publishedNotices)}
           icon={Newspaper}
           href="/admin/notices"
         />
       </div>
 
       <Panel className="mt-5">
-        <h2 className="mb-3 text-base font-semibold">গত ৩০ দিনের আবেদন</h2>
+        <h2 className="mb-3 text-base font-semibold">Applications, last 30 days</h2>
         <ApplicationsChart data={chartData} />
       </Panel>
 
       <Panel className="mt-5" padded={false}>
         <div className="flex items-center justify-between gap-3 border-b border-[color:var(--border)] p-4 sm:px-5">
-          <h2 className="text-base font-semibold">সর্বশেষ আবেদন</h2>
+          <h2 className="text-base font-semibold">Latest applications</h2>
           <Button asChild variant="outline" size="cta">
-            <Link href="/admin/applications">সব দেখুন</Link>
+            <Link href="/admin/applications">View all</Link>
           </Button>
         </div>
 
         {recentApplications.length === 0 ? (
           <p className="p-8 text-center text-sm text-[color:var(--muted-foreground)]">
-            এখনো কোনো আবেদন আসেনি।
+            No applications yet.
           </p>
         ) : (
           <div className="overflow-x-auto">
@@ -170,28 +171,28 @@ export default async function AdminDashboard() {
               <thead>
                 <tr className="border-b border-[color:var(--border)] bg-[color:var(--bg-soft)]">
                   <th scope="col" className="px-4 py-3 text-start font-semibold">
-                    নাম
+                    Name
                   </th>
                   <th scope="col" className="px-4 py-3 text-start font-semibold">
-                    ধরন
+                    Type
                   </th>
                   <th
                     scope="col"
                     className="hidden px-4 py-3 text-start font-semibold lg:table-cell"
                   >
-                    কোর্স
+                    Course
                   </th>
                   <th
                     scope="col"
                     className="hidden px-4 py-3 text-start font-semibold sm:table-cell"
                   >
-                    তারিখ
+                    Date
                   </th>
                   <th scope="col" className="px-4 py-3 text-start font-semibold">
-                    অবস্থা
+                    Status
                   </th>
                   <th scope="col" className="px-4 py-3 text-end font-semibold">
-                    যোগাযোগ
+                    Contact
                   </th>
                 </tr>
               </thead>
@@ -199,7 +200,9 @@ export default async function AdminDashboard() {
                 {recentApplications.map((application) => (
                   <tr key={application.id} className="hover:bg-[color:var(--bg-soft)]">
                     <td className="px-4 py-2.5">
-                      <p className="font-medium">{application.name}</p>
+                      <p className="font-medium" lang={langOf(application.name)}>
+                        {application.name}
+                      </p>
                       <p className="font-latin text-xs text-[color:var(--muted-foreground)]">
                         {displayPhone(application.phone)}
                       </p>
@@ -211,7 +214,7 @@ export default async function AdminDashboard() {
                       {application.course?.nameEn ?? "—"}
                     </td>
                     <td className="hidden px-4 py-2.5 whitespace-nowrap sm:table-cell">
-                      {formatDate(application.createdAt, "bn")}
+                      {formatDate(application.createdAt, "en")}
                     </td>
                     <td className="px-4 py-2.5">
                       <ApplicationStatusSelect
@@ -225,7 +228,7 @@ export default async function AdminDashboard() {
                           asChild
                           variant="ghost"
                           size="icon-sm"
-                          aria-label="কল করুন"
+                          aria-label="Call"
                         >
                           <a href={telHref(application.phone)}>
                             <Phone className="size-4" aria-hidden="true" />
@@ -280,7 +283,7 @@ function buildDailySeries(dates: Date[], days: number) {
     const key = day.toISOString().slice(0, 10);
     series.push({
       date: key,
-      label: toBanglaDigits(`${day.getUTCDate()}/${day.getUTCMonth() + 1}`),
+      label: `${day.getUTCDate()}/${day.getUTCMonth() + 1}`,
       count: counts.get(key) ?? 0,
     });
   }

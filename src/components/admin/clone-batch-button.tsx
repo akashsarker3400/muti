@@ -50,7 +50,7 @@ export function CloneBatchButton({
       });
 
       if (result.ok) {
-        toast.success("ব্যাচটি কপি করা হয়েছে।");
+        toast.success("Batch cloned.");
         setOpen(false);
         router.push(`/admin/batches/${result.id}`);
         router.refresh();
@@ -58,7 +58,7 @@ export function CloneBatchButton({
       }
 
       if (result.errors) setErrors(result.errors);
-      else toast.error(result.error ?? "কপি করা যায়নি।");
+      else toast.error(result.error ?? "Could not copy.");
     });
   }
 
@@ -70,7 +70,7 @@ export function CloneBatchButton({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon-sm" aria-label="ব্যাচ কপি করুন">
+        <Button variant="ghost" size="icon-sm" aria-label="Clone batch">
           <Copy className="size-4" aria-hidden="true" />
         </Button>
       </DialogTrigger>
@@ -78,16 +78,16 @@ export function CloneBatchButton({
       <DialogContent>
         <form onSubmit={submit}>
           <DialogHeader>
-            <DialogTitle>ব্যাচ কপি করুন</DialogTitle>
+            <DialogTitle>Clone batch</DialogTitle>
             <DialogDescription>
-              “{batchName}” থেকে ক্লাসের দিন, সময়, আসন সংখ্যা ও নোট কপি করা হবে। নতুন
-              ব্যাচটি “আসন্ন” অবস্থায় তৈরি হবে এবং পূর্ণ আসন ০ থেকে শুরু হবে।
+              Class days, time, seat count and note are copied from “{batchName}”. The
+              new batch starts as “Upcoming” with 0 seats filled.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label htmlFor="clone-name">নতুন ব্যাচের নাম</Label>
+              <Label htmlFor="clone-name">New batch name</Label>
               <Input
                 id="clone-name"
                 name="name"
@@ -104,7 +104,7 @@ export function CloneBatchButton({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="clone-start">শুরুর তারিখ</Label>
+                <Label htmlFor="clone-start">Start date</Label>
                 <Input
                   id="clone-start"
                   name="startDate"
@@ -114,14 +114,14 @@ export function CloneBatchButton({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="clone-seats">মোট আসন</Label>
+                <Label htmlFor="clone-seats">Total seats</Label>
                 <Input
                   id="clone-seats"
                   name="seats"
                   type="number"
                   min={0}
                   dir="ltr"
-                  placeholder="আগের মতোই"
+                  placeholder="unchanged"
                   className="h-11 font-latin"
                 />
               </div>
@@ -131,14 +131,14 @@ export function CloneBatchButton({
           <DialogFooter>
             <DialogClose asChild>
               <Button type="button" variant="outline" size="cta">
-                বাতিল
+                Cancel
               </Button>
             </DialogClose>
             <Button type="submit" variant="brand" size="cta" disabled={pending}>
               {pending && (
                 <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               )}
-              কপি করুন
+              Copy
             </Button>
           </DialogFooter>
         </form>

@@ -42,17 +42,17 @@ export function MultiUploadField({
         const response = await fetch("/api/admin/upload", { method: "POST", body });
         const data = (await response.json()) as { url?: string; error?: string };
         if (!response.ok || !data.url) {
-          toast.error(data.error ?? `আপলোড করা যায়নি: ${file.name}`);
+          toast.error(data.error ?? `Upload failed: ${file.name}`);
           continue;
         }
         added.push(data.url);
       }
       if (added.length > 0) {
         onChange([...value, ...added]);
-        toast.success(`${added.length}টি ছবি যোগ হয়েছে।`);
+        toast.success(`${added.length} images added.`);
       }
     } catch {
-      toast.error("আপলোড করা যায়নি।");
+      toast.error("Upload failed.");
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -102,7 +102,7 @@ export function MultiUploadField({
                   type="button"
                   variant="outline"
                   size="icon-sm"
-                  aria-label="উপরে নিন"
+                  aria-label="Move up"
                   disabled={index === 0}
                   onClick={() => move(index, -1)}
                 >
@@ -112,7 +112,7 @@ export function MultiUploadField({
                   type="button"
                   variant="outline"
                   size="icon-sm"
-                  aria-label="নিচে নিন"
+                  aria-label="Move down"
                   disabled={index === value.length - 1}
                   onClick={() => move(index, 1)}
                 >
@@ -122,7 +122,7 @@ export function MultiUploadField({
                   type="button"
                   variant="destructive"
                   size="icon-sm"
-                  aria-label="সরান"
+                  aria-label="Remove"
                   onClick={() => onChange(value.filter((_, i) => i !== index))}
                 >
                   <Trash2 className="size-4" aria-hidden="true" />
@@ -156,7 +156,7 @@ export function MultiUploadField({
           ) : (
             <Plus className="size-4" aria-hidden="true" />
           )}
-          ছবি যোগ করুন
+          Add images
         </Button>
 
         {/* Manual path entry, for files already on the volume. */}
@@ -170,8 +170,8 @@ export function MultiUploadField({
               addPath();
             }
           }}
-          placeholder="/uploads/… (Enter চাপুন)"
-          aria-label="ছবির পাথ"
+          placeholder="/uploads/… (press Enter)"
+          aria-label="Image path"
           dir="ltr"
           disabled={full}
           className="h-11 w-full min-w-0 font-latin text-xs sm:max-w-xs"
@@ -179,8 +179,8 @@ export function MultiUploadField({
       </div>
 
       <p className="text-xs break-words text-[color:var(--muted-foreground)]">
-        সর্বোচ্চ {max}টি ছবি, প্রতিটি ১০ MB পর্যন্ত। একসাথে একাধিক ছবি বাছাই করা যায়;
-        ক্রম বদলাতে তীর চিহ্ন ব্যবহার করুন।
+        Up to {max} images of 10 MB each. Several can be chosen at once; use the arrows
+        to reorder.
       </p>
     </div>
   );

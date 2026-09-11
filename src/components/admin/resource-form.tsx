@@ -49,7 +49,7 @@ export function ResourceForm({
   sections,
   defaultValues,
   onSave,
-  submitLabel = "সংরক্ষণ করুন",
+  submitLabel = "Save",
   cancelHref,
   extra,
 }: {
@@ -68,7 +68,8 @@ export function ResourceForm({
   // Both tab levels are controlled so a failed save can open the tab that
   // holds the offending field — an error under a closed tab is invisible.
   const [section, setSection] = useState(sections[0]!.id);
-  const [lang, setLang] = useState<Lang>("bn");
+  // English is the primary content language: its tab opens first.
+  const [lang, setLang] = useState<Lang>("en");
   const places = useMemo(() => indexFields(sections), [sections]);
 
   function setValue(name: string, value: FormValues[string]) {
@@ -87,7 +88,7 @@ export function ResourceForm({
       const result = await onSave(values);
 
       if (result.ok) {
-        toast.success("সংরক্ষণ করা হয়েছে।");
+        toast.success("Saved.");
         router.push(cancelHref);
         router.refresh();
         return;
@@ -99,7 +100,7 @@ export function ResourceForm({
         return;
       }
 
-      toast.error(result.error ?? "সংরক্ষণ করা যায়নি।");
+      toast.error(result.error ?? "Could not save.");
     });
   }
 
@@ -118,7 +119,7 @@ export function ResourceForm({
       ...unplaced.map((name) => `${name}: ${fieldErrors[name]}`),
     ];
 
-    toast.error("কিছু ফিল্ড ঠিক করতে হবে।", {
+    toast.error("Some fields need attention.", {
       description: (
         <ul className="mt-1 list-disc space-y-0.5 ps-4">
           {lines.map((line) => (
@@ -202,7 +203,7 @@ export function ResourceForm({
           onClick={() => router.push(cancelHref)}
           disabled={pending}
         >
-          বাতিল
+          Cancel
         </Button>
       </div>
     </form>
@@ -215,7 +216,7 @@ function ErrorDot({ count }: { count: number }) {
   return (
     <span
       className="ms-1.5 inline-flex min-w-4 items-center justify-center rounded-full bg-[color:var(--error)] px-1 font-latin text-[10px] leading-4 font-bold text-white"
-      aria-label={`${count} ভুল`}
+      aria-label={`${count} errors`}
     >
       {count}
     </span>
@@ -260,23 +261,15 @@ function SectionBody({
       {bilingual.length > 0 && (
         <Tabs value={lang} onValueChange={(value) => setLang(value as Lang)}>
           <TabsList className="mb-3">
-            <TabsTrigger value="bn">
-              বাংলা
-              <ErrorDot count={langErrorCount("bn")} />
-            </TabsTrigger>
             <TabsTrigger value="en">
               English
               <ErrorDot count={langErrorCount("en")} />
             </TabsTrigger>
+            <TabsTrigger value="bn">
+              <span lang="bn">বাংলা</span> (optional)
+              <ErrorDot count={langErrorCount("bn")} />
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value="bn">
-            <FieldGrid
-              fields={bilingual.filter((field) => field.lang === "bn")}
-              values={values}
-              errors={errors}
-              setValue={setValue}
-            />
-          </TabsContent>
           <TabsContent value="en">
             <FieldGrid
               fields={bilingual.filter((field) => field.lang === "en")}
@@ -284,8 +277,17 @@ function SectionBody({
               errors={errors}
               setValue={setValue}
             />
+          </TabsContent>
+          <TabsContent value="bn" lang="bn">
+            <FieldGrid
+              fields={bilingual.filter((field) => field.lang === "bn")}
+              values={values}
+              errors={errors}
+              setValue={setValue}
+            />
             <p className="mt-3 text-xs text-[color:var(--muted-foreground)]">
-              ইংরেজি ফাঁকা রাখলে ওয়েবসাইটে বাংলা লেখাটিই দেখানো হবে।
+              Bangla is optional. Leave a field empty and the /bn page shows the English
+              text.
             </p>
           </TabsContent>
         </Tabs>
@@ -436,7 +438,7 @@ function FieldControl({
           aria-invalid={error ? true : undefined}
           className="h-11 w-full rounded-lg border border-[color:var(--input)] bg-white px-3 text-sm focus-visible:border-[color:var(--brand)] focus-visible:outline-none"
         >
-          <option value="">— বাছাই করুন —</option>
+          <option value="">— select —</option>
           {field.options?.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -519,7 +521,7 @@ function FieldControl({
                 .filter(Boolean),
             )
           }
-          placeholder={field.placeholder ?? "কমা দিয়ে আলাদা করুন"}
+          placeholder={field.placeholder ?? "Separate with commas"}
           dir="ltr"
           className="h-11 font-latin"
         />

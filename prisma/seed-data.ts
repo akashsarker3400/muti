@@ -599,6 +599,8 @@ export const seedPosts = [
     // Draft: the owner will write the article. Seeded so the admin has a shell to edit.
     bodyBn:
       "<p>এই লেখাটি খসড়া অবস্থায় আছে। প্রকাশ করার আগে অ্যাডমিন প্যানেল থেকে সম্পূর্ণ লেখাটি যোগ করুন।</p>",
+    bodyEn:
+      "<p>This article is a draft. Write the full article in the admin panel before publishing.</p>",
     tags: ["career", "ultrasound"],
   },
   {
@@ -609,6 +611,8 @@ export const seedPosts = [
       "সময়কাল, সিলেবাস, প্র্যাকটিক্যাল ক্লাসের সংখ্যা ও সার্টিফিকেট — কোনটি আপনার জন্য উপযুক্ত।",
     bodyBn:
       "<p>এই লেখাটি খসড়া অবস্থায় আছে। প্রকাশ করার আগে অ্যাডমিন প্যানেল থেকে সম্পূর্ণ লেখাটি যোগ করুন।</p>",
+    bodyEn:
+      "<p>This article is a draft. Write the full article in the admin panel before publishing.</p>",
     tags: ["cmu", "dmu"],
   },
 ];

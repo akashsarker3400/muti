@@ -70,9 +70,9 @@ export function CourseJsonLd({
   url,
 }: {
   course: {
-    nameBn: string;
+    nameBn: string | null;
     nameEn: string;
-    fullNameBn: string;
+    fullNameBn: string | null;
     fullNameEn: string;
     overviewBn: string | null;
     overviewEn: string | null;

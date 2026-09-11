@@ -24,10 +24,10 @@ const SELECT =
 const CELL = "h-9 font-latin text-sm";
 
 const STATUS_OPTIONS = [
-  ["PASS", "উত্তীর্ণ"],
-  ["FAIL", "অনুত্তীর্ণ"],
-  ["WITHHELD", "স্থগিত"],
-  ["ABSENT", "অনুপস্থিত"],
+  ["PASS", "Passed"],
+  ["FAIL", "Failed"],
+  ["WITHHELD", "Withheld"],
+  ["ABSENT", "Absent"],
 ] as const;
 
 const EMPTY: EditableRow = {
@@ -74,11 +74,11 @@ export function BoardResultsEditor({
       setRows((current) => current.filter((_, i) => i !== index));
       return;
     }
-    if (!window.confirm(`রোল ${row.roll} মুছে ফেলবেন?`)) return;
+    if (!window.confirm(`Delete roll ${row.roll}?`)) return;
     startTransition(async () => {
       await deleteBoardResultRow(row.id!);
       setRows((current) => current.filter((_, i) => i !== index));
-      toast.success("মুছে ফেলা হয়েছে।");
+      toast.success("Deleted.");
     });
   }
 
@@ -86,7 +86,7 @@ export function BoardResultsEditor({
   function applyPaste() {
     const parsed = parseBoardNotice(paste);
     if (parsed.length === 0) {
-      toast.error("কোনো “রোল (GPA)” বা “রোল {বিষয়}” প্যাটার্ন পাওয়া যায়নি।");
+      toast.error("No “roll (GPA)” or “roll {subjects}” pattern found.");
       return;
     }
     setRows((current) => {
@@ -103,9 +103,7 @@ export function BoardResultsEditor({
       }
       return [...byRoll.values()];
     });
-    toast.success(
-      `${parsed.length}টি সারি পাওয়া গেছে — দেখে নিয়ে “সব সংরক্ষণ” চাপুন।`,
-    );
+    toast.success(`${parsed.length} rows found. Review them and press “Save all”.`);
     setPaste("");
     setPasteOpen(false);
   }
@@ -115,17 +113,17 @@ export function BoardResultsEditor({
     startTransition(async () => {
       const result = await saveBoardResultRows(examId, filled);
       if (!result.ok) {
-        toast.error(result.error ?? "সংরক্ষণ করা যায়নি।");
+        toast.error(result.error ?? "Could not save.");
         return;
       }
       const problems = result.errors?.length
-        ? ` ${result.errors.length}টি সারি বাদ: ${result.errors
+        ? ` ${result.errors.length} rows skipped: ${result.errors
             .slice(0, 3)
-            .map((e) => `সারি ${e.row} — ${e.message}`)
+            .map((e) => `row ${e.row}: ${e.message}`)
             .join("; ")}`
         : "";
       toast.success(
-        `সংরক্ষিত: ${result.created} নতুন, ${result.updated} আপডেট, ${result.linked} শিক্ষার্থীর সাথে লিংক।${problems}`,
+        `Saved: ${result.created} new, ${result.updated} updated, ${result.linked} linked to students.${problems}`,
         { duration: 8000 },
       );
       router.refresh();
@@ -135,7 +133,7 @@ export function BoardResultsEditor({
   function autoLink() {
     startTransition(async () => {
       const result = await autoLinkBoardResults(examId);
-      toast.success(`${result.linked}টি সারি শিক্ষার্থীর সাথে লিংক হয়েছে।`);
+      toast.success(`${result.linked} rows linked to students.`);
       router.refresh();
     });
   }
@@ -145,7 +143,7 @@ export function BoardResultsEditor({
       <div className="flex flex-wrap items-center gap-2">
         <Button type="button" variant="outline" size="cta" onClick={addRow}>
           <Plus className="size-4" aria-hidden="true" />
-          সারি যোগ
+          Add row
         </Button>
         <Button
           type="button"
@@ -154,7 +152,7 @@ export function BoardResultsEditor({
           onClick={() => setPasteOpen((open) => !open)}
         >
           <ClipboardPaste className="size-4" aria-hidden="true" />
-          নোটিশ পেস্ট করুন
+          Paste notice
         </Button>
         <Button
           type="button"
@@ -164,7 +162,7 @@ export function BoardResultsEditor({
           disabled={pending}
         >
           <Link2 className="size-4" aria-hidden="true" />
-          রোল দিয়ে শিক্ষার্থী লিংক
+          Link students by roll
         </Button>
         <span className="flex-1" />
         <Button
@@ -179,16 +177,16 @@ export function BoardResultsEditor({
           ) : (
             <Save className="size-4" aria-hidden="true" />
           )}
-          সব সংরক্ষণ
+          Save all
         </Button>
       </div>
 
       {pasteOpen && (
         <Panel>
           <p className="mb-2 text-sm text-[color:var(--muted-foreground)]">
-            বোর্ডের নোটিশ থেকে লেখা কপি করে এখানে পেস্ট করুন। “3825000128 (4.00)”
-            উত্তীর্ণ, “3825000129 {"{01101[T], 01103[T]}"}” অনুত্তীর্ণ হিসেবে পড়া হবে।
-            টেবিলে বসার পর নাম বা রেজিস্ট্রেশন যোগ করে সংরক্ষণ করুন।
+            Copy the text of the board notice and paste it here. “3825000128 (4.00)” is
+            read as a pass, “3825000129 {"{01101[T], 01103[T]}"}” as a fail. Once in the
+            table, add names or registration numbers and save.
           </p>
           <Textarea
             value={paste}
@@ -200,7 +198,7 @@ export function BoardResultsEditor({
           />
           <div className="mt-2 flex gap-2">
             <Button type="button" variant="brand" size="cta" onClick={applyPaste}>
-              পার্স করুন
+              Parse
             </Button>
             <Button
               type="button"
@@ -208,7 +206,7 @@ export function BoardResultsEditor({
               size="cta"
               onClick={() => setPasteOpen(false)}
             >
-              বাতিল
+              Cancel
             </Button>
           </div>
         </Panel>
@@ -218,13 +216,13 @@ export function BoardResultsEditor({
         <table className="w-full min-w-[880px] text-sm">
           <thead className="bg-[color:var(--bg-soft)] text-xs text-[color:var(--muted-foreground)]">
             <tr>
-              <th className="px-3 py-2 text-start font-medium">রোল</th>
-              <th className="px-3 py-2 text-start font-medium">রেজিস্ট্রেশন</th>
-              <th className="px-3 py-2 text-start font-medium">নাম</th>
-              <th className="px-3 py-2 text-start font-medium">অবস্থা</th>
+              <th className="px-3 py-2 text-start font-medium">Roll</th>
+              <th className="px-3 py-2 text-start font-medium">Registration</th>
+              <th className="px-3 py-2 text-start font-medium">Name</th>
+              <th className="px-3 py-2 text-start font-medium">Status</th>
               <th className="px-3 py-2 text-start font-medium">GPA</th>
-              <th className="px-3 py-2 text-start font-medium">অনুত্তীর্ণ বিষয়</th>
-              <th className="px-3 py-2 text-start font-medium">মন্তব্য</th>
+              <th className="px-3 py-2 text-start font-medium">Failed subjects</th>
+              <th className="px-3 py-2 text-start font-medium">Remark</th>
               <th className="px-3 py-2" />
             </tr>
           </thead>
@@ -235,8 +233,7 @@ export function BoardResultsEditor({
                   colSpan={8}
                   className="px-3 py-8 text-center text-[color:var(--muted-foreground)]"
                 >
-                  এখনো কোনো সারি নেই — “সারি যোগ”, “নোটিশ পেস্ট” বা ইমপোর্ট ব্যবহার
-                  করুন।
+                  No rows yet. Use “Add row”, “Paste notice” or import .
                 </td>
               </tr>
             )}
@@ -251,7 +248,7 @@ export function BoardResultsEditor({
                     onChange={(e) => update(index, { roll: e.target.value })}
                     dir="ltr"
                     className={CELL}
-                    aria-label={`সারি ${index + 1} রোল`}
+                    aria-label={`Row ${index + 1} roll`}
                   />
                 </td>
                 <td className="px-2 py-1.5">
@@ -260,7 +257,7 @@ export function BoardResultsEditor({
                     onChange={(e) => update(index, { registrationNo: e.target.value })}
                     dir="ltr"
                     className={CELL}
-                    aria-label={`সারি ${index + 1} রেজিস্ট্রেশন`}
+                    aria-label={`Row ${index + 1} registration`}
                   />
                 </td>
                 <td className="px-2 py-1.5">
@@ -268,8 +265,8 @@ export function BoardResultsEditor({
                     value={row.studentName}
                     onChange={(e) => update(index, { studentName: e.target.value })}
                     className="h-9 text-sm"
-                    placeholder={row.linked ? "(শিক্ষার্থী লিংকড)" : ""}
-                    aria-label={`সারি ${index + 1} নাম`}
+                    placeholder={row.linked ? "(student linked)" : ""}
+                    aria-label={`Row ${index + 1} name`}
                   />
                 </td>
                 <td className="px-2 py-1.5">
@@ -279,7 +276,7 @@ export function BoardResultsEditor({
                       update(index, { status: e.target.value as EditableRow["status"] })
                     }
                     className={SELECT}
-                    aria-label={`সারি ${index + 1} অবস্থা`}
+                    aria-label={`Row ${index + 1} status`}
                   >
                     {STATUS_OPTIONS.map(([value, label]) => (
                       <option key={value} value={value}>
@@ -294,7 +291,7 @@ export function BoardResultsEditor({
                     onChange={(e) => update(index, { gpa: e.target.value })}
                     dir="ltr"
                     className={`${CELL} w-20`}
-                    aria-label={`সারি ${index + 1} GPA`}
+                    aria-label={`Row ${index + 1} GPA`}
                   />
                 </td>
                 <td className="px-2 py-1.5">
@@ -304,7 +301,7 @@ export function BoardResultsEditor({
                     dir="ltr"
                     className={CELL}
                     placeholder="01101[T], 01103[T,P]"
-                    aria-label={`সারি ${index + 1} অনুত্তীর্ণ বিষয়`}
+                    aria-label={`Row ${index + 1} failed subjects`}
                   />
                 </td>
                 <td className="px-2 py-1.5">
@@ -312,7 +309,7 @@ export function BoardResultsEditor({
                     value={row.remark}
                     onChange={(e) => update(index, { remark: e.target.value })}
                     className="h-9 text-sm"
-                    aria-label={`সারি ${index + 1} মন্তব্য`}
+                    aria-label={`Row ${index + 1} remark`}
                   />
                 </td>
                 <td className="px-2 py-1.5">
@@ -320,7 +317,7 @@ export function BoardResultsEditor({
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    aria-label="সারি মুছুন"
+                    aria-label="Delete row"
                     onClick={() => removeRow(index)}
                   >
                     <Trash2

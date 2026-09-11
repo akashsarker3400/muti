@@ -28,7 +28,7 @@ export default async function EditCoursePage({
   return (
     <>
       <AdminPageHeader
-        title={course.nameBn}
+        title={course.nameEn}
         description={`${course.code} · /${course.slug}`}
         action={
           <Button asChild variant="outline" size="cta">
@@ -38,7 +38,7 @@ export default async function EditCoursePage({
               rel="noopener noreferrer"
             >
               <ExternalLink className="size-4" aria-hidden="true" />
-              সাইটে দেখুন
+              View on site
             </a>
           </Button>
         }

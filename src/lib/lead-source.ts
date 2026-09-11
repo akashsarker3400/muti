@@ -116,11 +116,12 @@ export function parseLeadCookie(raw: string | undefined): LeadData | null {
   }
 }
 
-export const LEAD_SOURCE_LABELS_BN: Record<LeadSource, string> = {
-  FACEBOOK: "ফেসবুক",
-  GOOGLE: "গুগল",
-  REFERRAL: "রেফারেল",
-  WALK_IN: "সরাসরি অফিসে",
-  WEBSITE: "ওয়েবসাইট",
-  OTHER: "অন্যান্য",
+/** Admin-panel labels (the admin UI is English only). */
+export const LEAD_SOURCE_LABELS: Record<LeadSource, string> = {
+  FACEBOOK: "Facebook",
+  GOOGLE: "Google",
+  REFERRAL: "Referral",
+  WALK_IN: "Walk-in",
+  WEBSITE: "Website",
+  OTHER: "Other",
 };
