@@ -50,7 +50,10 @@ export function LanguageSwitch({ className }: { className?: string }) {
               : "text-[color:var(--muted-foreground)] hover:bg-[color:var(--bg-soft)]",
           )}
         >
-          {locale === "bn" ? t("bangla") : t("english")}
+          <span className="xl:hidden">{locale === "bn" ? "বাং" : "EN"}</span>
+          <span className="hidden xl:inline">
+            {locale === "bn" ? t("bangla") : t("english")}
+          </span>
         </button>
       ))}
     </div>

@@ -62,8 +62,8 @@ export async function generateMetadata({
     alternates: {
       canonical: locale === routing.defaultLocale ? "/" : `/${locale}`,
       languages: {
-        bn: "/",
-        en: "/en",
+        en: "/",
+        bn: "/bn",
         "x-default": "/",
       },
     },
@@ -73,6 +73,7 @@ export async function generateMetadata({
       title,
       description,
       locale: locale === "bn" ? "bn_BD" : "en_US",
+      alternateLocale: locale === "bn" ? "en_US" : "bn_BD",
       images: settings.seo.ogImage
         ? [{ url: settings.seo.ogImage }]
         : [{ url: "/api/og" }],

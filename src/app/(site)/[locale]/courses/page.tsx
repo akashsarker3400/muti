@@ -23,7 +23,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("subtitle"),
-    alternates: { canonical: locale === "bn" ? "/courses" : "/en/courses" },
+    alternates: { canonical: locale === "en" ? "/courses" : "/bn/courses" },
   };
 }
 

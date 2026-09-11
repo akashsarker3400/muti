@@ -12,9 +12,10 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  --font-sans:
-    var(--font-bangla), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-bangla: var(--font-hind-siliguri);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-bangla:
+    var(--font-noto-bengali), "Noto Sans Bengali", "Hind Siliguri", ui-sans-serif,
+    sans-serif;
   --font-latin: var(--font-inter);
   --font-heading: var(--font-sans);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -156,12 +157,32 @@
 
   body {
     @apply bg-background text-foreground;
-    /* Bangla glyphs need extra leading to avoid clipping (section 4). */
-    line-height: 1.7;
+    line-height: 1.6;
   }
 
-  /* Latin-only surfaces (fees, codes, English UI) get Inter metrics. */
-  :lang(en) body,
+  /*
+   * Bangla typography (locale change): Noto Sans Bengali only where Bangla is
+   * rendered — the /bn routes (html[lang="bn"]) and any element marked
+   * lang="bn" on a mixed page. It renders smaller than Latin at the same size,
+   * so Bangla pages get a 17px base; conjuncts and vowel signs need the taller
+   * line-height, and letter-spacing must stay 0 or marks drift.
+   */
+  html[lang="bn"] {
+    font-size: 17px;
+  }
+  html[lang="bn"] body,
+  [lang="bn"] {
+    font-family: var(--font-bangla);
+    line-height: 1.75;
+    letter-spacing: 0;
+  }
+  html[lang="bn"] :is(h1, h2, h3, h4, h5, h6),
+  [lang="bn"] :is(h1, h2, h3, h4, h5, h6) {
+    line-height: 1.3;
+    letter-spacing: 0;
+  }
+
+  /* Latin-only surfaces (fees, codes, numbers) keep Inter metrics on Bangla pages. */
   .font-latin {
     font-family: var(--font-latin), ui-sans-serif, system-ui, sans-serif;
   }
@@ -305,6 +326,48 @@
   .nums {
     font-variant-numeric: tabular-nums;
   }
+}
+
+/*
+ * Navigation, ticker and footer link text (locale change §5): weight 500,
+ * 15px Inter on English pages, 16px Noto Sans Bengali at line-height 1.6 on
+ * Bangla pages. Marks above and below Bangla letters (ি ী ু ূ ্র, conjuncts)
+ * are clipped by tight boxes, so every nav item, pill and badge keeps at
+ * least line-height 1.5 with 3px of vertical padding and never a fixed
+ * height with overflow hidden.
+ */
+.nav-text {
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.5;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+html[lang="bn"] .nav-text {
+  font-size: 16px;
+  line-height: 1.6;
+}
+.pill-text {
+  line-height: 1.5;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+/* Sidebar / menu items: 12px vertical padding, 10px radius when active. */
+.menu-item {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  border-radius: 10px;
+  line-height: 1.5;
+}
+.menu-item:hover {
+  background: #f5f7fb;
+}
+.menu-item[aria-current="page"],
+.menu-item[data-active="true"] {
+  background: #eef2fa;
+  color: var(--brand);
 }
 
 /* Hero slider scrim (readability fix): painted by a pseudo-element so it sits

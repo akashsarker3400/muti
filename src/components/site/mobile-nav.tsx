@@ -35,7 +35,7 @@ export function MobileNav({
           variant="outline"
           size="icon-cta"
           aria-label={t("openMenu")}
-          className="lg:hidden"
+          className="xl:hidden"
         >
           <Menu className="size-5" aria-hidden="true" />
         </Button>
@@ -53,7 +53,7 @@ export function MobileNav({
                 <Link
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className="flex min-h-11 items-center justify-between rounded-lg px-3 text-[0.95rem] font-medium text-[color:var(--foreground)] transition hover:bg-[color:var(--bg-soft)] hover:text-[color:var(--brand)]"
+                  className="nav-text menu-item flex min-h-12 items-center justify-between px-3 text-[color:var(--foreground)] transition"
                 >
                   {item.label}
                   <ChevronRight
@@ -74,7 +74,7 @@ export function MobileNav({
                     <Link
                       href={course.href}
                       onClick={() => setOpen(false)}
-                      className="flex min-h-10 items-center rounded-lg px-3 text-sm text-[color:var(--muted-foreground)] transition hover:bg-[color:var(--bg-soft)] hover:text-[color:var(--brand)]"
+                      className="nav-text menu-item flex min-h-12 items-center px-3 text-[color:var(--muted-foreground)] transition"
                     >
                       {course.label}
                     </Link>

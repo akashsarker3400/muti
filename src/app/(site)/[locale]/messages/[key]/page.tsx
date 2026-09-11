@@ -28,7 +28,7 @@ export async function generateMetadata({
     description: pick(locale, message.excerptBn, message.excerptEn) || undefined,
     alternates: {
       canonical:
-        locale === "bn" ? `/messages/${message.key}` : `/en/messages/${message.key}`,
+        locale === "en" ? `/messages/${message.key}` : `/bn/messages/${message.key}`,
     },
   };
 }

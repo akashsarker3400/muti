@@ -96,7 +96,7 @@ export async function SiteFooter({
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-[color:#b9c2dd] transition hover:text-white"
+                    className="nav-text inline-block text-[color:#b9c2dd] transition hover:text-white"
                   >
                     {item.label ?? nav(item.labelKey ?? "")}
                   </Link>
@@ -120,7 +120,7 @@ export async function SiteFooter({
                 <li key={course.id}>
                   <Link
                     href={`/courses/${course.slug}`}
-                    className="text-[color:#b9c2dd] transition hover:text-white"
+                    className="nav-text inline-block text-[color:#b9c2dd] transition hover:text-white"
                   >
                     {pick(locale, course.nameBn, course.nameEn)}
                   </Link>

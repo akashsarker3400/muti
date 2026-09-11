@@ -23,7 +23,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "about" });
   return {
     title: t("title"),
-    alternates: { canonical: locale === "bn" ? "/about" : "/en/about" },
+    alternates: { canonical: locale === "en" ? "/about" : "/bn/about" },
   };
 }
 

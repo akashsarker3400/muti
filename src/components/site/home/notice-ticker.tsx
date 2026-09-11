@@ -122,8 +122,8 @@ function TickerItems({
                 aria-hidden="true"
               />
             )}
-            <span className="font-medium group-hover:underline">{item.title}</span>
-            <span className="nums text-xs text-[color:var(--muted-foreground)]">
+            <span className="nav-text py-0 group-hover:underline">{item.title}</span>
+            <span className="nums text-[13px] font-medium text-[color:var(--muted-foreground)]">
               {item.date}
             </span>
           </Link>

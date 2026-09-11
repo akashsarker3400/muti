@@ -25,7 +25,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("subtitle"),
-    alternates: { canonical: locale === "bn" ? "/verify" : "/en/verify" },
+    alternates: { canonical: locale === "en" ? "/verify" : "/bn/verify" },
     // The empty page is indexable; a result state is one person's record.
     robots: token ? { index: false, follow: false } : { index: true, follow: true },
   };

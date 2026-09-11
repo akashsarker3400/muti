@@ -32,6 +32,22 @@ export const aboutNav: NavItem[] = [
   { href: "/accreditation", labelKey: "accreditation" },
 ];
 
+/**
+ * Desktop bar only: with English labels at 15px, nine items plus Apply do
+ * not fit even at 1440px, so Notices and Gallery sit under "More ▾" there.
+ * The drawer and the footer still list everything flat.
+ */
+export const barNav: NavItem[] = primaryNav.filter(
+  (item) => !["/notices", "/gallery"].includes(item.href),
+);
+export const moreNav: NavItem[] = [
+  { href: "/notices", labelKey: "notices" },
+  { href: "/gallery", labelKey: "gallery" },
+  { href: "/downloads", labelKey: "downloads" },
+  { href: "/faq", labelKey: "faq" },
+  { href: "/blog", labelKey: "blog" },
+];
+
 /** Pages that only live in the footer and the mobile drawer. */
 export const secondaryNav: NavItem[] = [
   { href: "/downloads", labelKey: "downloads" },

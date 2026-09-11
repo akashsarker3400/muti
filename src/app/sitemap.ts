@@ -55,8 +55,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority,
       alternates: {
         languages: {
-          bn: `${siteUrl}${path || "/"}`,
-          en: `${siteUrl}/en${path}`,
+          en: `${siteUrl}${path || "/"}`,
+          bn: `${siteUrl}/bn${path}`,
+          "x-default": `${siteUrl}${path || "/"}`,
         },
       },
     });

@@ -20,6 +20,14 @@ const { auth } = NextAuth(authConfig);
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // English moved to the root: the old /en/* addresses redirect permanently
+  // to the same path without the prefix, query string intact.
+  if (pathname === "/en" || pathname.startsWith("/en/")) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname === "/en" ? "/" : pathname.slice(3);
+    return NextResponse.redirect(url, 308);
+  }
+
   if (pathname.startsWith("/admin")) {
     // The login page itself must stay reachable.
     if (pathname === "/admin/login") return NextResponse.next();

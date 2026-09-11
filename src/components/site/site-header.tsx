@@ -9,7 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { pick } from "@/lib/format";
-import { aboutMenu, allNav, primaryNav, visibleNav, type NavItem } from "@/lib/nav";
+import {
+  aboutMenu,
+  allNav,
+  barNav,
+  moreNav,
+  visibleNav,
+  type NavItem,
+} from "@/lib/nav";
 import { getLeadershipMessages, type PublicCourse } from "@/lib/queries";
 import type { SiteSettings } from "@/lib/site-settings";
 import { waLink } from "@/lib/whatsapp";
@@ -56,7 +63,7 @@ export async function SiteHeader({
   }));
   const about = aboutMenu(leadership);
   const flags = { health: settings.health.published };
-  const bar = visibleNav(primaryNav, flags);
+  const bar = visibleNav(barNav, flags);
   const text = (item: NavItem) => item.label ?? nav(item.labelKey ?? "");
 
   return (
@@ -70,13 +77,13 @@ export async function SiteHeader({
             <span className="font-latin text-lg font-bold tracking-tight text-[color:var(--brand)] lg:text-xl">
               {shortName}
             </span>
-            <span className="hidden max-w-[15rem] truncate text-[11px] text-[color:var(--muted-foreground)] sm:block lg:hidden xl:block xl:max-w-[22rem] xl:text-xs">
+            <span className="hidden max-w-[15rem] truncate text-[11px] text-[color:var(--muted-foreground)] sm:block xl:hidden 2xl:block 2xl:max-w-[22rem] 2xl:text-xs">
               {instituteName}
             </span>
           </span>
         </Link>
 
-        <nav className="ms-auto hidden items-center lg:flex" aria-label={nav("menu")}>
+        <nav className="ms-auto hidden items-center xl:flex" aria-label={nav("menu")}>
           <ul className="flex items-center gap-0.5">
             {bar.map((item) =>
               item.href === "/about" ? (
@@ -84,7 +91,7 @@ export async function SiteHeader({
                 <li key={item.href} className="group relative">
                   <Link
                     href="/about"
-                    className="flex min-h-9 items-center gap-1 rounded-md px-1.5 text-xs font-medium whitespace-nowrap text-[color:var(--foreground)] transition group-focus-within:bg-[color:var(--bg-soft)] group-hover:bg-[color:var(--bg-soft)] group-hover:text-[color:var(--brand)] xl:px-2 xl:text-[13px] 2xl:px-2.5 2xl:text-sm"
+                    className="nav-text flex items-center gap-1 rounded-md px-1.5 whitespace-nowrap text-[color:var(--foreground)] transition group-focus-within:bg-[color:var(--bg-soft)] group-hover:bg-[color:var(--bg-soft)] group-hover:text-[color:var(--brand)] xl:px-2"
                     aria-haspopup="true"
                   >
                     {nav("about")}
@@ -96,7 +103,7 @@ export async function SiteHeader({
                         <li key={entry.href}>
                           <Link
                             href={entry.href}
-                            className="flex min-h-10 items-center rounded-lg px-3 text-sm text-[color:var(--foreground)] transition hover:bg-[color:var(--bg-soft)] hover:text-[color:var(--brand)]"
+                            className="nav-text menu-item flex items-center px-3 text-[color:var(--foreground)] transition"
                           >
                             {text(entry)}
                           </Link>
@@ -109,43 +116,54 @@ export async function SiteHeader({
                 <li key={item.href} className={item.href === "/" ? "hidden" : ""}>
                   <Link
                     href={item.href}
-                    className="flex min-h-9 items-center rounded-md px-1.5 text-xs font-medium whitespace-nowrap text-[color:var(--foreground)] transition hover:bg-[color:var(--bg-soft)] hover:text-[color:var(--brand)] xl:px-2 xl:text-[13px] 2xl:px-2.5 2xl:text-sm"
+                    className="nav-text flex items-center rounded-md px-1.5 whitespace-nowrap text-[color:var(--foreground)] transition hover:bg-[color:var(--bg-soft)] hover:text-[color:var(--brand)] xl:px-2"
                   >
                     {text(item)}
                   </Link>
                 </li>
               ),
             )}
+            <li className="group relative">
+              <button
+                type="button"
+                className="nav-text flex items-center gap-1 rounded-md px-1.5 whitespace-nowrap text-[color:var(--foreground)] transition group-focus-within:bg-[color:var(--bg-soft)] group-hover:bg-[color:var(--bg-soft)] group-hover:text-[color:var(--brand)] xl:px-2"
+                aria-haspopup="true"
+              >
+                {nav("more")}
+                <ChevronDown className="size-3.5" aria-hidden="true" />
+              </button>
+              <div className="invisible absolute end-0 top-full w-56 pt-2 opacity-0 transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+                <ul className="rounded-xl border border-[color:var(--border)] bg-white p-1.5 shadow-[var(--shadow-card-hover)]">
+                  {moreNav.map((entry) => (
+                    <li key={entry.href}>
+                      <Link
+                        href={entry.href}
+                        className="nav-text menu-item flex items-center px-3 text-[color:var(--foreground)] transition"
+                      >
+                        {text(entry)}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </li>
           </ul>
         </nav>
 
-        <div className="ms-auto flex items-center gap-2 lg:ms-3">
-          <LanguageSwitch className="hidden lg:flex" />
+        <div className="ms-auto flex items-center gap-2 xl:ms-3">
+          <LanguageSwitch className="hidden sm:flex" />
 
           {/* Always-visible WhatsApp affordance: icon on mobile, labelled on desktop. */}
           <Button
             asChild
             variant="whatsapp"
             size="icon-cta"
-            className="2xl:hidden"
             aria-label={common("whatsapp")}
           >
             <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
               <WhatsAppIcon className="size-5" />
             </a>
           </Button>
-          <Button
-            asChild
-            variant="whatsapp"
-            size="cta"
-            className="hidden 2xl:inline-flex"
-          >
-            <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
-              <WhatsAppIcon className="size-4" />
-              {common("whatsappShort")}
-            </a>
-          </Button>
-
           <Button asChild variant="accent" size="cta" className="hidden sm:inline-flex">
             <Link href="/apply">{common("applyNow")}</Link>
           </Button>

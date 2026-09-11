@@ -1,31 +1,26 @@
-import { Hind_Siliguri, Inter } from "next/font/google";
+import { Inter, Noto_Sans_Bengali } from "next/font/google";
 
 /**
- * Bangla is the primary UI language, so Hind Siliguri leads the stack and
- * Inter carries Latin text (course codes, fees, English UI) — section 2 & 4.
- *
- * Only two Bangla weights are loaded and preloaded. The Bengali face carries a
- * large glyph set, and the homepage h1 is the Largest Contentful Paint
- * element: every extra preloaded weight pushes LCP out on a phone. Weight 500
- * and 600 resolve to the nearest available face, which reads fine in Bangla.
- *
- * Inter is deliberately not preloaded — Latin text is a minority on the page
- * and the system fallback is close enough for the first paint.
+ * English is the primary language: Inter is the page font and is the only
+ * face preloaded. Noto Sans Bengali is registered but not preloaded — the
+ * browser fetches it only where Bangla is actually rendered, which is the
+ * /bn routes and any admin content field the office types Bangla into
+ * (see the `html[lang="bn"]` and `[lang="bn"]` rules in globals.css).
  */
-export const hindSiliguri = Hind_Siliguri({
-  subsets: ["bengali", "latin"],
-  weight: ["400", "700"],
-  variable: "--font-hind-siliguri",
+export const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
   display: "swap",
   preload: true,
 });
 
-export const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  variable: "--font-inter",
+export const notoSansBengali = Noto_Sans_Bengali({
+  subsets: ["bengali"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-noto-bengali",
   display: "swap",
   preload: false,
 });
 
-export const fontVariables = `${hindSiliguri.variable} ${inter.variable}`;
+export const fontVariables = `${inter.variable} ${notoSansBengali.variable}`;

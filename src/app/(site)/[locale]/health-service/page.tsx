@@ -57,7 +57,7 @@ export async function generateMetadata({
       "free pregnancy ultrasound mymensingh",
     ],
     alternates: {
-      canonical: locale === "bn" ? "/health-service" : "/en/health-service",
+      canonical: locale === "en" ? "/health-service" : "/bn/health-service",
     },
     openGraph: {
       title: t("metaTitle"),
