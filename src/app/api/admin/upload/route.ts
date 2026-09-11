@@ -1,11 +1,9 @@
 import { randomBytes } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
 
 import { currentAdmin, logActivity } from "@/lib/admin-auth";
-import { uploadDir } from "@/lib/env";
+import { storage } from "@/lib/storage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -61,8 +59,6 @@ export async function POST(request: Request) {
   // Folder per month keeps the volume browsable as it grows.
   const now = new Date();
   const folder = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
-  const directory = path.join(path.resolve(uploadDir), folder);
-  await mkdir(directory, { recursive: true });
 
   // Random name: the original filename never reaches the filesystem.
   const id = randomBytes(12).toString("hex");
@@ -77,7 +73,7 @@ export async function POST(request: Request) {
         .toBuffer();
 
       const filename = `${id}.webp`;
-      await writeFile(path.join(directory, filename), output);
+      await storage().put(`${folder}/${filename}`, output, "image/webp");
       await logActivity(admin.id, "upload", "Media", `${folder}/${filename}`);
 
       return NextResponse.json({
@@ -89,7 +85,7 @@ export async function POST(request: Request) {
     }
 
     const filename = `${id}.pdf`;
-    await writeFile(path.join(directory, filename), input);
+    await storage().put(`${folder}/${filename}`, input, "application/pdf");
     await logActivity(admin.id, "upload", "Media", `${folder}/${filename}`);
 
     return NextResponse.json({

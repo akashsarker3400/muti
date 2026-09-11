@@ -70,3 +70,37 @@ test.describe("admin panel", () => {
     await expect(page.getByText(`অফিস সময় ${stamp}`)).toBeVisible();
   });
 });
+
+test.describe("media uploads", () => {
+  test("an image uploaded from the admin is served back and can be removed", async ({
+    page,
+  }) => {
+    // 1×1 PNG; the uploader converts it to webp and gives it a random name.
+    const png = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+      "base64",
+    );
+    const upload = await page.request.post("/api/admin/upload", {
+      multipart: { file: { name: "dot.png", mimeType: "image/png", buffer: png } },
+    });
+    expect(upload.ok()).toBe(true);
+    const { url } = (await upload.json()) as { url: string };
+    expect(url).toMatch(/^\/uploads\/\d{4}-\d{2}\/[a-f0-9]{24}\.webp$/);
+
+    // Served inline with the right type, through whichever driver is active.
+    const served = await page.request.get(url);
+    expect(served.status()).toBe(200);
+    expect(served.headers()["content-type"]).toBe("image/webp");
+    expect(served.headers()["content-disposition"]).toContain("inline");
+
+    // Listed in the media library, then deleted from there (no confirm
+    // dialog: an unused file is removed on the spot).
+    await page.goto("/admin/media");
+    const card = page.locator(`[data-media-url="${url}"]`);
+    await expect(card).toBeVisible();
+    await card.getByRole("button", { name: "ফাইল মুছুন" }).click();
+    await expect(page.getByText("ফাইল মুছে ফেলা হয়েছে।")).toBeVisible();
+    await expect(page.locator(`[data-media-url="${url}"]`)).toHaveCount(0);
+    expect((await page.request.get(url)).status()).toBe(404);
+  });
+});

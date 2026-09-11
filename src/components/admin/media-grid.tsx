@@ -44,6 +44,7 @@ export function MediaGrid({ files }: { files: MediaFile[] }) {
           {visible.map((file) => (
             <li
               key={file.url}
+              data-media-url={file.url}
               className="overflow-hidden rounded-[14px] border border-[color:var(--border)] bg-white shadow-[var(--shadow-card)]"
             >
               <a

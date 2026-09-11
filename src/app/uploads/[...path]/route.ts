@@ -1,17 +1,16 @@
-import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
 import path from "node:path";
-import { Readable } from "node:stream";
 import { NextResponse } from "next/server";
 
-import { uploadDir } from "@/lib/env";
+import { isSafeKey, storage } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Serves files from the uploads volume (section 2). Files live outside
- * `public/` so they survive redeploys on the mounted Coolify volume, which
- * means Next cannot serve them statically.
+ * Serves uploaded files (section 2) from whichever storage driver is active
+ * — Cloudflare R2 in production, the uploads volume otherwise — under the
+ * same `/uploads/<month>/<file>` URL, so database paths never change.
+ * Streams straight through with a one-year immutable cache, which lets
+ * Cloudflare hold the bytes at the edge.
  */
 
 const CONTENT_TYPES: Record<string, string> = {
@@ -33,65 +32,34 @@ export async function GET(
   // in the tab (or an iframe), which is what the downloads page relies on.
   const forceDownload = new URL(request.url).searchParams.get("download") === "1";
 
-  // Reject traversal attempts before touching the filesystem (section 11).
-  if (
-    segments.length === 0 ||
-    segments.some(
-      (segment) =>
-        !segment ||
-        segment === "." ||
-        segment === ".." ||
-        segment.includes("/") ||
-        segment.includes("\\") ||
-        segment.includes("\0"),
-    )
-  ) {
-    return new NextResponse("Not found", { status: 404 });
-  }
+  // Only the shape the uploader produces is ever looked up (section 11):
+  // one month folder, one random file name, a known extension.
+  const key = segments.join("/");
+  if (!isSafeKey(key)) return new NextResponse("Not found", { status: 404 });
 
-  const root = path.resolve(uploadDir);
-  const filePath = path.resolve(root, ...segments);
-
-  // Belt and braces: the resolved path must stay inside the uploads root.
-  if (filePath !== root && !filePath.startsWith(root + path.sep)) {
-    return new NextResponse("Not found", { status: 404 });
-  }
-
-  const extension = path.extname(filePath).toLowerCase();
+  const extension = path.extname(key).toLowerCase();
   const contentType = CONTENT_TYPES[extension];
-  if (!contentType) {
-    return new NextResponse("Not found", { status: 404 });
-  }
+  if (!contentType) return new NextResponse("Not found", { status: 404 });
 
-  try {
-    const stats = await stat(filePath);
-    if (!stats.isFile()) {
-      return new NextResponse("Not found", { status: 404 });
-    }
+  const file = await storage().get(key);
+  if (!file) return new NextResponse("Not found", { status: 404 });
 
-    const stream = Readable.toWeb(
-      createReadStream(filePath),
-    ) as unknown as ReadableStream;
-
-    const fileName = segments[segments.length - 1]!;
-    return new NextResponse(stream, {
-      headers: {
-        "Content-Type": contentType,
-        "Content-Length": String(stats.size),
-        "Content-Disposition": `${forceDownload ? "attachment" : "inline"}; filename="${fileName}"`,
-        // Uploaded files get a random name and are never overwritten, so they
-        // can be cached aggressively.
-        "Cache-Control": "public, max-age=31536000, immutable",
-        // SVGs are rendered by the browser; stop them executing script. The
-        // policy is not sent for PDFs: browser PDF viewers need their own
-        // scripts and styles, and the file cannot run anything anyway.
-        ...(extension === ".svg"
-          ? { "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'" }
-          : {}),
-        "X-Content-Type-Options": "nosniff",
-      },
-    });
-  } catch {
-    return new NextResponse("Not found", { status: 404 });
-  }
+  const fileName = segments[segments.length - 1]!;
+  return new NextResponse(file.stream, {
+    headers: {
+      "Content-Type": contentType,
+      ...(file.size > 0 ? { "Content-Length": String(file.size) } : {}),
+      "Content-Disposition": `${forceDownload ? "attachment" : "inline"}; filename="${fileName}"`,
+      // Uploaded files get a random name and are never overwritten, so they
+      // can be cached aggressively.
+      "Cache-Control": "public, max-age=31536000, immutable",
+      // SVGs are rendered by the browser; stop them executing script. The
+      // policy is not sent for PDFs: browser PDF viewers need their own
+      // scripts and styles, and the file cannot run anything anyway.
+      ...(extension === ".svg"
+        ? { "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'" }
+        : {}),
+      "X-Content-Type-Options": "nosniff",
+    },
+  });
 }

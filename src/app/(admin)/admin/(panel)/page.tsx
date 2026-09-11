@@ -84,13 +84,26 @@ export default async function AdminDashboard() {
           </p>
           <p className="mt-1">
             {!uploads.writable
-              ? "আপলোড ফোল্ডারে লেখা যাচ্ছে না। "
+              ? uploads.driver === "r2"
+                ? "Cloudflare R2 বাকেটে সংযোগ করা যাচ্ছে না — R2_* environment variable গুলো মিলিয়ে দেখুন। "
+                : "আপলোড ফোল্ডারে লেখা যাচ্ছে না। "
               : `${uploads.checked}টি ফাইলের মধ্যে ${uploads.missing.length}টি নেই (যেমন ${uploads.missing[0]})। `}
-            সাইটে লোগো, হিরো বা গ্যালারির ছবি ভাঙা দেখাচ্ছে? কারণ সাধারণত একটাই:
-            Coolify-তে অ্যাপের <strong>Storages</strong>-এ{" "}
-            <code className="font-latin">/app/uploads</code> পাথে persistent volume যোগ
-            করা নেই, তাই প্রতিটি redeploy-তে আপলোড মুছে যায়। ভলিউম যোগ করে (deploy
-            guide ধাপ ৫) redeploy করুন, তারপর ছবিগুলো আবার আপলোড করুন।
+            {uploads.driver === "r2" ? (
+              <>
+                ফাইলগুলো Cloudflare R2-তে রাখা হয়। যেগুলো নেই, সেগুলো হয় বাকেট থেকে
+                মুছে ফেলা হয়েছে, নয়তো R2 চালুর আগে সার্ভারে আপলোড হয়েছিল — আবার আপলোড
+                করুন।
+              </>
+            ) : (
+              <>
+                সাইটে লোগো, হিরো বা গ্যালারির ছবি ভাঙা দেখাচ্ছে? কারণ সাধারণত একটাই:
+                Coolify-তে অ্যাপের <strong>Storages</strong>-এ{" "}
+                <code className="font-latin">/app/uploads</code> পাথে persistent volume
+                যোগ করা নেই, তাই প্রতিটি redeploy-তে আপলোড মুছে যায়। সবচেয়ে নিরাপদ:
+                Cloudflare R2 চালু করুন (deploy guide ধাপ ৫), তারপর ছবিগুলো আবার আপলোড
+                করুন।
+              </>
+            )}
           </p>
         </div>
       )}

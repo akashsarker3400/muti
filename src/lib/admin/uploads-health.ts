@@ -1,13 +1,11 @@
 import "server-only";
 
-import { access, constants, stat } from "node:fs/promises";
-import path from "node:path";
-
-import { uploadDir } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/site-settings";
+import { storage } from "@/lib/storage";
 
 export type UploadsHealth = {
+  driver: "r2" | "local";
   writable: boolean;
   /** Paths the site references that are not on disk — the sign of a lost volume. */
   missing: string[];
@@ -21,12 +19,8 @@ export type UploadsHealth = {
  * redeploy wiped the directory — every image on the site 404s at once.
  */
 export async function uploadsHealth(): Promise<UploadsHealth> {
-  let writable = true;
-  try {
-    await access(uploadDir, constants.W_OK);
-  } catch {
-    writable = false;
-  }
+  const store = storage();
+  const writable = await store.healthy();
 
   const settings = await getSiteSettings();
   const referenced = new Set<string>();
@@ -69,13 +63,8 @@ export async function uploadsHealth(): Promise<UploadsHealth> {
 
   const missing: string[] = [];
   for (const url of referenced) {
-    const file = path.join(uploadDir, url.replace(/^\/uploads\//, ""));
-    try {
-      await stat(file);
-    } catch {
-      missing.push(url);
-    }
+    if (!(await store.exists(url.replace(/^\/uploads\//, "")))) missing.push(url);
   }
 
-  return { writable, missing, checked: referenced.size };
+  return { driver: store.name, writable, missing, checked: referenced.size };
 }

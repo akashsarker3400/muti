@@ -1,11 +1,9 @@
 "use server";
 
-import { unlink } from "node:fs/promises";
-import path from "node:path";
 import { revalidatePath } from "next/cache";
 
 import { logActivity, requireAdmin } from "@/lib/admin-auth";
-import { uploadDir } from "@/lib/env";
+import { isSafeKey, storage } from "@/lib/storage";
 
 /** Deletes one file from the uploads volume (section 7.13). */
 export async function deleteMediaFile(
@@ -17,28 +15,13 @@ export async function deleteMediaFile(
     return { ok: false, error: "শুধু আপলোড করা ফাইল মোছা যাবে।" };
   }
 
-  const relative = url.slice("/uploads/".length);
-  const segments = relative.split("/");
-
-  // Reject traversal before touching the filesystem (section 11).
-  if (
-    segments.length === 0 ||
-    segments.some(
-      (segment) =>
-        !segment || segment === "." || segment === ".." || segment.includes("\0"),
-    )
-  ) {
-    return { ok: false, error: "ফাইলের নাম সঠিক নয়।" };
-  }
-
-  const root = path.resolve(uploadDir);
-  const target = path.resolve(root, ...segments);
-  if (!target.startsWith(root + path.sep)) {
+  const key = url.slice("/uploads/".length);
+  if (!isSafeKey(key)) {
     return { ok: false, error: "ফাইলের নাম সঠিক নয়।" };
   }
 
   try {
-    await unlink(target);
+    await storage().delete(key);
     await logActivity(admin.id, "delete-media", "Media", url);
     revalidatePath("/admin/media");
     return { ok: true };

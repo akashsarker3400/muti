@@ -1,15 +1,13 @@
 import "server-only";
 
-import { readdir, stat } from "node:fs/promises";
-import path from "node:path";
-
-import { uploadDir } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
+import { storage } from "@/lib/storage";
 
 /**
- * Media library (section 7.13). Files live on the uploads volume rather than
- * in a database table, so the listing walks the directory and cross-references
- * every column that can hold an upload path to work out what is still in use.
+ * Media library (section 7.13). Files live in storage (R2 or the uploads
+ * volume) rather than in a database table, so the listing asks the storage
+ * driver and cross-references every column that can hold an upload path to
+ * work out what is still in use.
  */
 
 export type MediaFile = {
@@ -23,38 +21,12 @@ export type MediaFile = {
 };
 
 export async function listMedia(): Promise<MediaFile[]> {
-  const root = path.resolve(uploadDir);
-  const files: Array<{ url: string; name: string; size: number; modified: Date }> = [];
-
-  async function walk(directory: string, prefix: string) {
-    let entries;
-    try {
-      entries = await readdir(directory, { withFileTypes: true });
-    } catch {
-      // The volume may not exist yet on a brand new deployment.
-      return;
-    }
-
-    for (const entry of entries) {
-      if (entry.name.startsWith(".")) continue;
-      const full = path.join(directory, entry.name);
-
-      if (entry.isDirectory()) {
-        await walk(full, `${prefix}/${entry.name}`);
-        continue;
-      }
-
-      const info = await stat(full);
-      files.push({
-        url: `${prefix}/${entry.name}`,
-        name: entry.name,
-        size: info.size,
-        modified: info.mtime,
-      });
-    }
-  }
-
-  await walk(root, "/uploads");
+  const files = (await storage().list()).map((file) => ({
+    url: `/uploads/${file.key}`,
+    name: file.key.split("/").pop() ?? file.key,
+    size: file.size,
+    modified: file.modified,
+  }));
 
   const referenced = await referencedUrls();
 

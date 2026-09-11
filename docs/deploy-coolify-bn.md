@@ -115,7 +115,36 @@ App হিসেবে ইনস্টল করতে বলবে — অন�
 
 ---
 
-## ৫. Persistent volume (ছবি হারিয়ে যাওয়া ঠেকাতে)
+## ৫. ফাইল স্টোরেজ: Cloudflare R2 (সুপারিশ) অথবা volume
+
+অ্যাডমিন থেকে আপলোড করা প্রতিটি ছবি ও PDF কোথাও রাখতে হবে। দুটি পথ — **একটি বেছে নিন**:
+
+### ৫ক. Cloudflare R2 (সুপারিশ)
+
+ফাইল সার্ভারের বাইরে থাকে; redeploy, সার্ভার বদল, ভলিউম ভুল — কিছুতেই হারায় না।
+ফ্রি টিয়ার (১০ GB, egress ফ্রি) এই সাইটের জন্য যথেষ্ট।
+
+১. Cloudflare ড্যাশবোর্ড → **R2 Object Storage** → **Create bucket** → নাম `muti-uploads`,
+লোকেশন APAC। পাবলিক অ্যাক্সেস চালু করতে হবে **না** — সাইট নিজেই `/uploads/…` দিয়ে
+ফাইল সার্ভ করে।
+২. R2 পাতায় **Manage R2 API Tokens** → **Create API token** → Permission **Object Read &
+Write**, Specify bucket → `muti-uploads` → Create। **Access Key ID** ও **Secret Access
+Key** কপি করুন (একবারই দেখাবে)।
+৩. R2 overview পাতার ডানে **Account ID** কপি করুন।
+৪. Coolify-তে অ্যাপের Environment Variables-এ যোগ করুন:
+
+| Variable               | মান                       |
+| ---------------------- | ------------------------- |
+| `R2_ACCOUNT_ID`        | Account ID                |
+| `R2_BUCKET`            | `muti-uploads`            |
+| `R2_ACCESS_KEY_ID`     | টোকেনের Access Key ID     |
+| `R2_SECRET_ACCESS_KEY` | টোকেনের Secret Access Key |
+
+চারটি থাকলেই অ্যাপ R2 ব্যবহার করে; না থাকলে নিচের volume-এ লেখে। Redeploy-এর পর
+অ্যাডমিন ড্যাশবোর্ড খুলে দেখুন — লাল সতর্কবার্তা না থাকলে ঠিক আছে। এরপর লোগো ও
+ছবিগুলো **আবার আপলোড** করুন (আগে সার্ভারে যা ছিল তা R2-তে যায়নি)।
+
+### ৫খ. Persistent volume (R2 না নিলে)
 
 অ্যাপের **Storages** ট্যাব → **+ Add** → **Volume Mount**:
 
@@ -124,11 +153,9 @@ App হিসেবে ইনস্টল করতে বলবে — অন�
 | Name             | `muti-uploads` |
 | Destination Path | `/app/uploads` |
 
-> ⚠️ **এই ধাপটা বাদ দেবেন না।** অ্যাডমিন থেকে আপলোড করা প্রতিটা ছবি ও PDF এখানে
-> জমা হয়। ভলিউম না থাকলে প্রতিবার নতুন ডিপ্লয়ে **সব আপলোড মুছে যাবে** — লোগো,
-> ফেভিকন, হিরো ছবি, গ্যালারি, সব।
-
----
+> ⚠️ ভলিউম না থাকলে প্রতিবার নতুন ডিপ্লয়ে **সব আপলোড মুছে যাবে** — লোগো, ফেভিকন,
+> হিরো ছবি, গ্যালারি, সব। কন্টেইনার চালুর লগে তখন `WARNING: /app/uploads is not a
+mounted volume` দেখাবে, আর অ্যাডমিন ড্যাশবোর্ডে লাল সতর্কবার্তা।
 
 ## ৬. Health check
 
