@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import { getSiteSettings } from "@/lib/site-settings";
 import { verifyTurnstile } from "@/lib/turnstile";
-import { normalizeRoll } from "@/lib/verify";
+import { normalizeBmdc, normalizeRoll } from "@/lib/verify";
 
 /**
  * Public board-result search by roll or registration number (addendum 3,
@@ -14,7 +14,7 @@ import { normalizeRoll } from "@/lib/verify";
  * optional Turnstile, and a log row per lookup.
  */
 
-export type ResultMode = "roll" | "registration";
+export type ResultMode = "roll" | "registration" | "bmdc";
 
 export type FoundResult = {
   id: string;
@@ -43,7 +43,7 @@ export type ResultSearch =
   | { status: "invalid" };
 
 const inputSchema = z.object({
-  mode: z.enum(["roll", "registration"]).default("roll"),
+  mode: z.enum(["roll", "registration", "bmdc"]).default("roll"),
   query: z.string().trim().min(4).max(30),
   examId: z.string().trim().max(40).optional(),
   turnstileToken: z.string().optional(),
@@ -53,7 +53,10 @@ export async function searchBoardResults(raw: unknown): Promise<ResultSearch> {
   const parsed = inputSchema.safeParse(raw);
   if (!parsed.success) return { status: "invalid" };
   const { mode, examId, turnstileToken } = parsed.data;
-  const query = normalizeRoll(parsed.data.query);
+  const query =
+    mode === "bmdc"
+      ? normalizeBmdc(parsed.data.query)
+      : normalizeRoll(parsed.data.query);
   if (query.length < 4) return { status: "invalid" };
 
   const limit = await checkRateLimit("verify");
@@ -67,9 +70,34 @@ export async function searchBoardResults(raw: unknown): Promise<ResultSearch> {
   );
   if (!human) return { status: "captcha" };
 
+  /**
+   * A BMDC search goes through the student: rows linked to them, plus rows
+   * carrying their board roll that were never linked.
+   */
+  const byBmdc =
+    mode === "bmdc"
+      ? await prisma.student.findMany({
+          where: { bmdcNormalized: query },
+          select: { id: true, boardRoll: true },
+        })
+      : [];
+  const where =
+    mode === "roll"
+      ? { roll: query }
+      : mode === "registration"
+        ? { registrationNo: query }
+        : {
+            OR: [
+              { studentId: { in: byBmdc.map((s) => s.id) } },
+              {
+                roll: { in: byBmdc.flatMap((s) => (s.boardRoll ? [s.boardRoll] : [])) },
+              },
+            ],
+          };
+
   const rows = await prisma.boardResult.findMany({
     where: {
-      ...(mode === "roll" ? { roll: query } : { registrationNo: query }),
+      ...where,
       boardExam: { published: true, ...(examId ? { id: examId } : {}) },
     },
     include: {
@@ -81,13 +109,30 @@ export async function searchBoardResults(raw: unknown): Promise<ResultSearch> {
 
   try {
     await prisma.verificationLog.create({
-      data: { query, type: mode, found: rows.length > 0, ip: await clientIp() },
+      data: {
+        query,
+        type: mode === "bmdc" ? "result-bmdc" : mode,
+        found: rows.length > 0,
+        ip: await clientIp(),
+      },
     });
   } catch (error) {
     console.error("verification log failed", error);
   }
 
   if (rows.length === 0) return { status: "not-found" };
+
+  // Rows that were never linked still get a name if a student holds that roll.
+  const unlinkedRolls = rows
+    .filter((r) => !r.studentId && !r.studentName)
+    .map((r) => r.roll);
+  const holders = unlinkedRolls.length
+    ? await prisma.student.findMany({
+        where: { boardRoll: { in: unlinkedRolls } },
+        select: { boardRoll: true, name: true },
+      })
+    : [];
+  const nameByRoll = new Map(holders.map((s) => [s.boardRoll!, s.name]));
 
   return {
     status: "found",
@@ -103,7 +148,8 @@ export async function searchBoardResults(raw: unknown): Promise<ResultSearch> {
       courseEn: row.boardExam.course?.nameEn ?? null,
       roll: row.roll,
       registrationNo: row.registrationNo,
-      studentName: row.studentName ?? row.student?.name ?? null,
+      studentName:
+        row.studentName ?? row.student?.name ?? nameByRoll.get(row.roll) ?? null,
       status: row.status,
       gpa: row.gpa ? row.gpa.toFixed(2) : null,
       failedSubjects: row.failedSubjects,

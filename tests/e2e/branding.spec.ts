@@ -8,18 +8,33 @@ import { expect, test, type Page } from "@playwright/test";
  * a development database.
  */
 
-/** Flips every banner's "active" switch on the list page to `active`. */
+/**
+ * Flips every banner's "active" switch on the list page to `active`. One
+ * switch per page load: the list refreshes after each toggle, and clicking
+ * a second switch during that refresh was getting lost.
+ */
 async function setBannersActive(page: Page, active: boolean) {
-  await page.goto("/admin/banners");
-  const switches = page.getByRole("switch", { name: "active" });
-  const count = await switches.count();
-  for (let i = 0; i < count; i += 1) {
-    const toggle = switches.nth(i);
-    if ((await toggle.getAttribute("aria-checked")) !== String(active)) {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    await page.goto("/admin/banners");
+    const switches = page.getByRole("switch", { name: "active" });
+    const count = await switches.count();
+    let flipped = false;
+    for (let i = 0; i < count; i += 1) {
+      // nth() is stable across the refresh; a state-based locator would
+      // re-resolve to the next unflipped switch after the click.
+      const toggle = switches.nth(i);
+      if ((await toggle.getAttribute("aria-checked")) === String(active)) continue;
       await toggle.click();
+      // The switch flips optimistically and stays disabled until the server
+      // action and the refresh finish — leaving earlier would drop the write.
       await expect(toggle).toHaveAttribute("aria-checked", String(active));
+      await expect(toggle).toBeEnabled();
+      flipped = true;
+      break;
     }
+    if (!flipped) return;
   }
+  throw new Error("banners did not reach the requested state");
 }
 
 async function saveSettings(page: Page) {

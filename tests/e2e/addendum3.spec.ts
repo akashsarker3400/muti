@@ -142,6 +142,26 @@ test.describe("addendum 3", () => {
     // The exam is also browsable below the search.
     await expect(page.getByRole("heading", { level: 3, name: title })).toBeVisible();
 
+    // A student carrying that board roll and a BMDC makes the result
+    // findable by BMDC too, written any old way.
+    const bmdc = passRoll.slice(-5);
+    await page.goto("/admin/students/new");
+    await page.locator("#field-name").fill(`Dr. Board ${id}`);
+    await page.locator("#field-roll").fill(`B-${id}`);
+    await page.locator("#field-bmdc").fill(`A-${bmdc}`);
+    await page.locator("#field-boardRoll").fill(passRoll);
+    await page.locator("#field-courseId").selectOption({ index: 1 });
+    await save(page);
+    await page.waitForURL(/\/admin\/students$/);
+
+    await page.goto("/results");
+    await page.getByRole("radio", { name: "BMDC নম্বর" }).check();
+    await page.getByRole("textbox").fill(`a ${bmdc}`);
+    await page.getByRole("button", { name: "ফলাফল দেখুন" }).click();
+    await expect(page.getByTestId("result-card")).toContainText(title);
+    await expect(page.getByTestId("result-card")).toContainText(`Dr. Board ${id}`);
+
+    await deleteRow(page, "/admin/students", `B-${id}`);
     await deleteRow(page, "/admin/board-exams", title);
   });
 

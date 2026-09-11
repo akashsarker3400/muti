@@ -1452,7 +1452,18 @@ const studentResource: ResourceConfig = {
    * A new student in a batch takes a seat; moving an existing student between
    * batches moves the seat with them (addendum 2, A1).
    */
-  afterWrite: async (_row, data, existing) => {
+  afterWrite: async (row, data, existing) => {
+    // A board roll typed on the student links any unlinked result rows with
+    // that roll, so the office does not have to press "auto-link" afterwards
+    // (addendum 3, §2).
+    const boardRoll = typeof data.boardRoll === "string" ? data.boardRoll : null;
+    if (boardRoll) {
+      await prisma.boardResult.updateMany({
+        where: { roll: boardRoll, studentId: null },
+        data: { studentId: row.id },
+      });
+    }
+
     const { bumpSeatsFilled } = await import("@/lib/admin/seats");
     const next = typeof data.batchId === "string" ? data.batchId : null;
     const previous =

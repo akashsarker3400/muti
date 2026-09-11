@@ -6,7 +6,7 @@ import type { Locale } from "@/i18n/routing";
 import { pick, toBanglaDigits } from "@/lib/format";
 import { displayPhone } from "@/lib/phone";
 import type { getBanners } from "@/lib/queries";
-import type { SiteSettings } from "@/lib/site-settings";
+import { heroSlides, type SiteSettings } from "@/lib/site-settings";
 import { waLink } from "@/lib/whatsapp";
 
 type Banner = Awaited<ReturnType<typeof getBanners>>[number];
@@ -45,7 +45,13 @@ export async function HeroBanner({
     return value.toLowerCase() === "whatsapp" ? whatsappHref : value;
   };
 
-  const slides: HeroSlide[] = banners.map((banner) => {
+  // Banners without their own photo borrow the Site Settings hero images in
+  // order, so photos uploaded under "হিরো ছবি" are never silently unused.
+  const fallbackImages = heroSlides(settings);
+  const fallbackFor = (index: number) =>
+    fallbackImages.length > 0 ? fallbackImages[index % fallbackImages.length]! : "";
+
+  const slides: HeroSlide[] = banners.map((banner, index) => {
     const ctaLabel = pick(locale, banner.ctaLabelBn, banner.ctaLabelEn);
     const cta2Label = pick(locale, banner.cta2LabelBn, banner.cta2LabelEn);
     const cta2Href = resolveHref(banner.cta2Link, whatsappHref);
@@ -53,7 +59,7 @@ export async function HeroBanner({
       id: banner.id,
       title: pick(locale, banner.titleBn, banner.title),
       subtitle: pick(locale, banner.subtitleBn, banner.subtitle),
-      image: banner.image,
+      image: banner.image || fallbackFor(index),
       mobileImage: banner.mobileImage ?? "",
       overlay: banner.overlay,
       textPosition: banner.textPosition,

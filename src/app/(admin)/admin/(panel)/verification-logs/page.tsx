@@ -14,6 +14,7 @@ const TYPE_LABELS: Record<string, string> = {
   token: "QR টোকেন",
   roll: "রোল",
   registration: "রেজিস্ট্রেশন",
+  "result-bmdc": "ফলাফল — BMDC",
 };
 
 /**

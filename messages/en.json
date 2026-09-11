@@ -222,21 +222,25 @@
     "searchBy": "Search by",
     "mode": {
       "roll": "Roll No",
-      "registration": "Registration No"
+      "registration": "Registration No",
+      "bmdc": "BMDC No"
     },
     "exam": "Examination",
     "allExams": "All examinations",
     "inputLabel": {
       "roll": "Roll number",
-      "registration": "Registration number"
+      "registration": "Registration number",
+      "bmdc": "BMDC registration number"
     },
     "placeholder": {
       "roll": "e.g. 3825000128",
-      "registration": "Board registration number"
+      "registration": "Board registration number",
+      "bmdc": "e.g. A-12345"
     },
     "hint": {
       "roll": "The board's 10-digit roll. Bangla digits are accepted.",
-      "registration": "As printed on the admit card or registration card."
+      "registration": "As printed on the admit card or registration card.",
+      "bmdc": "Dashes and spaces are fine; every board result of that doctor is listed (the student record must carry the BMDC)."
     },
     "searchButton": "Show result",
     "status": {

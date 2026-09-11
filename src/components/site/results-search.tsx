@@ -78,7 +78,7 @@ export function ResultsSearch({
         <fieldset className="mb-4">
           <legend className="mb-2 text-sm font-medium">{t("searchBy")}</legend>
           <div className="flex flex-wrap gap-2">
-            {(["roll", "registration"] as const).map((option) => (
+            {(["roll", "registration", "bmdc"] as const).map((option) => (
               <label
                 key={option}
                 className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-4 text-sm font-medium transition ${
@@ -136,7 +136,7 @@ export function ResultsSearch({
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder={t(`placeholder.${mode}`)}
-                inputMode="numeric"
+                inputMode={mode === "bmdc" ? "text" : "numeric"}
                 dir="ltr"
                 autoComplete="off"
                 className="h-11 font-latin"
