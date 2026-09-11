@@ -1,0 +1,134 @@
+"use client";
+
+import { useRef, useState } from "react";
+import Image from "next/image";
+import { FileText, Loader2, Trash2, Upload } from "lucide-react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+/**
+ * Uploads one file to /api/admin/upload and stores the returned path.
+ * The value is always a site-relative URL such as
+ * `/uploads/2026-09/ab12….webp`, so it keeps working across redeploys.
+ */
+export function UploadField({
+  value,
+  onChange,
+  accept = "image/*",
+  kind = "image",
+}: {
+  value: string;
+  onChange: (url: string) => void;
+  accept?: string;
+  kind?: "image" | "file";
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function upload(file: File) {
+    setBusy(true);
+    try {
+      const body = new FormData();
+      body.append("file", file);
+
+      const response = await fetch("/api/admin/upload", {
+        method: "POST",
+        body,
+      });
+      const data = (await response.json()) as { url?: string; error?: string };
+
+      if (!response.ok || !data.url) {
+        toast.error(data.error ?? "আপলোড করা যায়নি।");
+        return;
+      }
+
+      onChange(data.url);
+      toast.success("আপলোড হয়েছে।");
+    } catch {
+      toast.error("আপলোড করা যায়নি।");
+    } finally {
+      setBusy(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+
+  return (
+    <div className="space-y-2">
+      {value && (
+        <div className="flex items-center gap-3 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-soft)] p-2">
+          {kind === "image" ? (
+            <span className="relative size-16 shrink-0 overflow-hidden rounded-md bg-white">
+              <Image src={value} alt="" fill sizes="64px" className="object-contain" />
+            </span>
+          ) : (
+            <FileText
+              className="size-8 shrink-0 text-[color:var(--brand)]"
+              aria-hidden="true"
+            />
+          )}
+
+          <a
+            href={value}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="min-w-0 flex-1 truncate font-latin text-xs text-[color:var(--muted-foreground)] hover:underline"
+          >
+            {value}
+          </a>
+
+          <Button
+            type="button"
+            variant="destructive"
+            size="icon-sm"
+            aria-label="সরান"
+            onClick={() => onChange("")}
+          >
+            <Trash2 className="size-4" aria-hidden="true" />
+          </Button>
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          className="hidden"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            if (file) void upload(file);
+          }}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="cta"
+          disabled={busy}
+          onClick={() => inputRef.current?.click()}
+        >
+          {busy ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <Upload className="size-4" aria-hidden="true" />
+          )}
+          {value ? "পরিবর্তন করুন" : "আপলোড করুন"}
+        </Button>
+
+        {/* Manual path entry, for files already on the volume. */}
+        <Input
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder="/uploads/…"
+          dir="ltr"
+          className="h-11 max-w-xs font-latin text-xs"
+        />
+      </div>
+
+      <p className="text-xs text-[color:var(--muted-foreground)]">
+        সর্বোচ্চ ১০ MB। ছবি স্বয়ংক্রিয়ভাবে webp-এ রূপান্তরিত হয় (সর্বোচ্চ ১৬০০px)।
+      </p>
+    </div>
+  );
+}
