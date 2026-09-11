@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import type { ApplicationStatus } from "@/generated/prisma/enums";
 import { logActivity, requireAdmin } from "@/lib/admin-auth";
+import { bumpSeatsFilled } from "@/lib/admin/seats";
 import { prisma } from "@/lib/prisma";
 
 /** Admin actions for the Applications inbox (section 7.2). */
@@ -21,10 +22,25 @@ export async function setApplicationStatus(
   }
 
   try {
+    const before = await prisma.application.findUnique({
+      where: { id },
+      select: { status: true, batchId: true },
+    });
+
     await prisma.application.update({
       where: { id },
       data: { status: status as ApplicationStatus },
     });
+
+    // Admitting into a batch fills a seat; undoing an admission frees it
+    // again (addendum 2, A1).
+    if (before && before.status !== status) {
+      if (status === "ADMITTED") await bumpSeatsFilled(before.batchId, 1);
+      else if (before.status === "ADMITTED") {
+        await bumpSeatsFilled(before.batchId, -1);
+      }
+    }
+
     await logActivity(admin.id, `status:${status}`, "application", id);
     revalidatePath("/admin/applications");
     revalidatePath("/admin");
@@ -85,10 +101,26 @@ export async function bulkSetStatus(
   if (ids.length === 0) return { ok: false, error: "কোনো আবেদন বাছাই করা হয়নি।" };
 
   try {
+    // Read the batches first so the seat counter only moves for applications
+    // whose status actually changes (addendum 2, A1).
+    const before = await prisma.application.findMany({
+      where: { id: { in: ids } },
+      select: { id: true, status: true, batchId: true },
+    });
+
     const result = await prisma.application.updateMany({
       where: { id: { in: ids } },
       data: { status: status as ApplicationStatus },
     });
+
+    for (const application of before) {
+      if (application.status === status) continue;
+      if (status === "ADMITTED") await bumpSeatsFilled(application.batchId, 1);
+      else if (application.status === "ADMITTED") {
+        await bumpSeatsFilled(application.batchId, -1);
+      }
+    }
+
     await logActivity(admin.id, `bulk-status:${status}`, "application", null);
     revalidatePath("/admin/applications");
     revalidatePath("/admin");

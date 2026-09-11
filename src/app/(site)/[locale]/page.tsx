@@ -22,6 +22,7 @@ import {
   getFaculty,
   getGalleryPreview,
   getNextBatch,
+  getNextBatchByCourse,
   getNotices,
   getPartners,
   getPublishedCourses,
@@ -46,6 +47,7 @@ export default async function HomePage({
     testimonials,
     faculty,
     galleryImages,
+    batchByCourse,
     home,
     common,
   ] = await Promise.all([
@@ -57,6 +59,7 @@ export default async function HomePage({
     getTestimonials(8),
     getFaculty(4),
     getGalleryPreview(8),
+    getNextBatchByCourse(),
     getTranslations("home"),
     getTranslations("common"),
   ]);
@@ -88,6 +91,7 @@ export default async function HomePage({
                 course={course}
                 locale={locale}
                 settings={settings}
+                batch={batchByCourse.get(course.id)}
               />
             ))}
           </div>

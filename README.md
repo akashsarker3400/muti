@@ -139,18 +139,22 @@ paths, not files.
 ## Tests
 
 ```bash
-npm test                     # 43 unit tests: phone, Bangla digits, fees, CSV,
-                             # slugs, HTML sanitising
-npm run test:e2e             # 13 smoke tests × desktop and mobile
+npm test                     # 58 unit tests: phone, Bangla digits, fees, CSV,
+                             # slugs, HTML sanitising, seat counter, lead source
+npm run test:e2e             # 31 smoke tests across desktop and mobile
 ```
 
 The Playwright suite starts `npm run dev` itself unless `E2E_BASE_URL` is set,
-and needs a seeded database. It creates and then deletes its own notice, so it
-is safe to run repeatedly against a development database — do not point it at
-production.
+and needs a seeded database. It creates and then removes its own notice and
+batch, so it is safe to run repeatedly against a development database — do not
+point it at production.
 
-Lighthouse (mobile) on the production build: performance 90–93,
-accessibility 100, best practices 100, SEO 100.
+A `setup` project signs in once and shares the session with every other
+project; logging in per test would trip the panel's own login rate limit (10
+attempts per 15 minutes per IP) part-way through a full run.
+
+Lighthouse (mobile) on the production build: performance 89–93 on the home
+page and 92–93 elsewhere, accessibility 100, best practices 100, SEO 100.
 
 ---
 
@@ -159,3 +163,5 @@ accessibility 100, best practices 100, SEO 100.
 - **`docs/admin-guide-bn.md`** — how office staff use the admin panel, in Bangla.
 - **`HANDOVER.md`** — every piece of content still marked TODO, what it affects,
   and where to enter it.
+- **`docs/build-spec.md`** and **`docs/addendum-2.md`** — the specifications this
+  was built from. Section numbers in code comments refer to them.

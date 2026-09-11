@@ -10,6 +10,7 @@ import { FaqAccordion } from "@/components/site/faq-accordion";
 import { FeeCard } from "@/components/site/fee-card";
 import { WhatsAppIcon } from "@/components/site/icons";
 import { CourseJsonLd } from "@/components/site/json-ld";
+import { SeatCounter } from "@/components/site/seat-counter";
 import { RichText } from "@/components/site/rich-text";
 import { RoutineTable } from "@/components/site/routine-table";
 import { Section } from "@/components/site/section";
@@ -17,9 +18,15 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { courseFeeLabel, durationLabel, totalClasses } from "@/lib/course";
+import { seatState } from "@/lib/seats";
 import { siteUrl } from "@/lib/env";
 import { formatNumber, pick } from "@/lib/format";
-import { getCourseBySlug, getGlobalFaqs, getPublishedCourses } from "@/lib/queries";
+import {
+  getCourseBySlug,
+  getGlobalFaqs,
+  getNextBatchByCourse,
+  getPublishedCourses,
+} from "@/lib/queries";
 import { isEmptyRichText } from "@/lib/sanitize";
 import { getSiteSettings } from "@/lib/site-settings";
 import { waLink } from "@/lib/whatsapp";
@@ -65,16 +72,41 @@ export default async function CourseDetailPage({
   const course = await getCourseBySlug(slug);
   if (!course) notFound();
 
-  const [settings, allCourses, globalFaqs, t, common, coursesT, levels] =
-    await Promise.all([
-      getSiteSettings(),
-      getPublishedCourses(),
-      getGlobalFaqs(),
-      getTranslations("course"),
-      getTranslations("common"),
-      getTranslations("courses"),
-      getTranslations("levels"),
-    ]);
+  const [
+    settings,
+    allCourses,
+    globalFaqs,
+    batchByCourse,
+    t,
+    common,
+    coursesT,
+    levels,
+    seatsT,
+  ] = await Promise.all([
+    getSiteSettings(),
+    getPublishedCourses(),
+    getGlobalFaqs(),
+    getNextBatchByCourse(),
+    getTranslations("course"),
+    getTranslations("common"),
+    getTranslations("courses"),
+    getTranslations("levels"),
+    getTranslations("seats"),
+  ]);
+
+  // Live seat counter for this course's next batch (addendum 2, A1).
+  const nextBatch = batchByCourse.get(course.id);
+  const seats = seatState(nextBatch);
+  const seatsFull = seats.show && seats.full;
+
+  /**
+   * When the batch is full the primary action becomes "join the waitlist" —
+   * the same form, flagged so the office sees it as a waitlist enquiry.
+   */
+  const applyHref = seatsFull
+    ? `/apply?course=${course.slug}&waitlist=1`
+    : `/apply?course=${course.slug}`;
+  const applyLabel = seatsFull ? seatsT("joinWaitlist") : common("applyNow");
 
   const name = pick(locale, course.nameBn, course.nameEn);
   const fullName = pick(locale, course.fullNameBn, course.fullNameEn);
@@ -117,6 +149,7 @@ export default async function CourseDetailPage({
               labelClosed={common("admissionClosed")}
             />
             {course.affiliationNote && <GovtBadge label={course.affiliationNote} />}
+            <SeatCounter batch={nextBatch} locale={locale} />
           </div>
 
           <p className="font-latin text-sm font-semibold text-[color:var(--muted-foreground)]">
@@ -159,9 +192,15 @@ export default async function CourseDetailPage({
             )}
           </dl>
 
+          {seatsFull && (
+            <p className="mt-5 inline-flex items-center rounded-lg bg-[color:var(--bg-soft)] px-3 py-2 text-sm text-[color:var(--muted-foreground)]">
+              {seatsT("fullNotice")}
+            </p>
+          )}
+
           <div className="mt-7 flex flex-wrap gap-3">
             <Button asChild variant="accent" size="cta-lg">
-              <Link href={`/apply?course=${course.slug}`}>{common("applyNow")}</Link>
+              <Link href={applyHref}>{applyLabel}</Link>
             </Button>
             <Button asChild variant="whatsapp" size="cta-lg">
               <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
@@ -284,9 +323,7 @@ export default async function CourseDetailPage({
 
               <div className="mt-4 flex flex-col gap-2">
                 <Button asChild variant="accent" size="cta">
-                  <Link href={`/apply?course=${course.slug}`}>
-                    {common("applyNow")}
-                  </Link>
+                  <Link href={applyHref}>{applyLabel}</Link>
                 </Button>
                 <Button asChild variant="whatsapp" size="cta">
                   <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
@@ -311,6 +348,7 @@ export default async function CourseDetailPage({
                 course={other}
                 locale={locale}
                 settings={settings}
+                batch={batchByCourse.get(other.id)}
               />
             ))}
           </div>
@@ -329,7 +367,7 @@ export default async function CourseDetailPage({
             </p>
           </div>
           <Button asChild variant="accent" size="cta">
-            <Link href={`/apply?course=${course.slug}`}>{common("applyNow")}</Link>
+            <Link href={applyHref}>{applyLabel}</Link>
           </Button>
           <Button
             asChild

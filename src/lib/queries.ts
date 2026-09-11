@@ -1,6 +1,16 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
+
+/**
+ * Batch reads carry the live seat counter, which changes as the office admits
+ * students. They are cached for 60 seconds under the `batches` tag (addendum
+ * 2, A1); every admin write that touches a batch calls
+ * `revalidateTag("batches")`, so a correction shows up immediately while a
+ * burst of visitors does not hit Postgres once per page view.
+ */
+export const BATCHES_TAG = "batches";
 
 /**
  * Read-only queries used by the public site. Each one is wrapped in React's
@@ -36,28 +46,82 @@ export const getCourseBySlug = cache(async (slug: string) => {
   });
 });
 
-/** The earliest upcoming published batch — drives the homepage CTA (7.4). */
-export const getNextBatch = cache(async () => {
-  try {
-    return await prisma.batch.findFirst({
+const nextBatchCached = unstable_cache(
+  async () =>
+    prisma.batch.findFirst({
       where: { published: true, status: "UPCOMING" },
       include: { course: true },
       orderBy: [{ startDate: "asc" }, { createdAt: "asc" }],
-    });
+    }),
+  ["next-batch"],
+  { tags: [BATCHES_TAG], revalidate: 60 },
+);
+
+/** The earliest upcoming published batch — drives the homepage CTA (7.4). */
+export const getNextBatch = cache(async () => {
+  try {
+    return await nextBatchCached();
   } catch (error) {
     console.error("getNextBatch failed", error);
     return null;
   }
 });
 
-/** Upcoming batches for the "preferred batch" select on /apply. */
-export const getUpcomingBatches = cache(async () => {
+const upcomingByCourseCached = unstable_cache(
+  async () =>
+    prisma.batch.findMany({
+      where: { published: true, status: "UPCOMING" },
+      orderBy: [{ startDate: "asc" }, { createdAt: "asc" }],
+      select: {
+        id: true,
+        name: true,
+        courseId: true,
+        seats: true,
+        seatsFilled: true,
+        showSeatCounter: true,
+        startDate: true,
+      },
+    }),
+  ["upcoming-batches-by-course"],
+  { tags: [BATCHES_TAG], revalidate: 60 },
+);
+
+export type CourseBatch = Awaited<ReturnType<typeof upcomingByCourseCached>>[number];
+
+/**
+ * The next upcoming batch for each course, keyed by course id — used by the
+ * course cards and the course detail header to show seats left.
+ */
+export const getNextBatchByCourse = cache(async () => {
+  const map = new Map<string, CourseBatch>();
+
   try {
-    return await prisma.batch.findMany({
+    for (const batch of await upcomingByCourseCached()) {
+      // The list is already ordered, so the first one wins.
+      if (!map.has(batch.courseId)) map.set(batch.courseId, batch);
+    }
+  } catch (error) {
+    console.error("getNextBatchByCourse failed", error);
+  }
+
+  return map;
+});
+
+const upcomingBatchesCached = unstable_cache(
+  async () =>
+    prisma.batch.findMany({
       where: { published: true, status: { in: ["UPCOMING", "RUNNING"] } },
       include: { course: true },
       orderBy: [{ startDate: "asc" }, { createdAt: "asc" }],
-    });
+    }),
+  ["upcoming-batches"],
+  { tags: [BATCHES_TAG], revalidate: 60 },
+);
+
+/** Upcoming batches for the "preferred batch" select on /apply. */
+export const getUpcomingBatches = cache(async () => {
+  try {
+    return await upcomingBatchesCached();
   } catch (error) {
     console.error("getUpcomingBatches failed", error);
     return [];

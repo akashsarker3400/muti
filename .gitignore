@@ -49,3 +49,4 @@ next-env.d.ts
 playwright-report/
 test-results/
 prisma/seed.mjs
+tests/e2e/.auth/

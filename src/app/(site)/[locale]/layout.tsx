@@ -8,6 +8,7 @@ import "@/app/globals.css";
 
 import { Analytics } from "@/components/site/analytics";
 import { AnnouncementBar } from "@/components/site/announcement-bar";
+import { LeadTracker } from "@/components/site/lead-tracker";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { WhatsAppFloat } from "@/components/site/whatsapp-float";
@@ -142,6 +143,7 @@ export default async function SiteLayout({
           <Toaster position="top-center" richColors />
         </NextIntlClientProvider>
 
+        <LeadTracker />
         <Analytics settings={settings} />
       </body>
     </html>

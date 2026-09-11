@@ -6,10 +6,12 @@ import {
   ApplicationsTable,
   type AdminApplication,
 } from "@/components/admin/applications-table";
+import { OfficeApplicationButton } from "@/components/admin/office-application-button";
 import { SearchBox } from "@/components/admin/search-box";
 import { AdminPageHeader, EmptyState, Panel } from "@/components/admin/ui";
 import { Button } from "@/components/ui/button";
 import { buildApplicationWhere } from "@/lib/admin/application-filters";
+import { LEAD_SOURCE_LABELS_BN } from "@/lib/lead-source";
 import { prisma } from "@/lib/prisma";
 import { cn } from "cn";
 
@@ -24,6 +26,14 @@ const TYPES: Array<{ value: string; label: string }> = [
   { value: "ADMISSION", label: "ভর্তি আবেদন" },
   { value: "FREE_CLASS", label: "ফ্রি ক্লাস" },
   { value: "CONTACT", label: "যোগাযোগ" },
+];
+
+const SOURCES: Array<{ value: string; label: string }> = [
+  { value: "", label: "সব সোর্স" },
+  ...Object.entries(LEAD_SOURCE_LABELS_BN).map(([value, label]) => ({
+    value,
+    label,
+  })),
 ];
 
 const STATUSES: Array<{ value: string; label: string }> = [
@@ -42,6 +52,7 @@ export default async function ApplicationsPage({
     type?: string;
     status?: string;
     course?: string;
+    source?: string;
     from?: string;
     to?: string;
     page?: string;
@@ -52,7 +63,7 @@ export default async function ApplicationsPage({
 
   const where = buildApplicationWhere(filters);
 
-  const [rows, total, courses] = await Promise.all([
+  const [rows, total, courses, batches] = await Promise.all([
     prisma.application.findMany({
       where,
       orderBy: { createdAt: "desc" },
@@ -64,6 +75,11 @@ export default async function ApplicationsPage({
     prisma.course.findMany({
       orderBy: { sortOrder: "asc" },
       select: { id: true, nameEn: true, code: true },
+    }),
+    prisma.batch.findMany({
+      where: { status: { in: ["UPCOMING", "RUNNING"] } },
+      orderBy: [{ startDate: "asc" }, { createdAt: "desc" }],
+      select: { id: true, name: true },
     }),
   ]);
 
@@ -84,6 +100,11 @@ export default async function ApplicationsPage({
     message: row.message,
     adminNote: row.adminNote,
     source: row.source,
+    referralCode: row.referralCode,
+    campaign:
+      row.utm && typeof row.utm === "object" && "utm_campaign" in row.utm
+        ? String((row.utm as Record<string, unknown>).utm_campaign ?? "")
+        : null,
     createdAt: row.createdAt.toISOString(),
   }));
 
@@ -99,14 +120,26 @@ export default async function ApplicationsPage({
         title="আবেদন"
         description={`মোট ${total} টি আবেদন`}
         action={
-          <Button asChild variant="outline" size="cta">
-            <a
-              href={`/api/admin/applications/export${exportQuery ? `?${exportQuery}` : ""}`}
-            >
-              <Download className="size-4" aria-hidden="true" />
-              CSV এক্সপোর্ট
-            </a>
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button asChild variant="outline" size="cta">
+              <a
+                href={`/api/admin/applications/export${exportQuery ? `?${exportQuery}` : ""}`}
+              >
+                <Download className="size-4" aria-hidden="true" />
+                CSV এক্সপোর্ট
+              </a>
+            </Button>
+            <OfficeApplicationButton
+              courses={courses.map((course) => ({
+                id: course.id,
+                label: `${course.nameEn} (${course.code})`,
+              }))}
+              batches={batches.map((batch) => ({
+                id: batch.id,
+                label: batch.name,
+              }))}
+            />
+          </div>
         }
       />
 
@@ -144,6 +177,14 @@ export default async function ApplicationsPage({
               filters={filters}
             />
           </div>
+          <div className="flex flex-wrap gap-2">
+            <FilterChips
+              current={filters.source ?? ""}
+              options={SOURCES}
+              paramName="source"
+              filters={filters}
+            />
+          </div>
         </div>
       </Panel>
 
@@ -165,6 +206,7 @@ export default async function ApplicationsPage({
           type: filters.type,
           status: filters.status,
           course: filters.course,
+          source: filters.source,
         }}
       />
     </>

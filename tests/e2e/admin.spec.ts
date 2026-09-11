@@ -1,17 +1,11 @@
 import { expect, test } from "@playwright/test";
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "mymensinghultrasound@gmail.com";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "ChangeMe123!";
 
-async function login(page: import("@playwright/test").Page) {
-  await page.goto("/admin/login");
-  await page.locator("#email").fill(ADMIN_EMAIL);
-  await page.locator("#password").fill(ADMIN_PASSWORD);
-  await page.getByRole("button", { name: "লগইন" }).click();
-  await page.waitForURL(/\/admin(?!\/login)/);
-}
+/** These two must start signed out, so they ignore the shared session. */
+test.describe("admin sign-in", () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
 
-test.describe("admin panel", () => {
   test("the panel is closed to visitors who are not signed in", async ({ page }) => {
     await page.goto("/admin/applications");
     await expect(page).toHaveURL(/\/admin\/login/);
@@ -27,9 +21,11 @@ test.describe("admin panel", () => {
     await page.getByRole("button", { name: "লগইন" }).click();
     await expect(page.locator("form").getByRole("alert")).toContainText("সঠিক নয়");
   });
+});
 
-  test("signing in lands on the dashboard", async ({ page }) => {
-    await login(page);
+test.describe("admin panel", () => {
+  test("the dashboard greets the signed-in user", async ({ page }) => {
+    await page.goto("/admin");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("স্বাগতম");
     await expect(page.getByText("নতুন আবেদন (৭ দিন)")).toBeVisible();
   });
@@ -37,8 +33,6 @@ test.describe("admin panel", () => {
   test("a notice created in the admin appears on the public notice board", async ({
     page,
   }) => {
-    await login(page);
-
     const stamp = Date.now().toString(36);
     const title = `স্মোক টেস্ট নোটিশ ${stamp}`;
 
@@ -64,7 +58,6 @@ test.describe("admin panel", () => {
   });
 
   test("site settings reach the public site", async ({ page }) => {
-    await login(page);
     await page.goto("/admin/settings");
 
     const stamp = Date.now().toString(36);

@@ -2,10 +2,12 @@ import { CalendarDays, Clock, Users } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { Section } from "@/components/site/section";
+import { SeatCounter } from "@/components/site/seat-counter";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { formatDate, formatNumber, pick } from "@/lib/format";
+import { seatState } from "@/lib/seats";
 import type { getNextBatch } from "@/lib/queries";
 
 type NextBatch = Awaited<ReturnType<typeof getNextBatch>>;
@@ -23,10 +25,15 @@ export async function NextBatchCta({
 }) {
   if (!batch) return null;
 
-  const [home, common] = await Promise.all([
+  const [home, common, seatsT] = await Promise.all([
     getTranslations("home"),
     getTranslations("common"),
+    getTranslations("seats"),
   ]);
+
+  // Live seat counter (addendum 2, A1).
+  const seats = seatState(batch);
+  const seatsFull = seats.show && seats.full;
 
   const courseName = pick(locale, batch.course.nameBn, batch.course.nameEn);
   const start = batch.startDate
@@ -44,7 +51,10 @@ export async function NextBatchCta({
             <h2 className="mt-2 text-2xl font-semibold text-white md:text-3xl">
               {batch.name}
             </h2>
-            <p className="mt-1 text-white/75">{courseName}</p>
+            <div className="mt-1 flex flex-wrap items-center gap-3">
+              <p className="text-white/75">{courseName}</p>
+              <SeatCounter batch={batch} locale={locale} onDark />
+            </div>
 
             <dl className="mt-5 flex flex-wrap gap-x-8 gap-y-3 text-sm">
               <div className="flex items-center gap-2">
@@ -80,7 +90,7 @@ export async function NextBatchCta({
             </dl>
 
             <p className="mt-4 max-w-lg text-sm text-white/75">
-              {home("freeClassNote")}
+              {seatsFull ? seatsT("fullNotice") : home("freeClassNote")}
             </p>
           </div>
 
@@ -93,7 +103,15 @@ export async function NextBatchCta({
               <Link href="/free-class">{home("freeClassCta")}</Link>
             </Button>
             <Button asChild variant="accent" size="cta-lg" className="w-full md:w-auto">
-              <Link href="/apply">{common("applyNow")}</Link>
+              <Link
+                href={
+                  seatsFull
+                    ? `/apply?course=${batch.course.slug}&waitlist=1`
+                    : `/apply?course=${batch.course.slug}`
+                }
+              >
+                {seatsFull ? seatsT("joinWaitlist") : common("applyNow")}
+              </Link>
             </Button>
           </div>
         </div>

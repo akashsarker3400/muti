@@ -48,13 +48,26 @@ export async function saveResource(
     return { ok: false, errors: zodFieldErrors(parsed.error) };
   }
 
-  const data = resource.toData(parsed.data as Record<string, unknown>);
   const admin = await requireAdmin();
+
+  // Some resources need to compare against the row as it is today — batches
+  // use it to notice a hand-edited seat count (addendum 2, A1).
+  const existing =
+    id && (resource.beforeWrite || resource.afterWrite)
+      ? ((await delegate(resource).findUnique({
+          where: { id },
+        })) as Record<string, unknown> | null)
+      : null;
+
+  let data = resource.toData(parsed.data as Record<string, unknown>);
+  if (resource.beforeWrite) data = resource.beforeWrite(data, existing);
 
   try {
     const record = id
       ? await delegate(resource).update({ where: { id }, data })
       : await delegate(resource).create({ data });
+
+    if (resource.afterWrite) await resource.afterWrite(record, data, existing);
 
     await logActivity(admin.id, id ? "update" : "create", resource.model, record.id);
 
@@ -78,6 +91,7 @@ export async function deleteResource(
 
   try {
     await delegate(resource).delete({ where: { id } });
+    if (resource.afterWrite) await resource.afterWrite({ id }, {}, null);
     await logActivity(admin.id, "delete", resource.model, id);
 
     revalidatePath("/admin/" + resource.key);
@@ -103,6 +117,7 @@ export async function setResourceFlag(
 
   try {
     await delegate(resource).update({ where: { id }, data: { [field]: value } });
+    if (resource.afterWrite) await resource.afterWrite({ id }, {}, null);
     await logActivity(admin.id, `${field}:${value}`, resource.model, id);
 
     revalidatePath("/admin/" + resource.key);

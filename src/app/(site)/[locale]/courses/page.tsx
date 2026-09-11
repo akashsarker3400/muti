@@ -6,7 +6,7 @@ import { PageHero } from "@/components/site/page-hero";
 import { Section } from "@/components/site/section";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { getPublishedCourses } from "@/lib/queries";
+import { getNextBatchByCourse, getPublishedCourses } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
 import { cn } from "cn";
 
@@ -37,9 +37,10 @@ export default async function CoursesPage({
   const [{ locale }, { level }] = await Promise.all([params, searchParams]);
   setRequestLocale(locale);
 
-  const [settings, courses, t, levels] = await Promise.all([
+  const [settings, courses, batchByCourse, t, levels] = await Promise.all([
     getSiteSettings(),
     getPublishedCourses(),
+    getNextBatchByCourse(),
     getTranslations("courses"),
     getTranslations("levels"),
   ]);
@@ -96,6 +97,8 @@ export default async function CoursesPage({
                 course={course}
                 locale={locale}
                 settings={settings}
+                batch={batchByCourse.get(course.id)}
+                headingLevel="h2"
               />
             ))}
           </div>

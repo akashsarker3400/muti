@@ -1,8 +1,15 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 
-import type { ApplicationType } from "@/generated/prisma/enums";
+import type { ApplicationType, LeadSource } from "@/generated/prisma/enums";
+import {
+  LEAD_COOKIE,
+  parseLeadCookie,
+  referralCodeOf,
+  resolveLeadSource,
+  type LeadData,
+} from "@/lib/lead-source";
 import { displayPhone, normalizePhone } from "@/lib/phone";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -62,6 +69,15 @@ export async function submitAdmissionApplication(raw: unknown): Promise<FormResu
 
   const phone = normalizePhone(data.phone)!;
   const whatsapp = data.whatsapp ? normalizePhone(data.whatsapp) : null;
+  const lead = await leadAttribution();
+
+  /**
+   * A waitlist application is an ordinary enquiry with a marker the office can
+   * see and filter on (addendum 2, A1).
+   */
+  const message = data.waitlist
+    ? `[WAITLIST] ${data.message ?? ""}`.trim()
+    : data.message || null;
 
   const application = await prisma.application.create({
     data: {
@@ -75,14 +91,16 @@ export async function submitAdmissionApplication(raw: unknown): Promise<FormResu
       qualification: QUALIFICATION_LABELS[data.qualification],
       bmdc: data.bmdc || null,
       location: data.location || null,
-      message: data.message || null,
-      source: await requestSource(),
+      message,
+      source: lead.source,
+      utm: lead.utm ?? undefined,
+      referralCode: lead.referralCode,
     },
   });
 
   await notifyOffice({
     type: "ADMISSION",
-    subject: `New admission application: ${data.name} — ${course.nameEn}`,
+    subject: `${data.waitlist ? "Waitlist" : "New admission"} application: ${data.name} — ${course.nameEn}`,
     lines: [
       ["Name", data.name],
       ["Phone", displayPhone(phone)],
@@ -93,8 +111,9 @@ export async function submitAdmissionApplication(raw: unknown): Promise<FormResu
       ["Qualification", QUALIFICATION_LABELS[data.qualification]],
       ["BMDC", data.bmdc || "—"],
       ["Location", data.location || "—"],
-      ["Message", data.message || "—"],
+      ["Message", message || "—"],
       ["Source", application.source ?? "—"],
+      ["Campaign", lead.utm?.utm_campaign ?? "—"],
     ],
     replyTo: data.email || undefined,
   });
@@ -125,6 +144,7 @@ export async function submitFreeClass(raw: unknown): Promise<FormResult> {
 
   const phone = normalizePhone(data.phone)!;
   const preferredDate = parseDate(data.preferredDate);
+  const lead = await leadAttribution();
 
   await prisma.application.create({
     data: {
@@ -134,7 +154,9 @@ export async function submitFreeClass(raw: unknown): Promise<FormResult> {
       courseId: course.id,
       preferredDate,
       message: data.message || null,
-      source: await requestSource(),
+      source: lead.source,
+      utm: lead.utm ?? undefined,
+      referralCode: lead.referralCode,
     },
   });
 
@@ -168,6 +190,7 @@ export async function submitContactMessage(raw: unknown): Promise<FormResult> {
   }
 
   const phone = normalizePhone(data.phone)!;
+  const lead = await leadAttribution();
 
   await prisma.application.create({
     data: {
@@ -176,7 +199,9 @@ export async function submitContactMessage(raw: unknown): Promise<FormResult> {
       phone,
       email: data.email || null,
       message: data.message,
-      source: await requestSource(),
+      source: lead.source,
+      utm: lead.utm ?? undefined,
+      referralCode: lead.referralCode,
     },
   });
 
@@ -195,23 +220,44 @@ export async function submitContactMessage(raw: unknown): Promise<FormResult> {
   return { ok: true };
 }
 
-/** Referrer plus any utm_* parameters, for the admin "source" column. */
-async function requestSource(): Promise<string | null> {
+/**
+ * Lead attribution for a submission (addendum 2, A3): the campaign cookie the
+ * browser stored on the first visit, plus the referrer of this request as a
+ * fallback for visitors who arrived untagged.
+ */
+async function leadAttribution(): Promise<{
+  source: LeadSource;
+  utm: LeadData | null;
+  referralCode: string | null;
+}> {
+  let data: LeadData | null = null;
+
   try {
-    const headerList = await headers();
-    const referer = headerList.get("referer");
-    if (!referer) return null;
-
-    const url = new URL(referer);
-    const utm = [...url.searchParams.entries()]
-      .filter(([key]) => key.startsWith("utm_"))
-      .map(([key, value]) => `${key}=${value}`)
-      .join("&");
-
-    return [url.hostname + url.pathname, utm].filter(Boolean).join(" ").slice(0, 300);
+    const store = await cookies();
+    data = parseLeadCookie(store.get(LEAD_COOKIE)?.value);
   } catch {
-    return null;
+    // No cookie access — fall through to the referrer.
   }
+
+  try {
+    const referer = (await headers()).get("referer");
+    if (referer) {
+      const url = new URL(referer);
+      if (!data) data = {};
+      // Only record an external referrer; our own pages say nothing useful.
+      data.referrer ??= url.origin.includes("localhost")
+        ? undefined
+        : `${url.hostname}${url.pathname}`.slice(0, 300);
+    }
+  } catch {
+    // A malformed referer header is not worth failing a submission over.
+  }
+
+  return {
+    source: resolveLeadSource(data),
+    utm: data && Object.keys(data).length > 0 ? data : null,
+    referralCode: referralCodeOf(data),
+  };
 }
 
 function parseDate(value?: string): Date | null {

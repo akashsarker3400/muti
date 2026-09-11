@@ -4,6 +4,7 @@ import { Check, Minus } from "lucide-react";
 
 import { deleteResource, setResourceFlag } from "@/app/actions/admin-resource";
 import { AdminPagination } from "@/components/admin/admin-pagination";
+import { CloneBatchButton } from "@/components/admin/clone-batch-button";
 import { FlagToggle } from "@/components/admin/flag-toggle";
 import { RowActions } from "@/components/admin/row-actions";
 import { SearchBox } from "@/components/admin/search-box";
@@ -157,14 +158,22 @@ export default async function ResourceListPage({
                       )}
 
                       <td className="px-4 py-2.5">
-                        <RowActions
-                          editHref={`/admin/${resource.key}/${id}`}
-                          label={primaryLabel(resource.columns, row)}
-                          onDelete={async () => {
-                            "use server";
-                            return deleteResource(resource.key, id);
-                          }}
-                        />
+                        <div className="flex items-center justify-end">
+                          {resource.rowTool === "batch-clone" && (
+                            <CloneBatchButton
+                              batchId={id}
+                              batchName={String(row.name ?? "")}
+                            />
+                          )}
+                          <RowActions
+                            editHref={`/admin/${resource.key}/${id}`}
+                            label={primaryLabel(resource.columns, row)}
+                            onDelete={async () => {
+                              "use server";
+                              return deleteResource(resource.key, id);
+                            }}
+                          />
+                        </div>
                       </td>
                     </tr>
                   );

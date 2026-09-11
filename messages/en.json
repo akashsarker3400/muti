@@ -65,6 +65,13 @@
     "DIPLOMA": "Diploma",
     "SPECIAL": "Special"
   },
+  "seats": {
+    "full": "Seats full",
+    "hurry": "Enrol now",
+    "fullNotice": "Seats are full — contact us about the next batch",
+    "joinWaitlist": "Join waitlist",
+    "waitlistNote": "This batch is full. Join the waitlist and we will contact you as soon as a seat opens up in the next batch."
+  },
   "noticeCategory": {
     "ADMISSION": "Admission",
     "EXAM": "Exam",

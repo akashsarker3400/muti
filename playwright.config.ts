@@ -1,8 +1,14 @@
 import { defineConfig, devices } from "@playwright/test";
 
+/** Relative to the project root, which is where Playwright runs. */
+const ADMIN_STATE = "tests/e2e/.auth/admin.json";
+
 /**
  * Smoke tests (section 11). They run against a real dev server and a real
  * database, so `npm run db:seed` must have been run first.
+ *
+ * The `setup` project signs in once and shares the session with every other
+ * project, which keeps the run under the admin login rate limit.
  */
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -17,8 +23,17 @@ export default defineConfig({
     locale: "bn-BD",
   },
   projects: [
-    { name: "desktop", use: { ...devices["Desktop Chrome"] } },
-    { name: "mobile", use: { ...devices["Pixel 7"] } },
+    { name: "setup", testMatch: /auth\.setup\.ts/ },
+    {
+      name: "desktop",
+      use: { ...devices["Desktop Chrome"], storageState: ADMIN_STATE },
+      dependencies: ["setup"],
+    },
+    {
+      name: "mobile",
+      use: { ...devices["Pixel 7"], storageState: ADMIN_STATE },
+      dependencies: ["setup"],
+    },
   ],
   webServer: process.env.E2E_BASE_URL
     ? undefined

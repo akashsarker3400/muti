@@ -67,6 +67,16 @@ enum PartnerType {
   COLLABORATION
 }
 
+/// Where an enquiry came from (addendum 2, A3).
+enum LeadSource {
+  FACEBOOK
+  GOOGLE
+  REFERRAL
+  WALK_IN
+  WEBSITE
+  OTHER
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -182,6 +192,14 @@ model Batch {
   note      String?
   published Boolean     @default(true)
 
+  /// Live seat counter (addendum 2, A1). `seatsFilled` rises automatically when
+  /// an application is admitted into this batch or a student is created in it;
+  /// once an admin edits the number by hand `seatsFilledManual` is set and the
+  /// automatic increments stop, so the manual value always wins.
+  seatsFilled       Int     @default(0)
+  seatsFilledManual Boolean @default(false)
+  showSeatCounter   Boolean @default(true)
+
   students     Student[]
   results      Result[]
   applications Application[]
@@ -213,14 +231,19 @@ model Application {
   message       String?   @db.Text
 
   adminNote String? @db.Text
-  /// utm / referrer
-  source    String?
+
+  /// Lead attribution (addendum 2, A3).
+  source        LeadSource?
+  /// Raw campaign data: { utm_source, utm_campaign, fbclid, gclid, referrer, landing }
+  utm           Json?
+  referralCode  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([type, status, createdAt])
   @@index([createdAt])
+  @@index([source])
 }
 
 model Student {

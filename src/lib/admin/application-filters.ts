@@ -1,10 +1,15 @@
-import type { ApplicationStatus, ApplicationType } from "@/generated/prisma/enums";
+import type {
+  ApplicationStatus,
+  ApplicationType,
+  LeadSource,
+} from "@/generated/prisma/enums";
 
 export type ApplicationFilters = {
   q?: string;
   type?: string;
   status?: string;
   course?: string;
+  source?: string;
   from?: string;
   to?: string;
 };
@@ -29,6 +34,7 @@ export function buildApplicationWhere(filters: ApplicationFilters) {
   if (filters.type) where.type = filters.type as ApplicationType;
   if (filters.status) where.status = filters.status as ApplicationStatus;
   if (filters.course) where.courseId = filters.course;
+  if (filters.source) where.source = filters.source as LeadSource;
 
   const createdAt: Record<string, Date> = {};
   const from = parseDate(filters.from);

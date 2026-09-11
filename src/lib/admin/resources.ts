@@ -57,6 +57,8 @@ export type ResourceConfig = {
   columns: ResourceColumn[];
   /** Renders an extra tool above the list, e.g. the students CSV importer. */
   listTool?: "student-import";
+  /** Renders an extra action in each row, e.g. "clone" on batches. */
+  rowTool?: "batch-clone";
   searchFields: string[];
   orderBy: Record<string, "asc" | "desc">[];
   include?: Record<string, boolean>;
@@ -67,6 +69,20 @@ export type ResourceConfig = {
   toForm: (row: Record<string, unknown>) => FormValues;
   /** Form values -> Prisma data. Runs after `schema` has validated. */
   toData: (values: Record<string, unknown>) => Record<string, unknown>;
+  /**
+   * Last chance to adjust the data, given the row as it is today (null when
+   * creating). Used by batches to notice a hand-edited seat count.
+   */
+  beforeWrite?: (
+    data: Record<string, unknown>,
+    existing: Record<string, unknown> | null,
+  ) => Record<string, unknown>;
+  /** Runs after a successful create or update — cache tags, counters, … */
+  afterWrite?: (
+    row: { id: string },
+    data: Record<string, unknown>,
+    existing: Record<string, unknown> | null,
+  ) => Promise<void>;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -870,6 +886,7 @@ const batchResource: ResourceConfig = {
   singular: "ব্যাচ",
   description: "হোমপেজে দেখানো হয় সবচেয়ে কাছের “UPCOMING” প্রকাশিত ব্যাচটি।",
   newLabel: "নতুন ব্যাচ",
+  rowTool: "batch-clone",
   columns: [
     { key: "name", label: "ব্যাচ" },
     { key: "course", label: "কোর্স", path: "course.nameEn", hideOnMobile: true },
@@ -881,6 +898,7 @@ const batchResource: ResourceConfig = {
     },
     { key: "startDate", label: "শুরু", type: "date", hideOnMobile: true },
     { key: "seats", label: "আসন", type: "number", hideOnMobile: true },
+    { key: "seatsFilled", label: "পূর্ণ", type: "number", hideOnMobile: true },
   ],
   searchFields: ["name"],
   orderBy: [{ startDate: "asc" }, { createdAt: "desc" }],
@@ -893,6 +911,8 @@ const batchResource: ResourceConfig = {
     endDate: optionalText,
     status: z.enum(["UPCOMING", "RUNNING", "COMPLETED"]),
     seats: optionalText.or(z.number()),
+    seatsFilled: optionalText.or(z.number()),
+    showSeatCounter: z.boolean().default(true),
     classDays: optionalText,
     classTime: optionalText,
     note: optionalText,
@@ -931,7 +951,23 @@ const batchResource: ResourceConfig = {
         },
         { name: "startDate", label: "শুরুর তারিখ", type: "date" },
         { name: "endDate", label: "শেষের তারিখ", type: "date" },
-        { name: "seats", label: "আসন সংখ্যা", type: "number" },
+        {
+          name: "seats",
+          label: "মোট আসন",
+          type: "number",
+          hint: "ফাঁকা রাখলে ওয়েবসাইটে সিট কাউন্টার দেখাবে না।",
+        },
+        {
+          name: "seatsFilled",
+          label: "পূর্ণ আসন",
+          type: "number",
+          hint: "ভর্তি নিশ্চিত হলে নিজে থেকেই বাড়ে। এখানে হাতে লিখলে সেটিই চূড়ান্ত ধরা হবে, স্বয়ংক্রিয় গণনা আর হবে না।",
+        },
+        {
+          name: "showSeatCounter",
+          label: "ওয়েবসাইটে “সিট বাকি” দেখান",
+          type: "checkbox",
+        },
         {
           name: "classDays",
           label: "ক্লাসের দিন",
@@ -956,6 +992,9 @@ const batchResource: ResourceConfig = {
     endDate: fromDate(row.endDate),
     status: str(row.status) || "UPCOMING",
     seats: row.seats == null ? "" : toInt(row.seats),
+    seatsFilled: row.seatsFilled == null ? 0 : toInt(row.seatsFilled),
+    showSeatCounter:
+      row.showSeatCounter === undefined ? true : Boolean(row.showSeatCounter),
     classDays: str(row.classDays),
     classTime: str(row.classTime),
     note: str(row.note),
@@ -968,11 +1007,27 @@ const batchResource: ResourceConfig = {
     endDate: toDate(values.endDate),
     status: str(values.status) || "UPCOMING",
     seats: optionalInt(values.seats),
+    seatsFilled: toInt(values.seatsFilled),
+    showSeatCounter: Boolean(values.showSeatCounter),
     classDays: nullable(values.classDays),
     classTime: nullable(values.classTime),
     note: nullable(values.note),
     published: Boolean(values.published),
   }),
+  /**
+   * A hand-typed seat count switches the batch to manual mode, so the
+   * automatic increments stop overwriting the office's own number
+   * (addendum 2, A1).
+   */
+  beforeWrite: (data, existing) => {
+    if (!existing) return data;
+    const changed = toInt(data.seatsFilled) !== toInt(existing.seatsFilled);
+    return changed ? { ...data, seatsFilledManual: true } : data;
+  },
+  afterWrite: async () => {
+    const { revalidateBatches } = await import("@/lib/admin/seats");
+    revalidateBatches();
+  },
 };
 
 const resultResource: ResourceConfig = {
@@ -1170,6 +1225,20 @@ const studentResource: ResourceConfig = {
     verifiable: Boolean(values.verifiable),
     note: nullable(values.note),
   }),
+  /**
+   * A new student in a batch takes a seat; moving an existing student between
+   * batches moves the seat with them (addendum 2, A1).
+   */
+  afterWrite: async (_row, data, existing) => {
+    const { bumpSeatsFilled } = await import("@/lib/admin/seats");
+    const next = typeof data.batchId === "string" ? data.batchId : null;
+    const previous =
+      existing && typeof existing.batchId === "string" ? existing.batchId : null;
+
+    if (next === previous) return;
+    if (previous) await bumpSeatsFilled(previous, -1);
+    if (next) await bumpSeatsFilled(next, 1);
+  },
 };
 
 export const RESOURCES: Record<string, ResourceConfig> = {

@@ -20,6 +20,7 @@ export async function GET(request: Request) {
     type: searchParams.get("type") ?? undefined,
     status: searchParams.get("status") ?? undefined,
     course: searchParams.get("course") ?? undefined,
+    source: searchParams.get("source") ?? undefined,
     from: searchParams.get("from") ?? undefined,
     to: searchParams.get("to") ?? undefined,
   });
@@ -47,6 +48,8 @@ export async function GET(request: Request) {
     "Message",
     "Admin note",
     "Source",
+    "Referral code",
+    "Campaign",
   ];
 
   const lines = [
@@ -69,6 +72,8 @@ export async function GET(request: Request) {
         row.message ?? "",
         row.adminNote ?? "",
         row.source ?? "",
+        row.referralCode ?? "",
+        campaignOf(row.utm),
       ]
         .map(csvCell)
         .join(","),
@@ -90,6 +95,13 @@ export async function GET(request: Request) {
       },
     },
   );
+}
+
+/** utm_campaign out of the stored campaign JSON, if there is one. */
+function campaignOf(utm: unknown): string {
+  if (!utm || typeof utm !== "object") return "";
+  const value = (utm as Record<string, unknown>).utm_campaign;
+  return typeof value === "string" ? value : "";
 }
 
 /**

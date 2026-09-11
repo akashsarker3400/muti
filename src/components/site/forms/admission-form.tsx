@@ -47,12 +47,19 @@ export function AdmissionForm({
   const t = useTranslations("form");
   const apply = useTranslations("apply");
   const common = useTranslations("common");
+  const seatsT = useTranslations("seats");
   const searchParams = useSearchParams();
 
   // /courses/[slug] links here with ?course=slug so the select is pre-filled.
   const preselected = courses.find(
     (course) => course.slug === searchParams.get("course"),
   );
+
+  /**
+   * Course pages link here with `waitlist=1` when the batch is full
+   * (addendum 2, A1). The office sees these as "[WAITLIST]" enquiries.
+   */
+  const waitlist = searchParams.get("waitlist") === "1";
 
   const [pending, startTransition] = useTransition();
   const [submitted, setSubmitted] = useState<{ name: string; course: string } | null>(
@@ -99,6 +106,7 @@ export function AdmissionForm({
         batchId: values.batchId || undefined,
         message: values.message || undefined,
         consent: values.consent,
+        waitlist,
         website: values.website,
       });
 
@@ -160,6 +168,12 @@ export function AdmissionForm({
       className="relative space-y-5 rounded-[14px] border border-[color:var(--border)] bg-white p-5 shadow-[var(--shadow-card)] sm:p-6"
     >
       <Honeypot {...register("website")} />
+
+      {waitlist && (
+        <p className="rounded-lg border border-[color:var(--warning)]/30 bg-[color:var(--warning)]/10 p-3 text-sm text-[color:var(--warning-ink)]">
+          {seatsT("waitlistNote")}
+        </p>
+      )}
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field
@@ -369,7 +383,11 @@ export function AdmissionForm({
         disabled={pending}
         className="w-full sm:w-auto"
       >
-        {pending ? common("submitting") : t("submitApplication")}
+        {pending
+          ? common("submitting")
+          : waitlist
+            ? seatsT("joinWaitlist")
+            : t("submitApplication")}
       </Button>
     </form>
   );

@@ -50,6 +50,8 @@ export const admissionApplicationSchema = z.object({
   batchId: z.string().trim().optional(),
   message: z.string().trim().max(2000).optional(),
   consent: z.literal(true, { message: "consentRequired" }),
+  /** Set when the chosen batch is full (addendum 2, A1). */
+  waitlist: z.boolean().optional(),
   website: honeypot,
 });
 

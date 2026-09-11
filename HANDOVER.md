@@ -1,8 +1,17 @@
 # MUTI — handover: content and decisions still needed
 
-The site is complete and working. Everything below was marked `TODO` in the
-build specification, or is a judgement call the owner should confirm. Nothing
-here blocks launch except the items in **section 1**.
+The site is complete and working, including **section A of addendum 2** (live
+seat counter and waitlist, batch clone, lead source tracking). Everything below
+was marked `TODO` in the specifications, or is a judgement call the owner
+should confirm. Nothing here blocks launch except the items in **section 1**.
+
+> **Addendum 2 section B (Phase 2)** — attendance, fees and installments,
+> exams, certificates with QR, ID cards, alerts, SMS, teacher payments,
+> reports, job board and the student portal — is **not** built. It is gated
+> behind the owner saying "start Phase 2", and it depends on
+> `muti-erp-addendum.md`, which has not been supplied yet (that document
+> defines `notify()`, `renderPdf`, `Counter`, `LedgerEntry`, the permission and
+> role system, and branches — most of section B is built on them).
 
 Each row says where to enter the value: an admin screen, an environment
 variable, or a file in the repository.

@@ -1,9 +1,14 @@
 # MUTI website — notes for agents and developers
 
 Official website plus admin panel for **Mymensingh Ultrasound Training
-Institute (MUTI)**. The full specification is kept in `docs/build-spec.md`;
-the section numbers in code comments refer to it. `HANDOVER.md` records every
-outstanding TODO and every deliberate deviation from that spec.
+Institute (MUTI)**. The specifications are kept in `docs/build-spec.md` and
+`docs/addendum-2.md`; section numbers in code comments refer to them
+("section 5.4" is the build spec, "addendum 2, A1" the addendum).
+`HANDOVER.md` records every outstanding TODO and every deliberate deviation.
+
+Addendum 2 section B (Phase 2: attendance, fees, exams, certificates, portal…)
+is **not** built and must not be started until the owner says "start Phase 2".
+It also depends on `muti-erp-addendum.md`, which has not been supplied yet.
 
 ## Stack
 
@@ -44,3 +49,8 @@ database access, so nothing can be prerendered at build time.
   number from Site Settings.
 - Content marked `TODO` in the spec is seeded as a clear placeholder and
   listed in `HANDOVER.md`. Do not invent facts, fees or dates.
+- Batch reads are cached for 60 seconds under the `batches` tag because they
+  carry the live seat counter. Any write that touches a batch must call
+  `revalidateBatches()` from `src/lib/admin/seats.ts`.
+- `Batch.seatsFilledManual` means the office typed the number themselves;
+  automatic seat counting must leave that batch alone.

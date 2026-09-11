@@ -2,13 +2,14 @@ import { ArrowRight, Clock, Wallet } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { AdmissionBadge, LevelBadge } from "@/components/site/badges";
+import { SeatCounter } from "@/components/site/seat-counter";
 import { WhatsAppIcon } from "@/components/site/icons";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { courseFeeLabel, durationLabel } from "@/lib/course";
 import { pick } from "@/lib/format";
-import type { PublicCourse } from "@/lib/queries";
+import type { CourseBatch, PublicCourse } from "@/lib/queries";
 import type { SiteSettings } from "@/lib/site-settings";
 import { waLink } from "@/lib/whatsapp";
 
@@ -16,10 +17,21 @@ export async function CourseCard({
   course,
   locale,
   settings,
+  batch,
+  headingLevel = "h3",
 }: {
   course: PublicCourse;
   locale: Locale;
   settings: SiteSettings;
+  /** Next upcoming batch, for the live seat counter (addendum 2, A1). */
+  batch?: CourseBatch;
+  /**
+   * Heading level for the course name. The grid on /courses sits directly
+   * under the page h1, so its cards are h2; grids introduced by a section
+   * heading (home, related courses) are h3. Skipping a level fails the
+   * heading-order check.
+   */
+  headingLevel?: "h2" | "h3";
 }) {
   const [common, levels, coursesT, courseT] = await Promise.all([
     getTranslations("common"),
@@ -28,6 +40,7 @@ export async function CourseCard({
     getTranslations("course"),
   ]);
 
+  const Heading = headingLevel;
   const name = pick(locale, course.nameBn, course.nameEn);
   const fullName = pick(locale, course.fullNameBn, course.fullNameEn);
 
@@ -48,19 +61,20 @@ export async function CourseCard({
             labelClosed={common("admissionClosed")}
           />
         )}
+        <SeatCounter batch={batch} locale={locale} />
       </div>
 
       <p className="font-latin text-xs font-semibold tracking-wide text-[color:var(--muted-foreground)]">
         {coursesT("code")} · {course.code}
       </p>
-      <h3 className="mt-1 text-lg font-semibold text-[color:var(--brand)]">
+      <Heading className="mt-1 text-lg font-semibold text-[color:var(--brand)]">
         <Link
           href={`/courses/${course.slug}`}
           className="transition group-hover:underline"
         >
           {name}
         </Link>
-      </h3>
+      </Heading>
       <p className="mt-1 line-clamp-2 text-sm text-[color:var(--muted-foreground)]">
         {fullName}
       </p>

@@ -10,6 +10,9 @@ import {
   deleteApplication,
   setApplicationNote,
 } from "@/app/actions/admin-applications";
+import { setApplicationSource } from "@/app/actions/admin-leads";
+import { AdminBadge } from "@/components/admin/ui";
+import { LEAD_SOURCE_LABELS_BN } from "@/lib/lead-source";
 import {
   APPLICATION_STATUS_LABELS,
   ApplicationStatusSelect,
@@ -44,6 +47,8 @@ export type AdminApplication = {
   message: string | null;
   adminNote: string | null;
   source: string | null;
+  referralCode: string | null;
+  campaign: string | null;
   createdAt: string;
 };
 
@@ -154,6 +159,12 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
               </th>
               <th
                 scope="col"
+                className="hidden px-4 py-3 text-start font-semibold lg:table-cell"
+              >
+                সোর্স
+              </th>
+              <th
+                scope="col"
                 className="hidden px-4 py-3 text-start font-semibold sm:table-cell"
               >
                 তারিখ
@@ -189,6 +200,17 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                 </td>
                 <td className="hidden px-4 py-2.5 lg:table-cell">
                   {row.courseName ?? "—"}
+                </td>
+                <td className="hidden px-4 py-2.5 lg:table-cell">
+                  {row.source ? (
+                    <AdminBadge tone="neutral">
+                      {LEAD_SOURCE_LABELS_BN[
+                        row.source as keyof typeof LEAD_SOURCE_LABELS_BN
+                      ] ?? row.source}
+                    </AdminBadge>
+                  ) : (
+                    <span className="text-[color:var(--muted-foreground)]">—</span>
+                  )}
                 </td>
                 <td className="hidden px-4 py-2.5 whitespace-nowrap sm:table-cell">
                   {formatDate(row.createdAt, "bn")}
@@ -263,7 +285,12 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                   />
                 )}
                 <Row label="জমা" value={formatDate(detail.createdAt, "bn")} />
-                {detail.source && <Row label="সোর্স" value={detail.source} latin />}
+                {detail.referralCode && (
+                  <Row label="রেফারেল কোড" value={detail.referralCode} latin />
+                )}
+                {detail.campaign && (
+                  <Row label="ক্যাম্পেইন" value={detail.campaign} latin />
+                )}
                 {detail.message && (
                   <div>
                     <dt className="text-[color:var(--muted-foreground)]">মেসেজ</dt>
@@ -273,6 +300,12 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                   </div>
                 )}
               </dl>
+
+              <SourceEditor
+                id={detail.id}
+                initial={detail.source ?? ""}
+                onSaved={() => router.refresh()}
+              />
 
               <NoteEditor
                 id={detail.id}
@@ -330,6 +363,55 @@ function Row({
     <div className="flex flex-wrap justify-between gap-2">
       <dt className="text-[color:var(--muted-foreground)]">{label}</dt>
       <dd className={latin ? "font-latin font-medium" : "font-medium"}>{value}</dd>
+    </div>
+  );
+}
+
+/** Staff can correct the attribution the site guessed (addendum 2, A3). */
+function SourceEditor({
+  id,
+  initial,
+  onSaved,
+}: {
+  id: string;
+  initial: string;
+  onSaved: () => void;
+}) {
+  const [pending, startTransition] = useTransition();
+
+  return (
+    <div className="mt-4">
+      <label
+        htmlFor={`source-${id}`}
+        className="text-sm font-medium text-[color:var(--muted-foreground)]"
+      >
+        সোর্স
+      </label>
+      <select
+        id={`source-${id}`}
+        defaultValue={initial}
+        disabled={pending}
+        onChange={(event) => {
+          const next = event.target.value;
+          startTransition(async () => {
+            const result = await setApplicationSource(id, next);
+            if (result.ok) {
+              toast.success("সোর্স পরিবর্তন হয়েছে।");
+              onSaved();
+            } else {
+              toast.error(result.error ?? "পরিবর্তন করা যায়নি।");
+            }
+          });
+        }}
+        className="mt-1 h-11 w-full rounded-lg border border-[color:var(--input)] bg-white px-3 text-sm focus-visible:border-[color:var(--brand)] focus-visible:outline-none"
+      >
+        <option value="">— জানা নেই —</option>
+        {Object.entries(LEAD_SOURCE_LABELS_BN).map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
