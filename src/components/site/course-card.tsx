@@ -67,21 +67,15 @@ export async function CourseCard({
 
       <dl className="mt-4 space-y-2 text-sm">
         <div className="flex items-center gap-2">
-          <Clock
-            className="size-4 shrink-0 text-[color:var(--muted-foreground)]"
-            aria-hidden="true"
-          />
-          <dt className="text-[color:var(--muted-foreground)]">
+          <dt className="flex items-center gap-2 text-[color:var(--muted-foreground)]">
+            <Clock className="size-4 shrink-0" aria-hidden="true" />
             {coursesT("duration")}:
           </dt>
           <dd className="font-medium">{duration}</dd>
         </div>
         <div className="flex items-center gap-2">
-          <Wallet
-            className="size-4 shrink-0 text-[color:var(--muted-foreground)]"
-            aria-hidden="true"
-          />
-          <dt className="text-[color:var(--muted-foreground)]">
+          <dt className="flex items-center gap-2 text-[color:var(--muted-foreground)]">
+            <Wallet className="size-4 shrink-0" aria-hidden="true" />
             {coursesT("courseFee")}:
           </dt>
           <dd className="nums font-semibold text-[color:var(--brand)]">{fee}</dd>

@@ -12,9 +12,9 @@ type Routine = {
 
 const TYPE_STYLES: Record<RoutineType, string> = {
   LECTURE: "bg-[color:var(--brand)]/10 text-[color:var(--brand)]",
-  PRACTICAL: "bg-[color:var(--success)]/12 text-[color:var(--success)]",
-  EXAM: "bg-[color:var(--accent-red)]/10 text-[color:var(--accent-red)]",
-  REVIEW: "bg-[color:var(--warning)]/12 text-[color:var(--warning)]",
+  PRACTICAL: "bg-[color:var(--success)]/12 text-[color:var(--success-ink)]",
+  EXAM: "bg-[color:var(--accent-red)]/10 text-[color:var(--accent-red-ink)]",
+  REVIEW: "bg-[color:var(--warning)]/12 text-[color:var(--warning-ink)]",
 };
 
 /**

@@ -48,13 +48,18 @@ export async function NextBatchCta({
 
             <dl className="mt-5 flex flex-wrap gap-x-8 gap-y-3 text-sm">
               <div className="flex items-center gap-2">
-                <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
-                <dt className="text-white/70">{home("nextBatchStarts")}:</dt>
+                <dt className="flex items-center gap-2 text-white/70">
+                  <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
+                  {home("nextBatchStarts")}:
+                </dt>
                 <dd className="font-semibold">{start}</dd>
               </div>
               {batch.classDays && (
                 <div className="flex items-center gap-2">
-                  <Clock className="size-4 shrink-0" aria-hidden="true" />
+                  <dt className="flex items-center gap-2 text-white/70">
+                    <Clock className="size-4 shrink-0" aria-hidden="true" />
+                    <span className="sr-only">{home("classDaysLabel")}</span>
+                  </dt>
                   <dd className="font-semibold">
                     {batch.classDays}
                     {batch.classTime ? ` · ${batch.classTime}` : ""}
@@ -63,7 +68,10 @@ export async function NextBatchCta({
               )}
               {batch.seats != null && batch.seats > 0 && (
                 <div className="flex items-center gap-2">
-                  <Users className="size-4 shrink-0" aria-hidden="true" />
+                  <dt className="flex items-center gap-2 text-white/70">
+                    <Users className="size-4 shrink-0" aria-hidden="true" />
+                    <span className="sr-only">{home("seatsLabel")}</span>
+                  </dt>
                   <dd className="nums font-semibold">
                     {formatNumber(batch.seats, locale)}
                   </dd>

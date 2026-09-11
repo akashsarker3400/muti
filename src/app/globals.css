@@ -25,10 +25,14 @@
   --color-accent-red: var(--accent-red);
   --color-highlight: var(--highlight);
   --color-whatsapp: var(--whatsapp);
+  --color-whatsapp-ink: var(--whatsapp-ink);
   --color-bg-soft: var(--bg-soft);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-error: var(--error);
+  --color-success-ink: var(--success-ink);
+  --color-warning-ink: var(--warning-ink);
+  --color-accent-red-ink: var(--accent-red-ink);
 
   /* shadcn tokens */
   --color-sidebar-ring: var(--sidebar-ring);
@@ -84,10 +88,20 @@
   --brand-soft: #eef1f9;
   --accent-red: #d62828;
   --highlight: #f4c20d;
+  /*
+   * WhatsApp brand green is #25D366, but white text on it is only 1.98:1.
+   * `--whatsapp` stays the brand colour for icon tints on light surfaces;
+   * `--whatsapp-ink` is the filled-button green (white text, 5.0:1 — AA).
+   */
   --whatsapp: #25d366;
+  --whatsapp-ink: #0b8043;
   --bg-soft: #f5f7fb;
   --success: #1e8e3e;
   --warning: #b26a00;
+  /* Darker variants for text on the 10–12% tinted badge backgrounds. */
+  --success-ink: #0f7a32;
+  --warning-ink: #8a5200;
+  --accent-red-ink: #b01d1d;
   --error: #c62828;
 
   /* shadcn semantic tokens mapped onto the brand palette */

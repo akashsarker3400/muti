@@ -52,11 +52,9 @@ export async function SiteHeader({
   return (
     <header className="sticky top-0 z-50 border-b border-[color:var(--border)] bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85">
       <div className="container-content flex h-16 items-center gap-3 lg:h-20">
-        <Link
-          href="/"
-          className="flex shrink-0 items-center gap-2.5"
-          aria-label={instituteName}
-        >
+        {/* No aria-label: the visible short name and institute name already
+            give the link its accessible name. */}
+        <Link href="/" className="flex shrink-0 items-center gap-2.5">
           <Logo size={40} className="size-9 lg:size-11" />
           <span className="flex flex-col leading-tight">
             <span className="font-latin text-lg font-bold tracking-tight text-[color:var(--brand)] lg:text-xl">

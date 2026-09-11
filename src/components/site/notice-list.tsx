@@ -9,10 +9,10 @@ import type { getNotices } from "@/lib/queries";
 type Notice = Awaited<ReturnType<typeof getNotices>>[number];
 
 const CATEGORY_STYLES: Record<string, string> = {
-  ADMISSION: "bg-[color:var(--accent-red)]/10 text-[color:var(--accent-red)]",
+  ADMISSION: "bg-[color:var(--accent-red)]/10 text-[color:var(--accent-red-ink)]",
   EXAM: "bg-[color:var(--brand)]/10 text-[color:var(--brand)]",
-  RESULT: "bg-[color:var(--success)]/12 text-[color:var(--success)]",
-  HOLIDAY: "bg-[color:var(--warning)]/12 text-[color:var(--warning)]",
+  RESULT: "bg-[color:var(--success)]/12 text-[color:var(--success-ink)]",
+  HOLIDAY: "bg-[color:var(--warning)]/12 text-[color:var(--warning-ink)]",
   GENERAL: "bg-[color:var(--bg-soft)] text-[color:var(--muted-foreground)]",
 };
 
@@ -55,7 +55,7 @@ export async function NoticeList({
                   {categories(notice.category)}
                 </span>
                 {notice.pinned && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[color:var(--accent-red)]">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[color:var(--accent-red-ink)]">
                     <Pin className="size-3" aria-hidden="true" />
                     {t("pinned")}
                   </span>

@@ -365,7 +365,7 @@ function ClassTile({
 }) {
   return (
     <div
-      className={`rounded-xl border p-4 text-center ${
+      className={`flex flex-col rounded-xl border p-4 text-center ${
         emphasis
           ? "border-[color:var(--brand)]/20 bg-[color:var(--brand-soft)]"
           : "border-[color:var(--border)] bg-white"

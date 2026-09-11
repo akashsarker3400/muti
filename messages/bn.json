@@ -102,7 +102,9 @@
     "facultyTitle": "আমাদের শিক্ষকমণ্ডলী",
     "galleryTitle": "গ্যালারি",
     "contactTitle": "যোগাযোগ করুন",
-    "contactSubtitle": "যেকোনো প্রশ্নে সরাসরি WhatsApp করুন বা অফিসে আসুন।"
+    "contactSubtitle": "যেকোনো প্রশ্নে সরাসরি WhatsApp করুন বা অফিসে আসুন।",
+    "classDaysLabel": "ক্লাসের দিন",
+    "seatsLabel": "আসন"
   },
   "about": {
     "title": "ডাক্তারদের জন্য, ডাক্তারদের দ্বারা পরিচালিত",

@@ -3,6 +3,7 @@ import "server-only";
 import { z } from "zod";
 
 import type { FormSection, FormValues } from "@/lib/admin/fields";
+import { slugify } from "@/lib/admin/slug";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -108,17 +109,6 @@ function fromDate(value: unknown): string {
 
 function str(value: unknown): string {
   return typeof value === "string" ? value : value == null ? "" : String(value);
-}
-
-/** Slugs keep Bangla characters; only whitespace and punctuation are folded. */
-export function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .trim()
-    .replace(/['"’]/g, "")
-    .replace(/[^\p{L}\p{N}]+/gu, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 90);
 }
 
 const publishedField = {
@@ -1200,3 +1190,5 @@ export const RESOURCES: Record<string, ResourceConfig> = {
 export function getResource(key: string): ResourceConfig | null {
   return RESOURCES[key] ?? null;
 }
+
+export { slugify } from "@/lib/admin/slug";

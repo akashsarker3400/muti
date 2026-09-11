@@ -198,17 +198,16 @@ const dmuRoutine: SeedRoutine[] = [
   },
 ];
 
-/** ADMU copies the DMU routine and adds the advanced-modules placeholder. */
-const admuRoutine: SeedRoutine[] = [
-  ...dmuRoutine,
-  {
-    semester: "Advanced",
-    label: "Note",
-    // TODO: the advanced module list has not been provided by the owner.
-    title: "Advanced modules: TODO — to be provided by the institute",
-    type: "REVIEW",
-  },
-];
+/**
+ * ADMU copies the DMU routine (section 8).
+ *
+ * The spec also asks for an "Advanced modules: TODO" note here, but that row
+ * would render inside the public routine table where prospective students
+ * read it. The course overview already tells visitors to contact the office
+ * for the advanced module list, and the missing content is recorded in
+ * HANDOVER.md instead.
+ */
+const admuRoutine: SeedRoutine[] = [...dmuRoutine];
 
 export const seedCourses: SeedCourse[] = [
   {

@@ -100,7 +100,7 @@ export function StudentImport() {
 
           {result.skipped && result.skipped.length > 0 && (
             <details className="mt-2">
-              <summary className="cursor-pointer text-[color:var(--warning)]">
+              <summary className="cursor-pointer text-[color:var(--warning-ink)]">
                 {result.skipped.length} টি সারি বাদ পড়েছে — বিস্তারিত দেখুন
               </summary>
               <ul className="mt-2 space-y-1 text-xs">

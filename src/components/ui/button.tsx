@@ -22,7 +22,7 @@ const buttonVariants = cva(
         accent:
           "bg-[color:var(--accent-red)] text-white shadow-xs hover:bg-[color-mix(in_oklab,var(--accent-red),black_10%)] focus-visible:ring-[color:var(--accent-red)]/40",
         whatsapp:
-          "bg-[color:var(--whatsapp)] text-white shadow-xs hover:bg-[color-mix(in_oklab,var(--whatsapp),black_12%)] focus-visible:ring-[color:var(--whatsapp)]/40",
+          "bg-[color:var(--whatsapp-ink)] text-white shadow-xs hover:bg-[color-mix(in_oklab,var(--whatsapp-ink),black_12%)] focus-visible:ring-[color:var(--whatsapp-ink)]/40",
         brand:
           "bg-[color:var(--brand)] text-white shadow-xs hover:bg-[color:var(--brand-dark)] focus-visible:ring-[color:var(--brand)]/40",
         brandOutline:

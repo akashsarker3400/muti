@@ -1,36 +1,161 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MUTI — Mymensingh Ultrasound Training Institute
 
-## Getting Started
+Official website and admin panel for **Mymensingh Ultrasound Training
+Institute (MUTI)** — a government approved ultrasound training institute in
+Mymensingh, Bangladesh (institute code 57125, established 2009).
 
-First, run the development server:
+Bangla-first, mobile-first, light theme only. Built so office staff can run the
+whole site from `/admin` without touching code.
+
+---
+
+## Stack
+
+| Layer      | Choice                                                                      |
+| ---------- | --------------------------------------------------------------------------- |
+| Framework  | Next.js 15 (App Router), TypeScript strict                                  |
+| Styling    | Tailwind CSS v4 + shadcn/ui (radix base), **light theme only**              |
+| Database   | PostgreSQL 16                                                               |
+| ORM        | Prisma 7 (driver adapter `@prisma/adapter-pg`, no Rust engine)              |
+| Admin auth | Auth.js v5 — credentials, bcrypt cost 12, 12-hour JWT sessions              |
+| i18n       | `next-intl` — `bn` (default, no prefix) and `en` (`/en/…`)                  |
+| Uploads    | Local volume `/app/uploads`, `sharp` → webp, served by `/uploads/[...path]` |
+| Email      | Nodemailer over SMTP (optional — submissions never depend on it)            |
+| Rich text  | Tiptap, stores HTML, sanitised on the way out                               |
+| Deployment | Multi-stage Dockerfile (`output: "standalone"`) on Coolify                  |
+
+---
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# 1. Postgres 16 must be running and a database must exist.
+#    macOS:  brew install postgresql@16 && brew services start postgresql@16
+#    Docker: docker compose up -d postgres
+
+# 2. Environment
+cp .env.example .env          # then fill in AUTH_SECRET, ADMIN_PASSWORD, …
+openssl rand -base64 32       # a good AUTH_SECRET
+
+# 3. Install, migrate, seed
+npm install
+npm run db:migrate            # creates the schema
+npm run db:seed               # admin user, 7 courses, routines, notices, FAQ…
+
+# 4. Run
+npm run dev                   # http://localhost:3000  ·  /admin for the panel
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The seed creates the first SUPER_ADMIN from `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
+Change that password after the first login.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Everyday commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command                            | What it does                                     |
+| ---------------------------------- | ------------------------------------------------ |
+| `npm run dev`                      | Development server                               |
+| `npm run build` / `npm start`      | Production build and server                      |
+| `npm run typecheck`                | TypeScript, no emit                              |
+| `npm run lint`                     | ESLint (zero warnings allowed)                   |
+| `npm run format`                   | Prettier, including Tailwind class sorting       |
+| `npm test`                         | Vitest unit tests                                |
+| `npm run test:e2e`                 | Playwright smoke tests (needs a seeded database) |
+| `npm run db:migrate` / `db:deploy` | Create / apply migrations                        |
+| `npm run db:seed`                  | Seed (safe to re-run)                            |
+| `npm run db:studio`                | Prisma Studio                                    |
+| `npm run db:reset`                 | **Destructive** — drop, migrate and re-seed      |
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## How the project is laid out
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+  app/
+    (site)/[locale]/…      public pages   (dynamic, locale-prefixed)
+    (admin)/admin/…        admin panel    (not locale-prefixed)
+    api/…                  health, OG image, upload, CSV export, Auth.js
+    uploads/[...path]/     serves the uploads volume
+    actions/               server actions (public forms + every admin mutation)
+  components/site/         public UI
+  components/admin/        admin UI
+  lib/                     formatting, phone, queries, sanitising, settings
+  lib/admin/               the admin form/resource registry
+prisma/                    schema, migrations, seed
+tests/unit                 Vitest
+tests/e2e                  Playwright
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Two root layouts live side by side in route groups because the public site is
+locale-prefixed and the admin panel is not. Public pages render per request
+(`dynamic = "force-dynamic"`): the Docker image is built without database
+access, so nothing can be prerendered — and staff edits appear immediately,
+with no cache to purge.
 
-## Deploy on Vercel
+### Conventions worth knowing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Bilingual columns are `…Bn` / `…En`. Read them with `pick()` from
+  `src/lib/format.ts`, which falls back to Bangla when English is empty.
+- Money and dates always go through `formatMoney` / `formatDate` so the Bangla
+  UI gets Bangla digits (`৳ ৩০,৭৫০`) and the English UI gets `Tk 30,750`.
+- Never hardcode the WhatsApp number — build links with `waLink()` and the
+  number from Site Settings.
+- Admin HTML is sanitised by `sanitizeRichText()` before it ever reaches
+  `dangerouslySetInnerHTML`.
+- Every server action re-checks authentication with `requireAdmin()`. A server
+  action is a public endpoint; it can never trust the page that rendered it.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Deployment (Coolify)
+
+1. Create a **PostgreSQL 16** service; note its internal connection string.
+2. Create an application from this Git repository (it builds the `Dockerfile`).
+3. Set the environment variables from `.env.example`. `NEXT_PUBLIC_SITE_URL`
+   must also be passed as a **build argument** — it is inlined at build time.
+4. Add a persistent volume mounted at **`/app/uploads`**. Without it, uploaded
+   images and PDFs are lost on every redeploy.
+5. Health check: `GET /api/health` (it verifies the database too).
+6. Put Cloudflare in front for TLS and caching.
+
+On start the container runs `prisma migrate deploy`, then the seed — which
+only creates content when the `User` table is empty, so a redeploy never
+resurrects notices or courses that staff deleted.
+
+### Backups
+
+Add a nightly Coolify cron on the Postgres service:
+
+```bash
+pg_dump -Fc "$DATABASE_URL" > /backups/muti-$(date +%F).dump
+find /backups -name 'muti-*.dump' -mtime +14 -delete
+```
+
+Back up the `/app/uploads` volume on the same schedule — the database stores
+paths, not files.
+
+---
+
+## Tests
+
+```bash
+npm test                     # 43 unit tests: phone, Bangla digits, fees, CSV,
+                             # slugs, HTML sanitising
+npm run test:e2e             # 13 smoke tests × desktop and mobile
+```
+
+The Playwright suite starts `npm run dev` itself unless `E2E_BASE_URL` is set,
+and needs a seeded database. It creates and then deletes its own notice, so it
+is safe to run repeatedly against a development database — do not point it at
+production.
+
+Lighthouse (mobile) on the production build: performance 90–93,
+accessibility 100, best practices 100, SEO 100.
+
+---
+
+## Staff guide and outstanding content
+
+- **`docs/admin-guide-bn.md`** — how office staff use the admin panel, in Bangla.
+- **`HANDOVER.md`** — every piece of content still marked TODO, what it affects,
+  and where to enter it.

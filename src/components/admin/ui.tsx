@@ -135,8 +135,8 @@ export function StatCard({
 const BADGE_TONES = {
   neutral: "bg-[color:var(--bg-soft)] text-[color:var(--muted-foreground)]",
   brand: "bg-[color:var(--brand)]/10 text-[color:var(--brand)]",
-  success: "bg-[color:var(--success)]/12 text-[color:var(--success)]",
-  warning: "bg-[color:var(--warning)]/12 text-[color:var(--warning)]",
+  success: "bg-[color:var(--success)]/12 text-[color:var(--success-ink)]",
+  warning: "bg-[color:var(--warning)]/12 text-[color:var(--warning-ink)]",
   danger: "bg-[color:var(--error)]/10 text-[color:var(--error)]",
 } as const;
 

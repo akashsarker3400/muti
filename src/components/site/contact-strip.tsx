@@ -44,74 +44,66 @@ export async function ContactStrip({
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-[14px] border border-[color:var(--border)] bg-white p-5 shadow-[var(--shadow-card)] sm:p-6">
           <dl className="space-y-5">
-            <div className="flex gap-3">
-              <MapPin
-                className="mt-0.5 size-5 shrink-0 text-[color:var(--brand)]"
-                aria-hidden="true"
-              />
-              <div>
-                <dt className="text-xs font-semibold tracking-wide text-[color:var(--muted-foreground)] uppercase">
-                  {contact("addressTitle")}
-                </dt>
-                <dd className="mt-0.5 leading-relaxed">{address}</dd>
-              </div>
+            <div>
+              <dt className="flex items-center gap-2 text-xs font-semibold tracking-wide text-[color:var(--muted-foreground)] uppercase">
+                <MapPin
+                  className="size-4 shrink-0 text-[color:var(--brand)]"
+                  aria-hidden="true"
+                />
+                {contact("addressTitle")}
+              </dt>
+              <dd className="mt-1 ps-6 leading-relaxed">{address}</dd>
             </div>
 
-            <div className="flex gap-3">
-              <Phone
-                className="mt-0.5 size-5 shrink-0 text-[color:var(--brand)]"
-                aria-hidden="true"
-              />
-              <div>
-                <dt className="text-xs font-semibold tracking-wide text-[color:var(--muted-foreground)] uppercase">
-                  {contact("phoneTitle")}
-                </dt>
-                <dd className="mt-0.5 flex flex-col gap-0.5">
-                  {phones.map((phone) => (
-                    <a
-                      key={phone}
-                      href={telHref(phone)}
-                      className="font-latin font-medium text-[color:var(--brand)] hover:underline"
-                    >
-                      {displayPhone(phone)}
-                    </a>
-                  ))}
-                </dd>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <Mail
-                className="mt-0.5 size-5 shrink-0 text-[color:var(--brand)]"
-                aria-hidden="true"
-              />
-              <div className="min-w-0">
-                <dt className="text-xs font-semibold tracking-wide text-[color:var(--muted-foreground)] uppercase">
-                  {contact("emailTitle")}
-                </dt>
-                <dd className="mt-0.5">
+            <div>
+              <dt className="flex items-center gap-2 text-xs font-semibold tracking-wide text-[color:var(--muted-foreground)] uppercase">
+                <Phone
+                  className="size-4 shrink-0 text-[color:var(--brand)]"
+                  aria-hidden="true"
+                />
+                {contact("phoneTitle")}
+              </dt>
+              <dd className="mt-1 flex flex-col gap-0.5 ps-6">
+                {phones.map((phone) => (
                   <a
-                    href={`mailto:${settings.contact.email}`}
-                    className="font-latin font-medium break-all text-[color:var(--brand)] hover:underline"
+                    key={phone}
+                    href={telHref(phone)}
+                    className="font-latin font-medium text-[color:var(--brand)] hover:underline"
                   >
-                    {settings.contact.email}
+                    {displayPhone(phone)}
                   </a>
-                </dd>
-              </div>
+                ))}
+              </dd>
+            </div>
+
+            <div className="min-w-0">
+              <dt className="flex items-center gap-2 text-xs font-semibold tracking-wide text-[color:var(--muted-foreground)] uppercase">
+                <Mail
+                  className="size-4 shrink-0 text-[color:var(--brand)]"
+                  aria-hidden="true"
+                />
+                {contact("emailTitle")}
+              </dt>
+              <dd className="mt-1 ps-6">
+                <a
+                  href={`mailto:${settings.contact.email}`}
+                  className="font-latin font-medium break-all text-[color:var(--brand)] hover:underline"
+                >
+                  {settings.contact.email}
+                </a>
+              </dd>
             </div>
 
             {officeHours && (
-              <div className="flex gap-3">
-                <Clock
-                  className="mt-0.5 size-5 shrink-0 text-[color:var(--brand)]"
-                  aria-hidden="true"
-                />
-                <div>
-                  <dt className="text-xs font-semibold tracking-wide text-[color:var(--muted-foreground)] uppercase">
-                    {contact("hoursTitle")}
-                  </dt>
-                  <dd className="mt-0.5">{officeHours}</dd>
-                </div>
+              <div>
+                <dt className="flex items-center gap-2 text-xs font-semibold tracking-wide text-[color:var(--muted-foreground)] uppercase">
+                  <Clock
+                    className="size-4 shrink-0 text-[color:var(--brand)]"
+                    aria-hidden="true"
+                  />
+                  {contact("hoursTitle")}
+                </dt>
+                <dd className="mt-1 ps-6">{officeHours}</dd>
               </div>
             )}
           </dl>

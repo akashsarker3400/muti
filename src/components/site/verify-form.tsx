@@ -60,7 +60,7 @@ export function VerifyForm({ locale }: { locale: Locale }) {
 
       {result?.status === "valid" && (
         <div className="mt-5 rounded-[14px] border border-[color:var(--success)]/30 bg-[color:var(--success)]/8 p-5 sm:p-6">
-          <p className="flex items-center gap-2 font-semibold text-[color:var(--success)]">
+          <p className="flex items-center gap-2 font-semibold text-[color:var(--success-ink)]">
             <BadgeCheck className="size-5" aria-hidden="true" />
             {t("valid")}
           </p>
@@ -92,7 +92,7 @@ export function VerifyForm({ locale }: { locale: Locale }) {
       {result?.status === "rate-limited" && (
         <p className="mt-5 flex items-start gap-2.5 rounded-[14px] border border-[color:var(--warning)]/30 bg-[color:var(--warning)]/10 p-5 text-sm">
           <ShieldAlert
-            className="mt-0.5 size-5 shrink-0 text-[color:var(--warning)]"
+            className="mt-0.5 size-5 shrink-0 text-[color:var(--warning-ink)]"
             aria-hidden="true"
           />
           {t("rateLimited")}

@@ -15,11 +15,11 @@ export const APPLICATION_STATUS_LABELS: Record<string, string> = {
 };
 
 const TONE: Record<string, string> = {
-  NEW: "border-[color:var(--accent-red)]/30 bg-[color:var(--accent-red)]/8 text-[color:var(--accent-red)]",
+  NEW: "border-[color:var(--accent-red)]/30 bg-[color:var(--accent-red)]/8 text-[color:var(--accent-red-ink)]",
   CONTACTED:
-    "border-[color:var(--warning)]/30 bg-[color:var(--warning)]/10 text-[color:var(--warning)]",
+    "border-[color:var(--warning)]/30 bg-[color:var(--warning)]/10 text-[color:var(--warning-ink)]",
   ADMITTED:
-    "border-[color:var(--success)]/30 bg-[color:var(--success)]/10 text-[color:var(--success)]",
+    "border-[color:var(--success)]/30 bg-[color:var(--success)]/10 text-[color:var(--success-ink)]",
   CLOSED:
     "border-[color:var(--border)] bg-[color:var(--bg-soft)] text-[color:var(--muted-foreground)]",
 };

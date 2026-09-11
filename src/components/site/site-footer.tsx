@@ -156,7 +156,7 @@ export async function SiteFooter({
               target="_blank"
               rel="noopener noreferrer"
               aria-label={common("whatsapp")}
-              className="grid size-10 place-items-center rounded-lg bg-white/10 transition hover:bg-[color:var(--whatsapp)]"
+              className="grid size-10 place-items-center rounded-lg bg-white/10 transition hover:bg-[color:var(--whatsapp-ink)]"
             >
               <WhatsAppIcon className="size-5" />
             </a>

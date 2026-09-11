@@ -40,7 +40,7 @@ export function WhatsAppFloat({
       rel="noopener noreferrer"
       aria-label={t("whatsapp")}
       className={cn(
-        "fixed end-4 bottom-4 z-40 grid size-14 place-items-center rounded-full bg-[color:var(--whatsapp)] text-white shadow-lg transition hover:scale-105 hover:bg-[color-mix(in_oklab,var(--whatsapp),black_12%)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--whatsapp)] print:hidden",
+        "fixed end-4 bottom-4 z-40 grid size-14 place-items-center rounded-full bg-[color:var(--whatsapp-ink)] text-white shadow-lg transition hover:scale-105 hover:bg-[color-mix(in_oklab,var(--whatsapp-ink),black_12%)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--whatsapp-ink)] print:hidden",
         hiddenOnMobile && "hidden md:grid",
       )}
     >

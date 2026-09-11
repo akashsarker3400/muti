@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { logActivity, requireAdmin } from "@/lib/admin-auth";
+import { parseCsv, parseImportDate } from "@/lib/admin/csv";
 import { normalizePhone } from "@/lib/phone";
 import { prisma } from "@/lib/prisma";
 
@@ -103,7 +104,7 @@ export async function importStudents(csv: string): Promise<ImportResult> {
     const phone = phoneRaw ? normalizePhone(phoneRaw) : null;
 
     const completionRaw = cell(columns.completionDate);
-    const completionDate = completionRaw ? parseDate(completionRaw) : null;
+    const completionDate = completionRaw ? parseImportDate(completionRaw) : null;
     if (completionRaw && !completionDate) {
       skipped.push({ line, reason: `completionDate "${completionRaw}" পড়া যায়নি` });
       continue;
@@ -157,72 +158,4 @@ export async function importStudents(csv: string): Promise<ImportResult> {
   revalidatePath("/admin/students");
 
   return { ok: true, created, updated, skipped };
-}
-
-/** Minimal RFC 4180 parser: handles quoted cells, escaped quotes and CRLF. */
-function parseCsv(input: string): string[][] {
-  const rows: string[][] = [];
-  let row: string[] = [];
-  let cell = "";
-  let inQuotes = false;
-
-  // Strip a UTF-8 BOM, which Excel adds when saving as CSV.
-  const text = input.replace(/^﻿/, "");
-
-  for (let i = 0; i < text.length; i += 1) {
-    const char = text[i]!;
-
-    if (inQuotes) {
-      if (char === '"') {
-        if (text[i + 1] === '"') {
-          cell += '"';
-          i += 1;
-        } else {
-          inQuotes = false;
-        }
-      } else {
-        cell += char;
-      }
-      continue;
-    }
-
-    if (char === '"') {
-      inQuotes = true;
-    } else if (char === ",") {
-      row.push(cell);
-      cell = "";
-    } else if (char === "\n") {
-      row.push(cell);
-      rows.push(row);
-      row = [];
-      cell = "";
-    } else if (char !== "\r") {
-      cell += char;
-    }
-  }
-
-  if (cell || row.length > 0) {
-    row.push(cell);
-    rows.push(row);
-  }
-
-  return rows.filter((entry) => entry.some((value) => value.trim() !== ""));
-}
-
-/** Accepts YYYY-MM-DD and DD/MM/YYYY, which is what office sheets contain. */
-function parseDate(value: string): Date | null {
-  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
-  if (iso) {
-    return new Date(`${iso[1]}-${iso[2]}-${iso[3]}T00:00:00.000Z`);
-  }
-
-  const dmy = /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/.exec(value.trim());
-  if (dmy) {
-    const day = dmy[1]!.padStart(2, "0");
-    const month = dmy[2]!.padStart(2, "0");
-    return new Date(`${dmy[3]}-${month}-${day}T00:00:00.000Z`);
-  }
-
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
 }

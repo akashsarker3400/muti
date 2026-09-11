@@ -102,7 +102,9 @@
     "facultyTitle": "Our faculty",
     "galleryTitle": "Gallery",
     "contactTitle": "Get in touch",
-    "contactSubtitle": "Message us on WhatsApp or visit the office for anything you need."
+    "contactSubtitle": "Message us on WhatsApp or visit the office for anything you need.",
+    "classDaysLabel": "Class days",
+    "seatsLabel": "Seats"
   },
   "about": {
     "title": "Built for doctors, run by doctors",
