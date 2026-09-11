@@ -63,11 +63,11 @@ postgres://postgres:xxxxxxxxxxxx@abcdefgh:5432/postgres
 ## ৩. অ্যাপ্লিকেশন তৈরি
 
 ১. একই প্রজেক্টে **+ New Resource** → **Private Repository (with GitHub App)**
-বেছে নিন (রিপো পাবলিক হলে **Public Repository**)।
+বেছে নিন (রিপো পাবলিক হলে **Public Repository**)। প্রাইভেট হলে Coolify-কে GitHub
+App হিসেবে ইনস্টল করতে বলবে — অনুমতি দিন, তারপর `akashsarker3400/muti` রিপোটা
+সিলেক্ট করুন।
 
-- প্রাইভেট হলে Coolify-কে GitHub App হিসেবে ইনস্টল করতে বলবে — অনুমতি দিন,
-  `akashsarker3400/muti` রিপোটা সিলেক্ট করুন।
-  ২. সেটিংসগুলো:
+২. সেটিংসগুলো:
 
 | ফিল্ড               | মান            |
 | ------------------- | -------------- |
@@ -186,11 +186,13 @@ https://mutibd.com
 সাইট HTTPS-এ আসার পর (অর্থাৎ Let's Encrypt সার্টিফিকেট পাওয়া হয়ে গেছে):
 
 ১. Cloudflare → **SSL/TLS** → encryption mode **Full (strict)** করুন।
+❌ **Flexible করবেন না** — রিডাইরেক্ট লুপ হবে।
 
-- ❌ **Flexible করবেন না** — রিডাইরেক্ট লুপ হবে।
-  ২. Cloudflare → **DNS** → দুটো A রেকর্ডের মেঘ **কমলা (Proxied)** করে দিন।
-  ৩. Cloudflare → **SSL/TLS → Edge Certificates** → **Always Use HTTPS** চালু করুন।
-  ৪. Cloudflare → **Speed → Optimization** → **Rocket Loader বন্ধ রাখুন**।
+২. Cloudflare → **DNS** → দুটো A রেকর্ডের মেঘ **কমলা (Proxied)** করে দিন।
+
+৩. Cloudflare → **SSL/TLS → Edge Certificates** → **Always Use HTTPS** চালু করুন।
+
+৪. Cloudflare → **Speed → Optimization** → **Rocket Loader বন্ধ রাখুন**।
 
 > Rocket Loader জাভাস্ক্রিপ্ট লোডের ক্রম বদলে দেয়, এতে Next.js-এর হাইড্রেশন ভাঙে —
 > মোবাইল মেনু, ফর্ম, সিট কাউন্টার কাজ করা বন্ধ করে দিতে পারে।
