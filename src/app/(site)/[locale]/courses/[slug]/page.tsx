@@ -30,6 +30,7 @@ import {
 import { isEmptyRichText } from "@/lib/sanitize";
 import { getSiteSettings } from "@/lib/site-settings";
 import { waLink } from "@/lib/whatsapp";
+import { pageAlternates, localizedPath } from "@/i18n/routing";
 
 export async function generateMetadata({
   params,
@@ -49,10 +50,7 @@ export async function generateMetadata({
     description:
       course.metaDescription ||
       `${fullName} at MUTI, Mymensingh. Government approved institute, code 57125.`,
-    alternates: {
-      canonical: locale === "bn" ? path : `/en${path}`,
-      languages: { bn: path, en: `/en${path}` },
-    },
+    alternates: pageAlternates(locale, path),
     openGraph: {
       title: `${name} — ${fullName}`,
       description: course.metaDescription ?? undefined,
@@ -386,7 +384,7 @@ export default async function CourseDetailPage({
         course={course}
         locale={locale}
         settings={settings}
-        url={`${siteUrl}${locale === "bn" ? "" : "/en"}/courses/${course.slug}`}
+        url={`${siteUrl}${localizedPath(locale, `/courses/${course.slug}`)}`}
       />
     </>
   );

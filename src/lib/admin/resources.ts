@@ -1581,7 +1581,8 @@ function contentResource(options: {
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     schema: z.object({
       titleBn: optionalText,
-      titleEn: requiredText,
+      // Only the lists that show a heading (e.g. "Why MUTI") require one.
+      titleEn: withTitle ? requiredText : optionalText,
       bodyBn: optionalText,
       bodyEn: requiredText,
       icon: optionalText,

@@ -10,7 +10,7 @@ test.describe("admin sign-in", () => {
     await page.goto("/admin/applications");
     await expect(page).toHaveURL(/\/admin\/login/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "MUTI অ্যাডমিন প্যানেল",
+      "MUTI admin panel",
     );
   });
 
@@ -18,30 +18,33 @@ test.describe("admin sign-in", () => {
     await page.goto("/admin/login");
     await page.locator("#email").fill(ADMIN_EMAIL);
     await page.locator("#password").fill("definitely-not-the-password");
-    await page.getByRole("button", { name: "লগইন" }).click();
-    await expect(page.locator("form").getByRole("alert")).toContainText("সঠিক নয়");
+    await page.getByRole("button", { name: "Sign in" }).click();
+    await expect(page.locator("form").getByRole("alert")).toContainText(
+      "Incorrect email or password",
+    );
   });
 });
 
 test.describe("admin panel", () => {
   test("the dashboard greets the signed-in user", async ({ page }) => {
     await page.goto("/admin");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("স্বাগতম");
-    await expect(page.getByText("নতুন আবেদন (৭ দিন)")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Welcome");
+    await expect(page.getByText("New applications (7 days)")).toBeVisible();
   });
 
   test("a notice created in the admin appears on the public notice board", async ({
     page,
   }) => {
     const stamp = Date.now().toString(36);
-    const title = `স্মোক টেস্ট নোটিশ ${stamp}`;
+    const title = `Smoke test notice ${stamp}`;
 
+    // English only: Bangla is optional since the locale change.
     await page.goto("/admin/notices/new");
-    await page.locator("#field-titleBn").fill(title);
+    await page.locator("#field-titleEn").fill(title);
     await page.locator(".ProseMirror").first().click();
-    await page.keyboard.type("স্মোক টেস্টের জন্য তৈরি নোটিশ।");
+    await page.keyboard.type("Notice created by the smoke test.");
     await page.locator("#field-category").selectOption("ADMISSION");
-    await page.getByRole("button", { name: "সংরক্ষণ করুন" }).click();
+    await page.getByRole("button", { name: "Save" }).click();
 
     await page.waitForURL(/\/admin\/notices$/);
     await expect(page.getByRole("cell", { name: title })).toBeVisible();
@@ -49,11 +52,15 @@ test.describe("admin panel", () => {
     await page.goto("/notices");
     await expect(page.getByText(title)).toBeVisible();
 
+    // The Bangla page falls back to the English title.
+    await page.goto("/bn/notices");
+    await expect(page.getByText(title)).toBeVisible();
+
     // Clean up so repeated runs stay independent.
     await page.goto("/admin/notices");
     const row = page.locator("tr", { hasText: title });
-    await row.getByRole("button", { name: "মুছে ফেলুন" }).click();
-    await page.getByRole("dialog").getByRole("button", { name: "মুছে ফেলুন" }).click();
+    await row.getByRole("button", { name: "Delete" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Delete" }).click();
     await expect(page.getByRole("cell", { name: title })).toBeHidden();
   });
 
@@ -61,13 +68,13 @@ test.describe("admin panel", () => {
     await page.goto("/admin/settings");
 
     const stamp = Date.now().toString(36);
-    await page.getByRole("tab", { name: "যোগাযোগ" }).click();
-    await page.locator("#field-contact\\.officeHoursBn").fill(`অফিস সময় ${stamp}`);
-    await page.getByRole("button", { name: "সেটিংস সংরক্ষণ করুন" }).click();
+    await page.getByRole("tab", { name: "Contact" }).click();
+    await page.locator("#field-contact\\.officeHoursEn").fill(`Office hours ${stamp}`);
+    await page.getByRole("button", { name: "Save settings" }).click();
     await page.waitForURL(/\/admin$/);
 
     await page.goto("/contact");
-    await expect(page.getByText(`অফিস সময় ${stamp}`)).toBeVisible();
+    await expect(page.getByText(`Office hours ${stamp}`)).toBeVisible();
   });
 });
 
@@ -98,8 +105,8 @@ test.describe("media uploads", () => {
     await page.goto("/admin/media");
     const card = page.locator(`[data-media-url="${url}"]`);
     await expect(card).toBeVisible();
-    await card.getByRole("button", { name: "ফাইল মুছুন" }).click();
-    await expect(page.getByText("ফাইল মুছে ফেলা হয়েছে।")).toBeVisible();
+    await card.getByRole("button", { name: "Delete file" }).click();
+    await expect(page.getByText("File deleted.")).toBeVisible();
     await expect(page.locator(`[data-media-url="${url}"]`)).toHaveCount(0);
     expect((await page.request.get(url)).status()).toBe(404);
   });

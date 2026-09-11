@@ -1,17 +1,21 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("public site", () => {
+/**
+ * The Bangla site lives under /bn since the locale change; the English root
+ * is covered by locale.spec.ts. These tests keep exercising the Bangla pages.
+ */
+test.describe("public site (Bangla)", () => {
   test("the notice ticker scrolls published notices under the header", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/bn");
 
     const ticker = page.getByTestId("notice-ticker");
     await expect(ticker).toBeVisible();
 
     // Each visible entry links to its notice; the seamless-loop clone is
     // hidden from assistive tech and from the tab order.
-    const links = ticker.locator("li:not([aria-hidden]) a[href^='/notices/']");
+    const links = ticker.locator("li:not([aria-hidden]) a[href^='/bn/notices/']");
     expect(await links.count()).toBeGreaterThan(0);
     await expect(ticker.locator("li[aria-hidden='true'] a").first()).toHaveAttribute(
       "tabindex",
@@ -33,7 +37,7 @@ test.describe("public site", () => {
   test("home page loads with the hero, courses and contact details", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/bn");
 
     await expect(page.getByRole("heading", { level: 1 }).first()).toContainText(
       "আল্ট্রাসাউন্ড",
@@ -54,7 +58,7 @@ test.describe("public site", () => {
   });
 
   test("course page renders the fee table and the routine", async ({ page }) => {
-    await page.goto("/courses/cmu-bteb");
+    await page.goto("/bn/courses/cmu-bteb");
 
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("CMU (বিটিইবি)");
 
@@ -73,12 +77,12 @@ test.describe("public site", () => {
   test("a course with no fee shows the contact line instead of a table", async ({
     page,
   }) => {
-    await page.goto("/courses/color-doppler");
+    await page.goto("/bn/courses/color-doppler");
     await expect(page.getByText("ফি জানতে যোগাযোগ করুন").first()).toBeVisible();
   });
 
   test("the language switch keeps the visitor on the same page", async ({ page }) => {
-    await page.goto("/courses");
+    await page.goto("/bn/courses");
 
     // On phones the switch lives inside the hamburger sheet.
     const menuButton = page.getByRole("button", { name: "মেনু খুলুন" });
@@ -86,21 +90,24 @@ test.describe("public site", () => {
       await menuButton.click();
     }
 
-    await page.getByRole("group", { name: "ভাষা" }).getByText("English").click();
+    await page
+      .getByRole("group", { name: "ভাষা" })
+      .locator('button[lang="en"]')
+      .click();
 
-    await expect(page).toHaveURL(/\/en\/courses$/);
+    await expect(page).toHaveURL(/\/courses$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Courses");
   });
 
   test("certificate verification reports an unknown number", async ({ page }) => {
-    await page.goto("/verify");
+    await page.goto("/bn/verify");
     await page.getByRole("textbox").fill("MUTI-0000-0000");
     await page.getByRole("button", { name: "যাচাই করুন" }).click();
     await expect(page.getByRole("status")).toContainText("কোনো রেকর্ড পাওয়া যায়নি");
   });
 
   test("the admission form rejects an invalid phone number", async ({ page }) => {
-    await page.goto("/apply");
+    await page.goto("/bn/apply");
     await page.getByRole("textbox", { name: "পূর্ণ নাম" }).fill("ডা. পরীক্ষা");
     await page.getByRole("textbox", { name: "মোবাইল নম্বর" }).fill("12345");
     await page.getByRole("combobox", { name: /^কোর্স/ }).selectOption({ index: 1 });
@@ -114,7 +121,7 @@ test.describe("public site", () => {
   test("the admission form submits and offers the WhatsApp follow-up", async ({
     page,
   }) => {
-    await page.goto("/apply");
+    await page.goto("/bn/apply");
     const name = `ডা. স্মোক ${Date.now().toString(36)}`;
 
     await page.getByRole("textbox", { name: "পূর্ণ নাম" }).fill(name);
@@ -139,7 +146,7 @@ test.describe("public site", () => {
       .getByRole("button")
       .first()
       .click();
-    await expect(page.getByRole("dialog")).toContainText("মেডিকেল কলেজ");
+    await expect(page.getByRole("dialog")).toContainText("Medical college");
     await expect(page.getByRole("dialog")).toContainText("ময়মনসিংহ মেডিকেল কলেজ");
   });
 

@@ -10,6 +10,7 @@ import { Section } from "@/components/site/section";
 import type { Locale } from "@/i18n/routing";
 import { pick } from "@/lib/format";
 import { getLeadershipMessage } from "@/lib/queries";
+import { pageAlternates } from "@/i18n/routing";
 
 type Params = Promise<{ locale: Locale; key: string }>;
 
@@ -26,10 +27,7 @@ export async function generateMetadata({
   return {
     title: `${role} — ${name}`,
     description: pick(locale, message.excerptBn, message.excerptEn) || undefined,
-    alternates: {
-      canonical:
-        locale === "en" ? `/messages/${message.key}` : `/bn/messages/${message.key}`,
-    },
+    alternates: pageAlternates(locale, `/messages/${message.key}`),
   };
 }
 

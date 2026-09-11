@@ -10,6 +10,7 @@ import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { formatDate, pick } from "@/lib/format";
 import { getNoticeBySlug } from "@/lib/queries";
+import { pageAlternates } from "@/i18n/routing";
 
 /** `attachments` is free-form JSON in the schema; validate before rendering. */
 type Attachment = { name: string; url: string };
@@ -38,10 +39,7 @@ export async function generateMetadata({
 
   return {
     title,
-    alternates: {
-      canonical: locale === "bn" ? path : `/en${path}`,
-      languages: { bn: path, en: `/en${path}` },
-    },
+    alternates: pageAlternates(locale, path),
     openGraph: { type: "article", title },
   };
 }

@@ -38,7 +38,7 @@ async function setBannersActive(page: Page, active: boolean) {
 }
 
 async function saveSettings(page: Page) {
-  await page.getByRole("button", { name: "সেটিংস সংরক্ষণ করুন" }).click();
+  await page.getByRole("button", { name: "Save settings" }).click();
   await page.waitForURL(/\/admin$/);
 }
 
@@ -48,7 +48,7 @@ test.describe("branding", () => {
   }) => {
     const heroTab = async () => {
       await page.goto("/admin/settings");
-      await page.getByRole("tab", { name: "হোমপেজ" }).click();
+      await page.getByRole("tab", { name: "Homepage" }).click();
     };
     const pathInput = () => page.locator("#field-homepage\\.heroImages");
     const seconds = () => page.locator("#field-homepage\\.heroSlideSeconds");
@@ -58,8 +58,8 @@ test.describe("branding", () => {
     const resetHero = async () => {
       await heroTab();
       // Scoped to the hero list: the other image fields on this tab have a
-      // "সরান" button too, and clearing one of those would wipe a real upload.
-      const remove = heroList().getByRole("button", { name: "সরান" });
+      // "Remove" button too, and clearing one of those would wipe a real upload.
+      const remove = heroList().getByRole("button", { name: "Remove" });
       while ((await remove.count()) > 0) {
         await remove.last().click();
       }
@@ -102,7 +102,7 @@ test.describe("branding", () => {
 
   test("a brand colour set in the admin reaches the public site", async ({ page }) => {
     await page.goto("/admin/settings");
-    await page.getByRole("tab", { name: "ব্র্যান্ডিং" }).click();
+    await page.getByRole("tab", { name: "Branding" }).click();
     await page.locator("#field-branding\\.brandColor").fill("#0E7C6B");
     await saveSettings(page);
 
@@ -114,7 +114,7 @@ test.describe("branding", () => {
 
     // Restore the seeded navy.
     await page.goto("/admin/settings");
-    await page.getByRole("tab", { name: "ব্র্যান্ডিং" }).click();
+    await page.getByRole("tab", { name: "Branding" }).click();
     await page.locator("#field-branding\\.brandColor").fill("");
     await saveSettings(page);
 
@@ -129,7 +129,7 @@ test.describe("branding", () => {
     page,
   }) => {
     await page.goto("/admin/settings");
-    await page.getByRole("tab", { name: "ব্র্যান্ডিং" }).click();
+    await page.getByRole("tab", { name: "Branding" }).click();
     await page.locator("#field-branding\\.brandColor").fill("red; content: 'x'");
     await saveSettings(page);
 
@@ -141,7 +141,7 @@ test.describe("branding", () => {
     expect(brand.toLowerCase()).toBe("#1b2a6b");
 
     await page.goto("/admin/settings");
-    await page.getByRole("tab", { name: "ব্র্যান্ডিং" }).click();
+    await page.getByRole("tab", { name: "Branding" }).click();
     await page.locator("#field-branding\\.brandColor").fill("");
     await saveSettings(page);
   });
@@ -168,18 +168,19 @@ test.describe("editable content lists", () => {
     page,
   }) => {
     const stamp = Date.now().toString(36);
-    const text = `পরীক্ষামূলক নিয়ম ${stamp}`;
+    const text = `Test rule ${stamp}`;
 
     await page.goto("/admin/payment-policy");
-    await page.getByRole("link", { name: "সম্পাদনা" }).first().click();
+    await page.getByRole("link", { name: "Edit" }).first().click();
     await page.waitForURL(/\/admin\/payment-policy\/[^/]+$/);
 
-    const original = await page.locator("#field-bodyBn").inputValue();
-    await page.locator("#field-bodyBn").fill(text);
-    await page.getByRole("button", { name: "সংরক্ষণ করুন" }).click();
+    const original = await page.locator("#field-bodyEn").inputValue();
+    await page.locator("#field-bodyEn").fill(text);
+    await page.getByRole("button", { name: "Save" }).click();
     await page.waitForURL(/\/admin\/payment-policy$/);
 
-    // The same list feeds the course fee card and the admission page.
+    // The same list feeds the course fee card and the admission page, and the
+    // Bangla page shows the English line when no Bangla was typed.
     await page.goto("/courses/dmu");
     await expect(page.getByText(text)).toBeVisible();
     await page.goto("/admission");
@@ -187,32 +188,35 @@ test.describe("editable content lists", () => {
 
     // Put the seeded wording back.
     await page.goto("/admin/payment-policy");
-    await page.getByRole("link", { name: "সম্পাদনা" }).first().click();
+    await page.getByRole("link", { name: "Edit" }).first().click();
     await page.waitForURL(/\/admin\/payment-policy\/[^/]+$/);
-    await page.locator("#field-bodyBn").fill(original);
-    await page.getByRole("button", { name: "সংরক্ষণ করুন" }).click();
+    await page.locator("#field-bodyEn").fill(original);
+    await page.getByRole("button", { name: "Save" }).click();
     await page.waitForURL(/\/admin\/payment-policy$/);
   });
 
   test("unpublishing a document hides it from course pages", async ({ page }) => {
     await page.goto("/courses/dmu");
-    const before = await page.getByText("SSC পাশের সনদ").count();
+    const before = await page.getByText("SSC certificate").count();
     expect(before).toBeGreaterThan(0);
 
     await page.goto("/admin/documents");
-    const row = page.locator("tr", { hasText: "SSC পাশের সনদ" });
+    const row = page.locator("tr", { hasText: "SSC certificate" });
     await row.getByRole("switch").click();
     await page.waitForTimeout(1200);
 
     await page.goto("/courses/dmu");
-    await expect(page.getByText("SSC পাশের সনদ")).toHaveCount(0);
+    await expect(page.getByText("SSC certificate")).toHaveCount(0);
 
     // Publish it again.
     await page.goto("/admin/documents");
-    await page.locator("tr", { hasText: "SSC পাশের সনদ" }).getByRole("switch").click();
+    await page
+      .locator("tr", { hasText: "SSC certificate" })
+      .getByRole("switch")
+      .click();
     await page.waitForTimeout(1200);
 
     await page.goto("/courses/dmu");
-    await expect(page.getByText("SSC পাশের সনদ")).toBeVisible();
+    await expect(page.getByText("SSC certificate")).toBeVisible();
   });
 });

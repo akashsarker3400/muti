@@ -18,7 +18,7 @@ whole site from `/admin` without touching code.
 | Database   | PostgreSQL 16                                                               |
 | ORM        | Prisma 7 (driver adapter `@prisma/adapter-pg`, no Rust engine)              |
 | Admin auth | Auth.js v5 — credentials, bcrypt cost 12, 12-hour JWT sessions              |
-| i18n       | `next-intl` — `bn` (default, no prefix) and `en` (`/en/…`)                  |
+| i18n       | `next-intl` — `en` (default, no prefix) and `bn` (`/bn/…`)                  |
 | Uploads    | Local volume `/app/uploads`, `sharp` → webp, served by `/uploads/[...path]` |
 | Email      | Nodemailer over SMTP (optional — submissions never depend on it)            |
 | Rich text  | Tiptap, stores HTML, sanitised on the way out                               |

@@ -7,6 +7,7 @@ import { PageHero } from "@/components/site/page-hero";
 import { Section, SectionHeading } from "@/components/site/section";
 import type { Locale } from "@/i18n/routing";
 import { getSiteSettings } from "@/lib/site-settings";
+import { pageAlternates } from "@/i18n/routing";
 
 export async function generateMetadata({
   params,
@@ -18,7 +19,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("subtitle"),
-    alternates: { canonical: locale === "en" ? "/contact" : "/bn/contact" },
+    alternates: pageAlternates(locale, "/contact"),
   };
 }
 

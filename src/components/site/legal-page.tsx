@@ -6,6 +6,7 @@ import { Section } from "@/components/site/section";
 import type { Locale } from "@/i18n/routing";
 import { pick } from "@/lib/format";
 import { getPageBySlug } from "@/lib/queries";
+import { pageAlternates } from "@/i18n/routing";
 
 /** Shared renderer for the admin-managed legal pages (section 5.18). */
 export async function LegalPage({ slug, locale }: { slug: string; locale: Locale }) {
@@ -30,7 +31,7 @@ export async function legalMetadata(slug: string, locale: Locale, path: string) 
   if (!page) return {};
   return {
     title: pick(locale, page.titleBn, page.titleEn),
-    alternates: { canonical: locale === "bn" ? path : `/en${path}` },
+    alternates: pageAlternates(locale, path),
     robots: { index: true, follow: true },
   };
 }

@@ -16,7 +16,8 @@ It also depends on `muti-erp-addendum.md`, which has not been supplied yet.
 - Tailwind CSS v4 + shadcn/ui (radix base), **light theme only — no dark mode**
 - PostgreSQL 16 + Prisma 7 (driver adapter `@prisma/adapter-pg`, no Rust engine)
 - Auth.js v5 (credentials, bcrypt cost 12, JWT sessions) for `/admin`
-- `next-intl` — Bangla (`bn`, default, no URL prefix) and English (`/en/...`)
+- `next-intl` — English (`en`, default, no URL prefix) and Bangla (`/bn/...`);
+  old `/en/*` URLs redirect permanently to the root
 
 ## Layout of the app router
 
@@ -41,10 +42,18 @@ database access, so nothing can be prerendered at build time.
 
 ## Conventions
 
-- Bilingual DB columns are `…Bn` / `…En`; read them through `pick()` in
-  `src/lib/format.ts`, which falls back to Bangla when English is empty.
-- Money and dates always go through `formatMoney` / `formatDate` so Bangla
-  digits are used in the Bangla UI.
+- Bilingual DB columns are `…Bn` / `…En`. English is required and Bangla is
+  optional; read them through `pick()` in `src/lib/format.ts`, which falls back
+  to English when Bangla is empty. `/admin/needs-english` lists records whose
+  English column still holds the Bangla placeholder from the migration.
+- Money and dates always go through `formatMoney` / `formatDate`: Latin digits
+  in English (and everywhere in the admin), Bangla digits on `/bn`.
+- The admin panel UI is English only. Bangla appears there only inside content
+  the office typed, wrapped in `lang="bn"` (use `langOf()` from `src/lib/lang.ts`).
+- Page metadata uses `pageAlternates(locale, path)` from `src/i18n/routing.ts`
+  for canonical + hreflang (x-default = English).
+- Fonts: Inter everywhere; Noto Sans Bengali only under `html[lang="bn"]` and
+  `[lang="bn"]` (see `src/lib/fonts.ts` and the Bangla block in `globals.css`).
 - Never hardcode the WhatsApp number — build links with `waLink()` and the
   number from Site Settings.
 - Content marked `TODO` in the spec is seeded as a clear placeholder and

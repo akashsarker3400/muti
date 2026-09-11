@@ -4,6 +4,8 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
+  // Keep the dev badge off the admin forms' Save button on phones.
+  devIndicators: { position: "bottom-right" },
   // Required for the slim Docker image used on Coolify (section 12).
   output: "standalone",
   poweredByHeader: false,

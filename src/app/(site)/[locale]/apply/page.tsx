@@ -10,6 +10,7 @@ import type { Locale } from "@/i18n/routing";
 import { pick } from "@/lib/format";
 import { getPublishedCourses, getUpcomingBatches } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
+import { pageAlternates } from "@/i18n/routing";
 
 export async function generateMetadata({
   params,
@@ -21,7 +22,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("subtitle"),
-    alternates: { canonical: locale === "en" ? "/apply" : "/bn/apply" },
+    alternates: pageAlternates(locale, "/apply"),
   };
 }
 

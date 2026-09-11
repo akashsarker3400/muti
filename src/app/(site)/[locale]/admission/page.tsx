@@ -14,6 +14,7 @@ import { getContent } from "@/lib/content-items";
 import { pick } from "@/lib/format";
 import { getDownloads, getPublishedCourses, getUpcomingBatches } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
+import { pageAlternates } from "@/i18n/routing";
 
 export async function generateMetadata({
   params,
@@ -25,7 +26,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("subtitle"),
-    alternates: { canonical: locale === "en" ? "/admission" : "/bn/admission" },
+    alternates: pageAlternates(locale, "/admission"),
   };
 }
 

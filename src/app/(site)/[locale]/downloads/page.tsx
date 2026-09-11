@@ -7,6 +7,7 @@ import { Section } from "@/components/site/section";
 import { FileViewer } from "@/components/site/file-viewer";
 import type { Locale } from "@/i18n/routing";
 import { getDownloads } from "@/lib/queries";
+import { pageAlternates } from "@/i18n/routing";
 
 export async function generateMetadata({
   params,
@@ -18,7 +19,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("subtitle"),
-    alternates: { canonical: locale === "en" ? "/downloads" : "/bn/downloads" },
+    alternates: pageAlternates(locale, "/downloads"),
   };
 }
 

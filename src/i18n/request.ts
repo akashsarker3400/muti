@@ -11,7 +11,11 @@ function withFallback(base: Messages, over: Messages): Messages {
   for (const [key, value] of Object.entries(over)) {
     const current = out[key];
     out[key] =
-      value && typeof value === "object" && !Array.isArray(value) && current && typeof current === "object"
+      value &&
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      current &&
+      typeof current === "object"
         ? withFallback(current as Messages, value as Messages)
         : value;
   }
@@ -20,7 +24,9 @@ function withFallback(base: Messages, over: Messages): Messages {
 
 export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale;
-  const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
+  const locale = hasLocale(routing.locales, requested)
+    ? requested
+    : routing.defaultLocale;
 
   // English is the source of truth; a Bangla gap shows the English string
   // rather than a missing-message error.
@@ -28,7 +34,10 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const messages =
     locale === "en"
       ? en
-      : withFallback(en, (await import(`../../messages/${locale}.json`)).default as Messages);
+      : withFallback(
+          en,
+          (await import(`../../messages/${locale}.json`)).default as Messages,
+        );
 
   return { locale, messages };
 });

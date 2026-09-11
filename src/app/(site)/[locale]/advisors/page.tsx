@@ -9,6 +9,7 @@ import type { Locale } from "@/i18n/routing";
 import { getAdvisors } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
 import { parseAdvisorCategories } from "@/lib/verify";
+import { pageAlternates } from "@/i18n/routing";
 
 export async function generateMetadata({
   params,
@@ -20,7 +21,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("subtitle"),
-    alternates: { canonical: locale === "en" ? "/advisors" : "/bn/advisors" },
+    alternates: pageAlternates(locale, "/advisors"),
   };
 }
 

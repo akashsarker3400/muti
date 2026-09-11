@@ -6,6 +6,7 @@ import { PageHero } from "@/components/site/page-hero";
 import { Section } from "@/components/site/section";
 import type { Locale } from "@/i18n/routing";
 import { getFaculty } from "@/lib/queries";
+import { pageAlternates } from "@/i18n/routing";
 
 export async function generateMetadata({
   params,
@@ -17,7 +18,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("subtitle"),
-    alternates: { canonical: locale === "en" ? "/faculty" : "/bn/faculty" },
+    alternates: pageAlternates(locale, "/faculty"),
   };
 }
 

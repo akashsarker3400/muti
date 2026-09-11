@@ -9,6 +9,7 @@ import type { Locale } from "@/i18n/routing";
 import { formatNumber } from "@/lib/format";
 import { countNotices, getNotices } from "@/lib/queries";
 import { cn } from "cn";
+import { pageAlternates } from "@/i18n/routing";
 
 const PAGE_SIZE = 10;
 
@@ -22,7 +23,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("subtitle"),
-    alternates: { canonical: locale === "en" ? "/notices" : "/bn/notices" },
+    alternates: pageAlternates(locale, "/notices"),
   };
 }
 

@@ -16,10 +16,10 @@ setup("authenticate as admin", async ({ page }) => {
   await page.goto("/admin/login");
   await page.locator("#email").fill(ADMIN_EMAIL);
   await page.locator("#password").fill(ADMIN_PASSWORD);
-  await page.getByRole("button", { name: "লগইন" }).click();
+  await page.getByRole("button", { name: "Sign in" }).click();
 
   await page.waitForURL(/\/admin(?!\/login)/);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("স্বাগতম");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Welcome");
 
   await page.context().storageState({ path: ADMIN_STATE });
 });

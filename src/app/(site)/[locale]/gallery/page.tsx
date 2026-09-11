@@ -9,6 +9,7 @@ import type { Locale } from "@/i18n/routing";
 import { pick } from "@/lib/format";
 import { getGalleryAlbums } from "@/lib/queries";
 import { cn } from "cn";
+import { pageAlternates } from "@/i18n/routing";
 
 export async function generateMetadata({
   params,
@@ -20,7 +21,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("subtitle"),
-    alternates: { canonical: locale === "en" ? "/gallery" : "/bn/gallery" },
+    alternates: pageAlternates(locale, "/gallery"),
   };
 }
 

@@ -9,6 +9,7 @@ import type { Locale } from "@/i18n/routing";
 import { getNextBatchByCourse, getPublishedCourses } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
 import { cn } from "cn";
+import { pageAlternates } from "@/i18n/routing";
 
 const LEVELS = ["ALL", "CERTIFICATE", "DIPLOMA", "SPECIAL"] as const;
 type LevelFilter = (typeof LEVELS)[number];
@@ -23,7 +24,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("subtitle"),
-    alternates: { canonical: locale === "en" ? "/courses" : "/bn/courses" },
+    alternates: pageAlternates(locale, "/courses"),
   };
 }
 

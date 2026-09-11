@@ -21,3 +21,21 @@ export const routing = defineRouting({
   localeDetection: true,
   localeCookie: { name: "NEXT_LOCALE", maxAge: 60 * 60 * 24 * 365 },
 });
+
+/** Path of a public page in `locale`: English at the root, Bangla under /bn. */
+export function localizedPath(locale: Locale, path: string): string {
+  const clean = path === "/" ? "" : path;
+  return locale === defaultLocale ? clean || "/" : `/${locale}${clean}`;
+}
+
+/** `alternates` metadata for a public page: canonical + hreflang, x-default = en. */
+export function pageAlternates(locale: Locale, path: string) {
+  return {
+    canonical: localizedPath(locale, path),
+    languages: {
+      en: localizedPath("en", path),
+      bn: localizedPath("bn", path),
+      "x-default": localizedPath("en", path),
+    },
+  };
+}

@@ -10,6 +10,7 @@ import type { Locale } from "@/i18n/routing";
 import { pick } from "@/lib/format";
 import { getSiteSettings } from "@/lib/site-settings";
 import { waLink } from "@/lib/whatsapp";
+import { pageAlternates } from "@/i18n/routing";
 
 type Search = Promise<{ t?: string }>;
 
@@ -25,7 +26,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("subtitle"),
-    alternates: { canonical: locale === "en" ? "/verify" : "/bn/verify" },
+    alternates: pageAlternates(locale, "/verify"),
     // The empty page is indexable; a result state is one person's record.
     robots: token ? { index: false, follow: false } : { index: true, follow: true },
   };

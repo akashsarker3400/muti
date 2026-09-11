@@ -9,14 +9,14 @@ import { expect, test, type Page } from "@playwright/test";
 const stamp = () => Date.now().toString(36);
 
 async function save(page: Page) {
-  await page.getByRole("button", { name: "সংরক্ষণ করুন" }).click();
+  await page.getByRole("button", { name: "Save" }).click();
 }
 
 async function deleteRow(page: Page, listPath: string, text: string) {
   await page.goto(listPath);
   const row = page.locator("tr", { hasText: text });
-  await row.getByRole("button", { name: "মুছে ফেলুন" }).click();
-  await page.getByRole("dialog").getByRole("button", { name: "মুছে ফেলুন" }).click();
+  await row.getByRole("button", { name: "Delete" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Delete" }).click();
   await expect(page.locator("tr", { hasText: text })).toHaveCount(0);
 }
 
@@ -50,7 +50,7 @@ test.describe("addendum 3", () => {
     await page.waitForURL(/\/admin\/certificates$/);
 
     // Public: by certificate number, case-insensitively.
-    await page.goto("/verify");
+    await page.goto("/bn/verify");
     await page.getByRole("textbox").fill(` ${certNo.toLowerCase()} `);
     await page.getByRole("button", { name: "যাচাই করুন" }).click();
     const card = page.getByTestId("verify-card");
@@ -73,19 +73,19 @@ test.describe("addendum 3", () => {
     await page.goto("/admin/certificates");
     await page
       .locator("tr", { hasText: certNo })
-      .getByRole("link", { name: "সম্পাদনা" })
+      .getByRole("link", { name: "Edit" })
       .click();
     await page.locator("#field-status").selectOption("REVOKED");
-    await page.locator("#field-revokedReason").fill("পরীক্ষার ফলাফল সংশোধিত");
+    await page.locator("#field-revokedReason").fill("Exam result corrected");
     await save(page);
     await page.waitForURL(/\/admin\/certificates$/);
 
-    await page.goto("/verify");
+    await page.goto("/bn/verify");
     await page.getByRole("textbox").fill(certNo);
     await page.getByRole("button", { name: "যাচাই করুন" }).click();
     await expect(page.getByTestId("verify-card")).toContainText("বাতিল করা হয়েছে");
     await expect(page.getByTestId("verify-card")).toContainText(
-      "পরীক্ষার ফলাফল সংশোধিত",
+      "Exam result corrected",
     );
 
     // The lookups were logged.
@@ -114,18 +114,18 @@ test.describe("addendum 3", () => {
 
     await page
       .locator("tr", { hasText: title })
-      .getByRole("link", { name: "ফলাফল" })
+      .getByRole("link", { name: "Results" })
       .click();
-    await page.getByRole("button", { name: "নোটিশ পেস্ট করুন" }).click();
+    await page.getByRole("button", { name: "Paste notice" }).click();
     await page
       .getByPlaceholder(/3825000128/)
       .fill(`${passRoll} (4.00), ${failRoll} {01101[T], 01103[T,P]}`);
-    await page.getByRole("button", { name: "পার্স করুন" }).click();
-    await expect(page.getByLabel("সারি 1 রোল")).toHaveValue(passRoll);
-    await page.getByRole("button", { name: "সব সংরক্ষণ" }).click();
-    await expect(page.getByText(/2 নতুন/)).toBeVisible();
+    await page.getByRole("button", { name: "Parse" }).click();
+    await expect(page.getByLabel("Row 1 roll")).toHaveValue(passRoll);
+    await page.getByRole("button", { name: "Save all" }).click();
+    await expect(page.getByText(/2 new/)).toBeVisible();
 
-    await page.goto("/results");
+    await page.goto("/bn/results");
     await page.getByRole("textbox").fill(passRoll);
     await page.getByRole("button", { name: "ফলাফল দেখুন" }).click();
     const card = page.getByTestId("result-card");
@@ -154,7 +154,7 @@ test.describe("addendum 3", () => {
     await save(page);
     await page.waitForURL(/\/admin\/students$/);
 
-    await page.goto("/results");
+    await page.goto("/bn/results");
     await page.getByRole("radio", { name: "BMDC নম্বর" }).check();
     await page.getByRole("textbox").fill(`a ${bmdc}`);
     await page.getByRole("button", { name: "ফলাফল দেখুন" }).click();
@@ -180,12 +180,12 @@ test.describe("addendum 3", () => {
       mimeType: "text/csv",
       buffer: Buffer.from(csv, "utf8"),
     });
-    await expect(page.getByText("সঠিক 2")).toBeVisible();
-    await expect(page.getByText("ভুল 1")).toBeVisible();
-    await page.getByRole("button", { name: "৪. ইমপোর্ট করুন" }).click();
-    await expect(page.getByText("ইমপোর্ট সম্পন্ন")).toBeVisible();
+    await expect(page.getByText("Valid 2")).toBeVisible();
+    await expect(page.getByText("Invalid 1")).toBeVisible();
+    await page.getByRole("button", { name: "4. Import" }).click();
+    await expect(page.getByText("Import complete")).toBeVisible();
 
-    await page.goto("/advisors");
+    await page.goto("/bn/advisors");
     await expect(page.getByText(`Prof. Import One ${id}`)).toBeVisible();
     await expect(page.getByText(`Dr. Import Two ${id}`)).toBeVisible();
     // Grouped under the category headings from Site Settings.
@@ -215,19 +215,19 @@ test.describe("addendum 3", () => {
     await page.goto("/admin/leadership");
     await page
       .locator("tr", { hasText: "chairman" })
-      .getByRole("link", { name: "সম্পাদনা" })
+      .getByRole("link", { name: "Edit" })
       .click();
     await page.locator("#field-personName").fill("Dr. Smoke Chairman");
     await page.locator("#field-published").check();
     await save(page);
     await page.waitForURL(/\/admin\/leadership$/);
 
-    await page.goto("/");
+    await page.goto("/bn");
     await expect(
       page.getByRole("heading", { name: "নেতৃত্বের বক্তব্য" }),
     ).toBeVisible();
     await page.getByRole("link", { name: "পূর্ণ বক্তব্য পড়ুন" }).first().click();
-    await expect(page).toHaveURL(/\/messages\/chairman$/);
+    await expect(page).toHaveURL(/\/bn\/messages\/chairman$/);
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
       "প্রতিষ্ঠান চেয়ারম্যান",
     );
@@ -241,14 +241,14 @@ test.describe("addendum 3", () => {
     await page.goto("/admin/leadership");
     await page
       .locator("tr", { hasText: "chairman" })
-      .getByRole("link", { name: "সম্পাদনা" })
+      .getByRole("link", { name: "Edit" })
       .click();
     await page.locator("#field-personName").fill("TODO: Chairman's name");
     await page.locator("#field-published").uncheck();
     await save(page);
     await page.waitForURL(/\/admin\/leadership$/);
 
-    await page.goto("/messages/chairman");
+    await page.goto("/bn/messages/chairman");
     await expect(page.getByRole("heading", { level: 1 })).not.toContainText(
       "চেয়ারম্যান",
     );
@@ -257,7 +257,7 @@ test.describe("addendum 3", () => {
   test("the hero slider shows the seeded banners and moves with the arrows", async ({
     page,
   }, info) => {
-    await page.goto("/");
+    await page.goto("/bn");
     const slider = page.getByTestId("hero-slider");
     await expect(slider).toBeVisible();
     await expect(slider.getByRole("tab")).toHaveCount(3);

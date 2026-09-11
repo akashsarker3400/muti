@@ -8,6 +8,7 @@ import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { formatDate, pick } from "@/lib/format";
 import { getPosts } from "@/lib/queries";
+import { pageAlternates } from "@/i18n/routing";
 
 export async function generateMetadata({
   params,
@@ -19,7 +20,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("subtitle"),
-    alternates: { canonical: locale === "en" ? "/blog" : "/bn/blog" },
+    alternates: pageAlternates(locale, "/blog"),
   };
 }
 

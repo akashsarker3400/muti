@@ -14,6 +14,7 @@ import { getResults } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
 import { parseSubjectCodes } from "@/lib/verify";
 import { waLink } from "@/lib/whatsapp";
+import { pageAlternates } from "@/i18n/routing";
 
 export async function generateMetadata({
   params,
@@ -25,7 +26,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("subtitle"),
-    alternates: { canonical: locale === "en" ? "/results" : "/bn/results" },
+    alternates: pageAlternates(locale, "/results"),
   };
 }
 

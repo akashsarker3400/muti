@@ -13,6 +13,7 @@ import { getContent } from "@/lib/content-items";
 import { getPageBySlug, getPartners } from "@/lib/queries";
 import { isEmptyRichText } from "@/lib/sanitize";
 import { getSiteSettings } from "@/lib/site-settings";
+import { pageAlternates } from "@/i18n/routing";
 
 export async function generateMetadata({
   params,
@@ -23,7 +24,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "about" });
   return {
     title: t("title"),
-    alternates: { canonical: locale === "en" ? "/about" : "/bn/about" },
+    alternates: pageAlternates(locale, "/about"),
   };
 }
 

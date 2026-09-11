@@ -34,6 +34,7 @@ import {
   X,
   Upload,
   HeartPulse,
+  Languages,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -128,6 +129,7 @@ const NAV: NavGroup[] = [
     items: [
       { href: "/admin/settings", label: "Site settings", icon: Settings },
       { href: "/admin/media", label: "Media", icon: Images },
+      { href: "/admin/needs-english", label: "Needs English", icon: Languages },
       {
         href: "/admin/users",
         label: "Users",

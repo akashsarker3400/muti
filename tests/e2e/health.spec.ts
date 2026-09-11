@@ -8,11 +8,11 @@ import { expect, test, type Page } from "@playwright/test";
 
 async function healthTab(page: Page) {
   await page.goto("/admin/settings");
-  await page.getByRole("tab", { name: "স্বাস্থ্যসেবা" }).click();
+  await page.getByRole("tab", { name: "Health service" }).click();
 }
 
 async function saveSettings(page: Page) {
-  await page.getByRole("button", { name: "সেটিংস সংরক্ষণ করুন" }).click();
+  await page.getByRole("button", { name: "Save settings" }).click();
   await page.waitForURL(/\/admin$/);
 }
 
@@ -27,13 +27,13 @@ test.describe("free health service", () => {
 
     try {
       // Public page, nav item and homepage band are now visible.
-      await page.goto("/");
+      await page.goto("/bn");
       await expect(page.getByTestId("health-band")).toBeVisible();
       await expect(
         page.locator("footer").getByRole("link", { name: "স্বাস্থ্যসেবা" }),
       ).toBeVisible();
 
-      await page.goto("/health-service");
+      await page.goto("/bn/health-service");
       await expect(page.getByRole("heading", { level: 1 })).toContainText(
         "বিনামূল্যে স্বাস্থ্যসেবা",
       );
@@ -66,15 +66,15 @@ test.describe("free health service", () => {
       await page.goto("/admin/health");
       const row = page.locator("tr", { hasText: name });
       await expect(row).toBeVisible();
-      await expect(row).toContainText("হ্যাঁ (7 মাস)");
+      await expect(row).toContainText("Yes (7 months)");
       await row.getByRole("combobox").selectOption("SEEN");
-      await expect(row.getByText("দেখা হয়েছে").first()).toBeVisible();
+      await expect(row.getByText("Seen").first()).toBeVisible();
 
       await page.locator("#count-patients").fill("12");
       await page.locator("#count-reports").fill("11");
       await page.locator("#count-consultations").fill("10");
-      await page.getByRole("button", { name: "সংরক্ষণ" }).click();
-      await expect(page.getByText("দিনের হিসাব সংরক্ষিত।")).toBeVisible();
+      await page.getByRole("button", { name: "Save" }).click();
+      await expect(page.getByText("Daily count saved.")).toBeVisible();
 
       // Printable list renders the serial.
       const print = await page.request.get(`/admin/health/print`);
@@ -89,11 +89,11 @@ test.describe("free health service", () => {
       await page.locator("#count-patients").fill("0");
       await page.locator("#count-reports").fill("0");
       await page.locator("#count-consultations").fill("0");
-      await page.getByRole("button", { name: "সংরক্ষণ" }).click();
-      await expect(page.getByText("দিনের হিসাব সংরক্ষিত।")).toBeVisible();
+      await page.getByRole("button", { name: "Save" }).click();
+      await expect(page.getByText("Daily count saved.")).toBeVisible();
     }
 
-    await page.goto("/health-service");
+    await page.goto("/bn/health-service");
     await expect(page.getByRole("heading", { level: 1 })).not.toContainText(
       "বিনামূল্যে স্বাস্থ্যসেবা",
     );

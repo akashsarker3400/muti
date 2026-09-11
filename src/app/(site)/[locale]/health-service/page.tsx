@@ -32,6 +32,7 @@ import { prisma } from "@/lib/prisma";
 import { getPartners } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
 import { waLink } from "@/lib/whatsapp";
+import { pageAlternates } from "@/i18n/routing";
 
 export const dynamic = "force-dynamic";
 
@@ -56,9 +57,7 @@ export async function generateMetadata({
       "গর্ভবতী মায়ের বিনামূল্যে আল্ট্রাসনোগ্রাম ময়মনসিংহ",
       "free pregnancy ultrasound mymensingh",
     ],
-    alternates: {
-      canonical: locale === "en" ? "/health-service" : "/bn/health-service",
-    },
+    alternates: pageAlternates(locale, "/health-service"),
     openGraph: {
       title: t("metaTitle"),
       description: t("metaDescription"),

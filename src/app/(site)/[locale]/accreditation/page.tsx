@@ -10,6 +10,7 @@ import { getContent } from "@/lib/content-items";
 import { toBanglaDigits } from "@/lib/format";
 import { getPartners } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
+import { pageAlternates } from "@/i18n/routing";
 
 export async function generateMetadata({
   params,
@@ -21,9 +22,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("subtitle"),
-    alternates: {
-      canonical: locale === "en" ? "/accreditation" : "/bn/accreditation",
-    },
+    alternates: pageAlternates(locale, "/accreditation"),
   };
 }
 
