@@ -4,6 +4,9 @@ import { z } from "zod";
 
 import type { FormSection, FormValues } from "@/lib/admin/fields";
 import { slugify } from "@/lib/admin/slug";
+import type { Permission } from "@/lib/permissions";
+import { normalizeBmdc, parseAdvisorCategories } from "@/lib/verify";
+import { defaultSiteSettings } from "@/lib/site-settings-schema";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -50,7 +53,11 @@ export type ResourceConfig = {
     | "page"
     | "batch"
     | "result"
-    | "student";
+    | "student"
+    | "certificate"
+    | "boardExam"
+    | "leadershipMessage"
+    | "advisor";
   title: string;
   singular: string;
   description?: string;
@@ -64,7 +71,15 @@ export type ResourceConfig = {
   /** Renders an extra tool above the list, e.g. the students CSV importer. */
   listTool?: "student-import";
   /** Renders an extra action in each row, e.g. "clone" on batches. */
-  rowTool?: "batch-clone";
+  rowTool?: "batch-clone" | "board-results";
+  /** Entity key on /admin/import — shows an "Import" button above the list. */
+  importEntity?: string;
+  /** Offers a CSV download of the whole table from the list header. */
+  exportCsv?: boolean;
+  /** Extra read-only panel under the edit form. */
+  detailPanel?: "student-certificates";
+  /** Named permission (addendum 3, §8) needed to open the list or save. */
+  permission?: Permission;
   searchFields: string[];
   orderBy: Record<string, "asc" | "desc">[];
   include?: Record<string, boolean>;
@@ -609,21 +624,39 @@ const partnerResource: ResourceConfig = {
 const bannerResource: ResourceConfig = {
   key: "banners",
   model: "banner",
-  title: "ব্যানার",
+  title: "হিরো ব্যানার (স্লাইডার)",
   singular: "ব্যানার",
+  description:
+    "সক্রিয় ব্যানার থাকলে হোমপেজের ওপরে পুরো প্রস্থের স্লাইডার দেখায় (সর্বোচ্চ ৫টি)। ডেস্কটপ ছবি ১৯২০×৭০০, মোবাইল ছবি ১০৮০×১০৮০ হলে ভালো। ছবি না দিলে ব্র্যান্ড রঙের স্লাইড হয়। গতি ও ডট/তীর সাইট সেটিংস → হিরো স্লাইডার ট্যাবে।",
   newLabel: "নতুন ব্যানার",
+  permission: "banners.manage",
   columns: [
     { key: "image", label: "", type: "image" },
-    { key: "title", label: "শিরোনাম" },
+    { key: "titleBn", label: "শিরোনাম" },
     { key: "sortOrder", label: "ক্রম", type: "number", hideOnMobile: true },
+    { key: "startAt", label: "শুরু", type: "date", hideOnMobile: true },
+    { key: "endAt", label: "শেষ", type: "date", hideOnMobile: true },
+    { key: "active", label: "সক্রিয়", type: "bool" },
   ],
-  searchFields: ["title"],
+  searchFields: ["title", "titleBn", "subtitle", "subtitleBn"],
   orderBy: [{ sortOrder: "asc" }],
   schema: z.object({
+    titleBn: optionalText,
+    subtitleBn: optionalText,
     title: optionalText,
     subtitle: optionalText,
-    image: requiredText,
-    link: optionalText,
+    image: optionalText,
+    mobileImage: optionalText,
+    ctaLabelBn: optionalText,
+    ctaLabelEn: optionalText,
+    ctaLink: optionalText,
+    cta2LabelBn: optionalText,
+    cta2LabelEn: optionalText,
+    cta2Link: optionalText,
+    overlay: z.coerce.number().int().min(0).max(80).default(40),
+    textPosition: z.enum(["LEFT", "CENTER"]).default("LEFT"),
+    startAt: optionalText,
+    endAt: optionalText,
     sortOrder: z.coerce.number().int().default(0),
     active: z.boolean().default(true),
   }),
@@ -632,28 +665,146 @@ const bannerResource: ResourceConfig = {
       id: "main",
       label: "ব্যানার",
       fields: [
-        { name: "title", label: "শিরোনাম", type: "text" },
-        { name: "subtitle", label: "উপশিরোনাম", type: "text" },
-        { name: "image", label: "ছবি", type: "image", required: true },
-        { name: "link", label: "লিংক", type: "text", latin: true },
+        {
+          name: "titleBn",
+          label: "শিরোনাম (বাংলা)",
+          type: "text",
+          lang: "bn",
+          full: true,
+        },
+        {
+          name: "subtitleBn",
+          label: "উপশিরোনাম (বাংলা)",
+          type: "text",
+          lang: "bn",
+          full: true,
+        },
+        {
+          name: "ctaLabelBn",
+          label: "বোতাম ১ লেখা (বাংলা)",
+          type: "text",
+          lang: "bn",
+          placeholder: "এখনই আবেদন করুন",
+        },
+        {
+          name: "cta2LabelBn",
+          label: "বোতাম ২ লেখা (বাংলা)",
+          type: "text",
+          lang: "bn",
+          placeholder: "WhatsApp করুন",
+        },
+        {
+          name: "title",
+          label: "Title (English)",
+          type: "text",
+          lang: "en",
+          latin: true,
+          full: true,
+        },
+        {
+          name: "subtitle",
+          label: "Subtitle (English)",
+          type: "text",
+          lang: "en",
+          latin: true,
+          full: true,
+        },
+        {
+          name: "ctaLabelEn",
+          label: "Button 1 label (English)",
+          type: "text",
+          lang: "en",
+          latin: true,
+        },
+        {
+          name: "cta2LabelEn",
+          label: "Button 2 label (English)",
+          type: "text",
+          lang: "en",
+          latin: true,
+        },
+        {
+          name: "image",
+          label: "ডেস্কটপ ছবি (১৯২০×৭০০)",
+          type: "image",
+          hint: "ফাঁকা রাখলে নেভি গ্রেডিয়েন্টের ওপর লেখা দেখাবে।",
+        },
+        { name: "mobileImage", label: "মোবাইল ছবি (১০৮০×১০৮০, ঐচ্ছিক)", type: "image" },
+        {
+          name: "ctaLink",
+          label: "বোতাম ১ লিংক",
+          type: "text",
+          latin: true,
+          placeholder: "/apply",
+          hint: "লেখা ফাঁকা রাখলে ডিফল্ট “এখনই আবেদন করুন” → /apply।",
+        },
+        {
+          name: "cta2Link",
+          label: "বোতাম ২ লিংক",
+          type: "text",
+          latin: true,
+          placeholder: "whatsapp",
+          hint: "“whatsapp” লিখলে সাইট সেটিংসের WhatsApp নম্বরে লিংক হবে। লেখা ফাঁকা রাখলে ডিফল্ট WhatsApp বোতাম।",
+        },
+        {
+          name: "overlay",
+          label: "কালো ওভারলে (০–৮০%)",
+          type: "number",
+          hint: "ছবির ওপর লেখা পড়তে যতটা অন্ধকার দরকার। ৪০ সাধারণত ভালো।",
+        },
+        {
+          name: "textPosition",
+          label: "লেখার অবস্থান",
+          type: "select",
+          options: [
+            { value: "LEFT", label: "বাম" },
+            { value: "CENTER", label: "মাঝখানে" },
+          ],
+        },
+        { name: "startAt", label: "দেখানো শুরু (ঐচ্ছিক)", type: "date" },
+        { name: "endAt", label: "দেখানো শেষ (ঐচ্ছিক)", type: "date" },
         sortOrderField,
         { name: "active", label: "সক্রিয়", type: "checkbox" },
       ],
     },
   ],
   toForm: (row) => ({
+    titleBn: str(row.titleBn),
+    subtitleBn: str(row.subtitleBn),
     title: str(row.title),
     subtitle: str(row.subtitle),
     image: str(row.image),
-    link: str(row.link),
+    mobileImage: str(row.mobileImage),
+    ctaLabelBn: str(row.ctaLabelBn),
+    ctaLabelEn: str(row.ctaLabelEn),
+    ctaLink: str(row.ctaLink),
+    cta2LabelBn: str(row.cta2LabelBn),
+    cta2LabelEn: str(row.cta2LabelEn),
+    cta2Link: str(row.cta2Link),
+    overlay: row.overlay == null ? 40 : toInt(row.overlay, 40),
+    textPosition: str(row.textPosition) || "LEFT",
+    startAt: fromDate(row.startAt),
+    endAt: fromDate(row.endAt),
     sortOrder: toInt(row.sortOrder),
     active: row.active === undefined ? true : Boolean(row.active),
   }),
   toData: (values) => ({
+    titleBn: nullable(values.titleBn),
+    subtitleBn: nullable(values.subtitleBn),
     title: nullable(values.title),
     subtitle: nullable(values.subtitle),
     image: str(values.image),
-    link: nullable(values.link),
+    mobileImage: nullable(values.mobileImage),
+    ctaLabelBn: nullable(values.ctaLabelBn),
+    ctaLabelEn: nullable(values.ctaLabelEn),
+    ctaLink: nullable(values.ctaLink),
+    cta2LabelBn: nullable(values.cta2LabelBn),
+    cta2LabelEn: nullable(values.cta2LabelEn),
+    cta2Link: nullable(values.cta2Link),
+    overlay: toInt(values.overlay, 40),
+    textPosition: str(values.textPosition) || "LEFT",
+    startAt: toDate(values.startAt),
+    endAt: toDate(values.endAt),
     sortOrder: toInt(values.sortOrder),
     active: Boolean(values.active),
   }),
@@ -1132,9 +1283,12 @@ const studentResource: ResourceConfig = {
     },
     { key: "verifiable", label: "যাচাইযোগ্য", type: "bool", hideOnMobile: true },
   ],
-  searchFields: ["roll", "certificateNo", "name", "phone"],
+  searchFields: ["roll", "certificateNo", "name", "phone", "bmdc", "boardRoll"],
   orderBy: [{ createdAt: "desc" }],
   include: { course: true, batch: true },
+  importEntity: "students",
+  exportCsv: true,
+  detailPanel: "student-certificates",
   loadOptions: async () => ({
     courses: await courseOptions(),
     batches: await batchOptions(),
@@ -1143,7 +1297,18 @@ const studentResource: ResourceConfig = {
     roll: requiredText,
     certificateNo: optionalText,
     name: requiredText,
+    nameBn: optionalText,
     phone: optionalText,
+    email: optionalText,
+    gender: optionalText,
+    dateOfBirth: optionalText,
+    fatherName: optionalText,
+    motherName: optionalText,
+    nid: optionalText,
+    bmdc: optionalText,
+    address: optionalText,
+    boardRoll: optionalText,
+    boardRegistrationNo: optionalText,
     courseId: requiredText,
     batchId: optionalText,
     admissionDate: optionalText,
@@ -1158,15 +1323,47 @@ const studentResource: ResourceConfig = {
       id: "main",
       label: "শিক্ষার্থী",
       fields: [
-        { name: "name", label: "নাম", type: "text", required: true, full: true },
+        { name: "name", label: "নাম (English)", type: "text", required: true },
+        { name: "nameBn", label: "নাম (বাংলা)", type: "text" },
         { name: "roll", label: "রোল", type: "text", required: true, latin: true },
         {
           name: "certificateNo",
-          label: "সার্টিফিকেট নম্বর",
+          label: "সার্টিফিকেট নম্বর (পুরনো ঘর)",
+          type: "text",
+          latin: true,
+          hint: "সনদ এখন “সার্টিফিকেট” মেনু থেকে দেওয়া হয়; এই ঘরটি পুরনো রেকর্ডের জন্য।",
+        },
+        { name: "phone", label: "মোবাইল", type: "text", latin: true },
+        { name: "email", label: "ইমেইল", type: "text", latin: true },
+        { name: "bmdc", label: "BMDC নম্বর", type: "text", latin: true },
+        {
+          name: "gender",
+          label: "লিঙ্গ",
+          type: "select",
+          options: [
+            { value: "MALE", label: "পুরুষ" },
+            { value: "FEMALE", label: "নারী" },
+            { value: "OTHER", label: "অন্যান্য" },
+          ],
+        },
+        { name: "dateOfBirth", label: "জন্মতারিখ", type: "date" },
+        { name: "fatherName", label: "পিতার নাম", type: "text" },
+        { name: "motherName", label: "মাতার নাম", type: "text" },
+        { name: "nid", label: "NID", type: "text", latin: true },
+        { name: "address", label: "ঠিকানা", type: "textarea" },
+        {
+          name: "boardRoll",
+          label: "বোর্ড রোল (BTEB)",
+          type: "text",
+          latin: true,
+          hint: "১০ সংখ্যার বোর্ড রোল; ফলাফল এই রোলে স্বয়ংক্রিয়ভাবে লিংক হয়।",
+        },
+        {
+          name: "boardRegistrationNo",
+          label: "বোর্ড রেজিস্ট্রেশন নম্বর",
           type: "text",
           latin: true,
         },
-        { name: "phone", label: "মোবাইল", type: "text", latin: true },
         {
           name: "courseId",
           label: "কোর্স",
@@ -1207,7 +1404,18 @@ const studentResource: ResourceConfig = {
     roll: str(row.roll),
     certificateNo: str(row.certificateNo),
     name: str(row.name),
+    nameBn: str(row.nameBn),
     phone: str(row.phone),
+    email: str(row.email),
+    gender: str(row.gender),
+    dateOfBirth: fromDate(row.dateOfBirth),
+    fatherName: str(row.fatherName),
+    motherName: str(row.motherName),
+    nid: str(row.nid),
+    bmdc: str(row.bmdc),
+    address: str(row.address),
+    boardRoll: str(row.boardRoll),
+    boardRegistrationNo: str(row.boardRegistrationNo),
     courseId: str(row.courseId),
     batchId: str(row.batchId),
     admissionDate: fromDate(row.admissionDate),
@@ -1221,7 +1429,19 @@ const studentResource: ResourceConfig = {
     roll: str(values.roll),
     certificateNo: nullable(values.certificateNo),
     name: str(values.name),
+    nameBn: nullable(values.nameBn),
     phone: nullable(values.phone),
+    email: nullable(values.email),
+    gender: nullable(values.gender),
+    dateOfBirth: toDate(values.dateOfBirth),
+    fatherName: nullable(values.fatherName),
+    motherName: nullable(values.motherName),
+    nid: nullable(values.nid),
+    bmdc: nullable(values.bmdc),
+    bmdcNormalized: nullable(values.bmdc) ? normalizeBmdc(str(values.bmdc)) : null,
+    address: nullable(values.address),
+    boardRoll: nullable(values.boardRoll),
+    boardRegistrationNo: nullable(values.boardRegistrationNo),
     courseId: str(values.courseId),
     batchId: nullable(values.batchId),
     admissionDate: toDate(values.admissionDate),
@@ -1457,8 +1677,8 @@ const valueResource = contentResource({
   bodyLabelEn: "Description (English)",
 });
 
-const certificateResource = contentResource({
-  key: "certificates",
+const certificateTypeResource = contentResource({
+  key: "certificate-types",
   kind: "CERTIFICATE",
   title: "প্রদত্ত সার্টিফিকেট",
   singular: "সার্টিফিকেট",
@@ -1467,6 +1687,560 @@ const certificateResource = contentResource({
   bodyLabelBn: "সার্টিফিকেটের নাম (বাংলা)",
   bodyLabelEn: "Certificate (English)",
 });
+
+/* -------------------------------------------------------------------------- */
+/* Addendum 3                                                                 */
+/* -------------------------------------------------------------------------- */
+
+async function studentOptions(): Promise<OptionList> {
+  const students = await prisma.student.findMany({
+    orderBy: { createdAt: "desc" },
+    select: { id: true, roll: true, name: true },
+    take: 2000,
+  });
+  return students.map((s) => ({ value: s.id, label: `${s.roll} — ${s.name}` }));
+}
+
+/** Issued certificates (addendum 3, §1) — what /verify answers from. */
+const issuedCertificateResource: ResourceConfig = {
+  key: "certificates",
+  model: "certificate",
+  title: "সার্টিফিকেট",
+  singular: "সার্টিফিকেট",
+  description:
+    "প্রদান করা সনদের রেজিস্টার। /verify পাতায় সার্টিফিকেট নম্বর বা শিক্ষার্থীর BMDC দিয়ে এগুলোই যাচাই হয়। বাতিল করতে অবস্থা “বাতিল” করে কারণ লিখুন।",
+  newLabel: "নতুন সার্টিফিকেট",
+  permission: "certificates.manage",
+  importEntity: "certificates",
+  exportCsv: true,
+  baseWhere: { deletedAt: null },
+  columns: [
+    { key: "certificateNo", label: "নম্বর" },
+    { key: "student", label: "শিক্ষার্থী", path: "student.name" },
+    { key: "course", label: "কোর্স", path: "course.code", hideOnMobile: true },
+    {
+      key: "type",
+      label: "ধরন",
+      type: "badge",
+      labels: { COURSE: "কোর্স", SEMESTER: "সেমিস্টার", BOARD: "বোর্ড" },
+      hideOnMobile: true,
+    },
+    { key: "issuedAt", label: "প্রদান", type: "date", hideOnMobile: true },
+    {
+      key: "status",
+      label: "অবস্থা",
+      type: "badge",
+      labels: { VALID: "বৈধ", REVOKED: "বাতিল" },
+    },
+  ],
+  searchFields: ["certificateNo", "session", "batchName"],
+  orderBy: [{ createdAt: "desc" }],
+  include: { student: true, course: true },
+  loadOptions: async () => ({
+    students: await studentOptions(),
+    courses: await courseOptions(),
+  }),
+  schema: z.object({
+    certificateNo: requiredText,
+    studentId: requiredText,
+    courseId: requiredText,
+    type: z.enum(["COURSE", "SEMESTER", "BOARD"]).default("COURSE"),
+    batchName: optionalText,
+    session: optionalText,
+    issuedAt: optionalText,
+    grade: optionalText,
+    status: z.enum(["VALID", "REVOKED"]).default("VALID"),
+    revokedReason: optionalText,
+    file: optionalText,
+  }),
+  sections: (options) => [
+    {
+      id: "main",
+      label: "সার্টিফিকেট",
+      fields: [
+        {
+          name: "certificateNo",
+          label: "সার্টিফিকেট নম্বর (সনদে যেমন ছাপা)",
+          type: "text",
+          required: true,
+          latin: true,
+          placeholder: "MUTI-C-2026-0117",
+        },
+        {
+          name: "studentId",
+          label: "শিক্ষার্থী",
+          type: "select",
+          required: true,
+          options: options.students ?? [],
+        },
+        {
+          name: "courseId",
+          label: "কোর্স",
+          type: "select",
+          required: true,
+          options: options.courses ?? [],
+        },
+        {
+          name: "type",
+          label: "ধরন",
+          type: "select",
+          required: true,
+          options: [
+            { value: "COURSE", label: "কোর্স সনদ (MUTI)" },
+            { value: "SEMESTER", label: "সেমিস্টার সনদ" },
+            {
+              value: "BOARD",
+              label: "বোর্ড সনদ (BTEB প্রদত্ত, MUTI শুধু রেকর্ড রাখে)",
+            },
+          ],
+        },
+        {
+          name: "session",
+          label: "সেশন",
+          type: "text",
+          latin: true,
+          placeholder: "Jan-June 2025",
+        },
+        { name: "batchName", label: "ব্যাচ", type: "text", latin: true },
+        { name: "issuedAt", label: "প্রদানের তারিখ", type: "date" },
+        {
+          name: "grade",
+          label: "গ্রেড",
+          type: "text",
+          latin: true,
+          placeholder: "4.00",
+        },
+        {
+          name: "status",
+          label: "অবস্থা",
+          type: "select",
+          required: true,
+          options: [
+            { value: "VALID", label: "বৈধ" },
+            { value: "REVOKED", label: "বাতিল" },
+          ],
+        },
+        {
+          name: "revokedReason",
+          label: "বাতিলের কারণ",
+          type: "text",
+          hint: "অবস্থা “বাতিল” হলে যাচাই পাতায় এই কারণটি দেখাবে।",
+        },
+        {
+          name: "file",
+          label: "স্ক্যান কপি (শুধু অফিসের জন্য, পাবলিকে দেখায় না)",
+          type: "file",
+        },
+      ],
+    },
+  ],
+  toForm: (row) => ({
+    certificateNo: str(row.certificateNo),
+    studentId: str(row.studentId),
+    courseId: str(row.courseId),
+    type: str(row.type) || "COURSE",
+    batchName: str(row.batchName),
+    session: str(row.session),
+    issuedAt: fromDate(row.issuedAt),
+    grade: str(row.grade),
+    status: str(row.status) || "VALID",
+    revokedReason: str(row.revokedReason),
+    file: str(row.file),
+  }),
+  toData: (values) => ({
+    certificateNo: str(values.certificateNo).replace(/\s+/g, "").toUpperCase(),
+    studentId: str(values.studentId),
+    courseId: str(values.courseId),
+    type: str(values.type) || "COURSE",
+    batchName: nullable(values.batchName),
+    session: nullable(values.session),
+    issuedAt: toDate(values.issuedAt),
+    grade: nullable(values.grade),
+    status: str(values.status) || "VALID",
+    revokedReason:
+      str(values.status) === "REVOKED" ? nullable(values.revokedReason) : null,
+    file: nullable(values.file),
+  }),
+};
+
+/** BTEB examinations (addendum 3, §2); rows are edited on their own page. */
+const boardExamResource: ResourceConfig = {
+  key: "board-exams",
+  model: "boardExam",
+  title: "বোর্ড পরীক্ষা ও ফলাফল",
+  singular: "বোর্ড পরীক্ষা",
+  description:
+    "BTEB যে পরীক্ষার ফলাফল প্রকাশ করেছে সেটি এখানে যোগ করুন, তারপর “ফলাফল” বোতামে রোলভিত্তিক ফল বসান বা পেস্ট করুন। প্রকাশিত হলে /results পাতায় খোঁজা যাবে।",
+  newLabel: "নতুন বোর্ড পরীক্ষা",
+  permission: "results.manage",
+  rowTool: "board-results",
+  columns: [
+    { key: "title", label: "পরীক্ষা" },
+    { key: "session", label: "সেশন", hideOnMobile: true },
+    { key: "publishedOn", label: "প্রকাশ", type: "date", hideOnMobile: true },
+    { key: "published", label: "প্রকাশিত", type: "bool" },
+  ],
+  searchFields: ["title", "session", "memoNo"],
+  orderBy: [{ publishedOn: "desc" }, { createdAt: "desc" }],
+  loadOptions: async () => ({ courses: await courseOptions() }),
+  schema: z.object({
+    title: requiredText,
+    session: requiredText,
+    heldIn: optionalText,
+    memoNo: optionalText,
+    publishedOn: optionalText,
+    courseId: optionalText,
+    boardName: optionalText,
+    noticeFile: optionalText,
+    published: z.boolean().default(false),
+  }),
+  sections: (options) => [
+    {
+      id: "main",
+      label: "পরীক্ষা",
+      fields: [
+        {
+          name: "title",
+          label: "পরীক্ষার নাম",
+          type: "text",
+          required: true,
+          full: true,
+          placeholder: "Certificate in Medical Ultrasound Examination 2025",
+        },
+        {
+          name: "session",
+          label: "সেশন",
+          type: "text",
+          required: true,
+          latin: true,
+          placeholder: "Jan-June 2025",
+        },
+        {
+          name: "heldIn",
+          label: "অনুষ্ঠিত",
+          type: "text",
+          latin: true,
+          placeholder: "August 2025",
+        },
+        { name: "memoNo", label: "স্মারক নম্বর", type: "text", latin: true },
+        { name: "publishedOn", label: "প্রকাশের তারিখ", type: "date" },
+        {
+          name: "courseId",
+          label: "কোর্স",
+          type: "select",
+          options: options.courses ?? [],
+        },
+        { name: "boardName", label: "বোর্ড", type: "text", latin: true },
+        {
+          name: "noticeFile",
+          label: "বোর্ডের নোটিশ (PDF) — পাবলিকে ডাউনলোড করা যাবে",
+          type: "file",
+        },
+        {
+          name: "published",
+          label: "প্রকাশিত (/results পাতায় দেখাবে)",
+          type: "checkbox",
+        },
+      ],
+    },
+  ],
+  toForm: (row) => ({
+    title: str(row.title),
+    session: str(row.session),
+    heldIn: str(row.heldIn),
+    memoNo: str(row.memoNo),
+    publishedOn: fromDate(row.publishedOn),
+    courseId: str(row.courseId),
+    boardName: str(row.boardName) || "Bangladesh Technical Education Board",
+    noticeFile: str(row.noticeFile),
+    published: Boolean(row.published),
+  }),
+  toData: (values) => ({
+    title: str(values.title),
+    session: str(values.session),
+    heldIn: nullable(values.heldIn),
+    memoNo: nullable(values.memoNo),
+    publishedOn: toDate(values.publishedOn),
+    courseId: nullable(values.courseId),
+    boardName: str(values.boardName) || "Bangladesh Technical Education Board",
+    noticeFile: nullable(values.noticeFile),
+    published: Boolean(values.published),
+  }),
+};
+
+/** Chairman's / MD's message (addendum 3, §4). */
+const leadershipResource: ResourceConfig = {
+  key: "leadership",
+  model: "leadershipMessage",
+  title: "নেতৃত্বের বক্তব্য",
+  singular: "বক্তব্য",
+  description:
+    "চেয়ারম্যান, ব্যবস্থাপনা পরিচালক বা অন্য কারও বার্তা। প্রকাশিত হলে হোমপেজে কার্ড ও /messages/<key> পাতা তৈরি হয়; নতুন key দিলেই নতুন পাতা।",
+  newLabel: "নতুন বক্তব্য",
+  permission: "leadership.manage",
+  columns: [
+    { key: "photo", label: "", type: "image" },
+    { key: "personName", label: "নাম" },
+    { key: "roleTitleBn", label: "পদ", hideOnMobile: true },
+    { key: "sortOrder", label: "ক্রম", type: "number", hideOnMobile: true },
+    { key: "published", label: "প্রকাশিত", type: "bool" },
+  ],
+  searchFields: ["personName", "personNameBn", "roleTitleBn", "roleTitleEn", "key"],
+  orderBy: [{ sortOrder: "asc" }],
+  schema: z.object({
+    key: requiredText.regex(/^[a-z0-9-]+$/i, "শুধু ইংরেজি অক্ষর, সংখ্যা ও হাইফেন"),
+    roleTitleBn: requiredText,
+    roleTitleEn: requiredText,
+    personName: requiredText,
+    personNameBn: optionalText,
+    degrees: optionalText,
+    designationLine: optionalText,
+    photo: optionalText,
+    messageBn: requiredText,
+    messageEn: optionalText,
+    excerptBn: optionalText,
+    excerptEn: optionalText,
+    signatureImage: optionalText,
+    sortOrder: z.coerce.number().int().default(0),
+    published: z.boolean().default(false),
+  }),
+  sections: () => [
+    {
+      id: "main",
+      label: "বক্তব্য",
+      fields: [
+        {
+          name: "key",
+          label: "URL key",
+          type: "text",
+          required: true,
+          latin: true,
+          placeholder: "chairman",
+          hint: "পাতার ঠিকানা হবে /messages/<key>। যেমন chairman, managing-director, principal।",
+        },
+        {
+          name: "personName",
+          label: "নাম (English)",
+          type: "text",
+          required: true,
+          latin: true,
+        },
+        {
+          name: "roleTitleBn",
+          label: "পদবি (বাংলা)",
+          type: "text",
+          required: true,
+          lang: "bn",
+        },
+        { name: "personNameBn", label: "নাম (বাংলা)", type: "text", lang: "bn" },
+        {
+          name: "excerptBn",
+          label: "সংক্ষিপ্ত উদ্ধৃতি (বাংলা) — হোমপেজ কার্ডে দুই লাইন",
+          type: "textarea",
+          lang: "bn",
+        },
+        {
+          name: "messageBn",
+          label: "পূর্ণ বক্তব্য (বাংলা)",
+          type: "richtext",
+          lang: "bn",
+          required: true,
+        },
+        {
+          name: "roleTitleEn",
+          label: "Role title (English)",
+          type: "text",
+          required: true,
+          lang: "en",
+          latin: true,
+        },
+        {
+          name: "excerptEn",
+          label: "Excerpt (English)",
+          type: "textarea",
+          lang: "en",
+          latin: true,
+        },
+        {
+          name: "messageEn",
+          label: "Full message (English)",
+          type: "richtext",
+          lang: "en",
+        },
+        {
+          name: "degrees",
+          label: "ডিগ্রি",
+          type: "text",
+          latin: true,
+          placeholder: "MBBS, DMU",
+        },
+        {
+          name: "designationLine",
+          label: "পরিচিতি লাইন",
+          type: "text",
+          latin: true,
+          placeholder: "Sonologist",
+        },
+        { name: "photo", label: "ছবি", type: "image" },
+        { name: "signatureImage", label: "স্বাক্ষরের ছবি", type: "image" },
+        sortOrderField,
+        { name: "published", label: "প্রকাশিত", type: "checkbox" },
+      ],
+    },
+  ],
+  toForm: (row) => ({
+    key: str(row.key),
+    roleTitleBn: str(row.roleTitleBn),
+    roleTitleEn: str(row.roleTitleEn),
+    personName: str(row.personName),
+    personNameBn: str(row.personNameBn),
+    degrees: str(row.degrees),
+    designationLine: str(row.designationLine),
+    photo: str(row.photo),
+    messageBn: str(row.messageBn),
+    messageEn: str(row.messageEn),
+    excerptBn: str(row.excerptBn),
+    excerptEn: str(row.excerptEn),
+    signatureImage: str(row.signatureImage),
+    sortOrder: toInt(row.sortOrder),
+    published: Boolean(row.published),
+  }),
+  toData: (values) => ({
+    key: str(values.key).toLowerCase(),
+    roleTitleBn: str(values.roleTitleBn),
+    roleTitleEn: str(values.roleTitleEn),
+    personName: str(values.personName),
+    personNameBn: nullable(values.personNameBn),
+    degrees: nullable(values.degrees),
+    designationLine: nullable(values.designationLine),
+    photo: nullable(values.photo),
+    messageBn: str(values.messageBn),
+    messageEn: nullable(values.messageEn),
+    excerptBn: nullable(values.excerptBn),
+    excerptEn: nullable(values.excerptEn),
+    signatureImage: nullable(values.signatureImage),
+    sortOrder: toInt(values.sortOrder),
+    published: Boolean(values.published),
+  }),
+};
+
+/** Advisory board (addendum 3, §5). Categories come from Site Settings. */
+const advisorResource: ResourceConfig = {
+  key: "advisors",
+  model: "advisor",
+  title: "উপদেষ্টা মণ্ডলী",
+  singular: "উপদেষ্টা",
+  description:
+    "ক্যাটাগরির তালিকা সাইট সেটিংস → ফলাফল ও যাচাই ট্যাবে সম্পাদনা করা যায়।",
+  newLabel: "নতুন উপদেষ্টা",
+  permission: "advisors.manage",
+  importEntity: "advisors",
+  exportCsv: true,
+  columns: [
+    { key: "photo", label: "", type: "image" },
+    { key: "name", label: "নাম" },
+    { key: "designation", label: "পদবি", hideOnMobile: true },
+    { key: "category", label: "ক্যাটাগরি", hideOnMobile: true },
+    { key: "sortOrder", label: "ক্রম", type: "number", hideOnMobile: true },
+    { key: "published", label: "প্রকাশিত", type: "bool" },
+  ],
+  searchFields: ["name", "nameBn", "designation", "organization"],
+  orderBy: [{ category: "asc" }, { sortOrder: "asc" }],
+  loadOptions: async () => {
+    const row = await prisma.siteSetting.findUnique({ where: { id: 1 } });
+    const json = (row?.json ?? {}) as { advisors?: { categories?: string } };
+    const text =
+      json.advisors?.categories?.trim() || defaultSiteSettings.advisors.categories;
+    return {
+      categories: parseAdvisorCategories(text).map((c) => ({
+        value: c.key,
+        label: `${c.labelBn} (${c.key})`,
+      })),
+    };
+  },
+  schema: z.object({
+    name: requiredText,
+    nameBn: optionalText,
+    degrees: optionalText,
+    designation: requiredText,
+    designationBn: optionalText,
+    organization: optionalText,
+    bio: optionalText,
+    photo: optionalText,
+    category: requiredText,
+    sortOrder: z.coerce.number().int().default(0),
+    published: z.boolean().default(true),
+  }),
+  sections: (options) => [
+    {
+      id: "main",
+      label: "উপদেষ্টা",
+      fields: [
+        {
+          name: "name",
+          label: "নাম (English)",
+          type: "text",
+          required: true,
+          latin: true,
+        },
+        { name: "nameBn", label: "নাম (বাংলা)", type: "text" },
+        {
+          name: "degrees",
+          label: "ডিগ্রি",
+          type: "text",
+          latin: true,
+          placeholder: "MBBS, FCPS",
+        },
+        {
+          name: "designation",
+          label: "পদবি (English)",
+          type: "text",
+          required: true,
+          latin: true,
+        },
+        { name: "designationBn", label: "পদবি (বাংলা)", type: "text" },
+        { name: "organization", label: "প্রতিষ্ঠান / হাসপাতাল", type: "text" },
+        {
+          name: "category",
+          label: "ক্যাটাগরি",
+          type: "select",
+          required: true,
+          options: options.categories ?? [],
+        },
+        { name: "photo", label: "ছবি (বর্গাকার)", type: "image" },
+        { name: "bio", label: "সংক্ষিপ্ত পরিচিতি", type: "textarea" },
+        sortOrderField,
+        { name: "published", label: "প্রকাশিত", type: "checkbox" },
+      ],
+    },
+  ],
+  toForm: (row) => ({
+    name: str(row.name),
+    nameBn: str(row.nameBn),
+    degrees: str(row.degrees),
+    designation: str(row.designation),
+    designationBn: str(row.designationBn),
+    organization: str(row.organization),
+    bio: str(row.bio),
+    photo: str(row.photo),
+    category: str(row.category) || "ADVISOR",
+    sortOrder: toInt(row.sortOrder),
+    published: row.published === undefined ? true : Boolean(row.published),
+  }),
+  toData: (values) => ({
+    name: str(values.name),
+    nameBn: nullable(values.nameBn),
+    degrees: nullable(values.degrees),
+    designation: str(values.designation),
+    designationBn: nullable(values.designationBn),
+    organization: nullable(values.organization),
+    bio: nullable(values.bio),
+    photo: nullable(values.photo),
+    category: str(values.category).toUpperCase() || "ADVISOR",
+    sortOrder: toInt(values.sortOrder),
+    published: Boolean(values.published),
+  }),
+};
 
 export const RESOURCES: Record<string, ResourceConfig> = {
   notices: noticeResource,
@@ -1486,7 +2260,11 @@ export const RESOURCES: Record<string, ResourceConfig> = {
   "payment-policy": paymentPolicyResource,
   "admission-steps": admissionStepResource,
   values: valueResource,
-  certificates: certificateResource,
+  "certificate-types": certificateTypeResource,
+  certificates: issuedCertificateResource,
+  "board-exams": boardExamResource,
+  leadership: leadershipResource,
+  advisors: advisorResource,
 };
 
 export function getResource(key: string): ResourceConfig | null {

@@ -91,6 +91,29 @@ enum Employment {
   OTHER
 }
 
+enum CertificateType {
+  COURSE
+  SEMESTER
+  BOARD
+}
+
+enum CertificateStatus {
+  VALID
+  REVOKED
+}
+
+enum BoardResultStatus {
+  PASS
+  FAIL
+  WITHHELD
+  ABSENT
+}
+
+enum TextPosition {
+  LEFT
+  CENTER
+}
+
 enum LeadSource {
   FACEBOOK
   GOOGLE
@@ -106,11 +129,15 @@ model User {
   name         String
   passwordHash String
   role         Role     @default(STAFF)
+  /// Extra permissions granted on top of the role defaults (addendum 3, §8).
+  /// See src/lib/permissions.ts. SUPER_ADMIN always has everything.
+  permissions  String[] @default([])
   active       Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  logs ActivityLog[]
+  logs       ActivityLog[]
+  importJobs ImportJob[]
 }
 
 /// Single row (id = 1) holding the whole Site Settings JSON blob (section 7.11).
@@ -123,6 +150,8 @@ model SiteSetting {
 model Course {
   id   String @id @default(cuid())
   slug String @unique
+  certificates Certificate[]
+  boardExams   BoardExam[]
   /// CMU, CMU-BTEB, DMU, ADMU, TVS, DOPPLER, ANOMALY
   code String @unique
 
@@ -305,10 +334,183 @@ model Student {
   verifiable     Boolean       @default(false)
   note           String?
 
+  /// Addendum 3 — identity, import columns and board identifiers.
+  nameBn              String?
+  email               String?
+  gender              String?
+  dateOfBirth         DateTime?
+  fatherName          String?
+  motherName          String?
+  nid                 String?
+  bmdc                String?
+  /// `bmdc` with spaces, dashes and a leading "A-" stripped, upper-cased —
+  /// what /verify matches against.
+  bmdcNormalized      String?
+  address             String?   @db.Text
+  boardRoll           String?   @unique
+  boardRegistrationNo String?
+
+  certificates Certificate[]
+  boardResults BoardResult[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([verifiable])
+  @@index([bmdc])
+  @@index([bmdcNormalized])
+  @@index([boardRegistrationNo])
+}
+
+/// An issued certificate (addendum 3, §1). BOARD means BTEB issued it and
+/// MUTI only records the number; the scanned copy is never shown publicly.
+model Certificate {
+  id            String            @id @default(cuid())
+  certificateNo String            @unique
+  studentId     String
+  student       Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseId      String
+  course        Course            @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  batchName     String?
+  type          CertificateType   @default(COURSE)
+  issuedAt      DateTime?
+  session       String?
+  grade         String?
+  verifyToken   String            @unique @default(cuid())
+  status        CertificateStatus @default(VALID)
+  revokedReason String?
+  /// Optional scanned copy on the uploads volume.
+  file          String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([studentId])
+  @@index([courseId, status])
+}
+
+/// Every public lookup on /verify and /results, so abuse is visible.
+model VerificationLog {
+  id        String   @id @default(cuid())
+  query     String
+  type      String
+  found     Boolean
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+/// A BTEB examination whose results the board published (addendum 3, §2).
+model BoardExam {
+  id          String    @id @default(cuid())
+  title       String
+  session     String
+  heldIn      String?
+  memoNo      String?
+  publishedOn DateTime?
+  courseId    String?
+  course      Course?   @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  boardName   String    @default("Bangladesh Technical Education Board")
+  /// The board's notice PDF on the uploads volume; downloadable publicly.
+  noticeFile  String?
+  published   Boolean   @default(false)
+
+  results BoardResult[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, publishedOn])
+}
+
+model BoardResult {
+  id             String            @id @default(cuid())
+  boardExamId    String
+  boardExam      BoardExam         @relation(fields: [boardExamId], references: [id], onDelete: Cascade)
+  roll           String
+  registrationNo String?
+  studentId      String?
+  student        Student?          @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  studentName    String?
+  status         BoardResultStatus @default(PASS)
+  gpa            Decimal?          @db.Decimal(4, 2)
+  /// Raw board text, e.g. "01101[T], 01103[T,P]".
+  failedSubjects String?
+  remark         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([boardExamId, roll])
+  @@index([roll])
+  @@index([registrationNo])
+}
+
+/// One bulk import run (addendum 3, §3).
+model ImportJob {
+  id           String   @id @default(cuid())
+  entity       String
+  fileName     String
+  uploadedById String?
+  uploadedBy   User?    @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  total        Int      @default(0)
+  created      Int      @default(0)
+  updated      Int      @default(0)
+  skipped      Int      @default(0)
+  /// [{ row, message }]
+  errors       Json?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+/// Chairman's / MD's message and any further role (addendum 3, §4).
+model LeadershipMessage {
+  id              String  @id @default(cuid())
+  key             String  @unique
+  roleTitleBn     String
+  roleTitleEn     String
+  personName      String
+  personNameBn    String?
+  degrees         String?
+  designationLine String?
+  photo           String?
+  messageBn       String  @db.Text
+  messageEn       String? @db.Text
+  excerptBn       String?
+  excerptEn       String?
+  signatureImage  String?
+  sortOrder       Int     @default(0)
+  published       Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, sortOrder])
+}
+
+/// Advisory board member (addendum 3, §5). `category` is a free label the
+/// office manages in Site Settings.
+model Advisor {
+  id            String  @id @default(cuid())
+  name          String
+  nameBn        String?
+  degrees       String?
+  designation   String
+  designationBn String?
+  organization  String?
+  bio           String? @db.Text
+  photo         String?
+  category      String  @default("ADVISOR")
+  sortOrder     Int     @default(0)
+  published     Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, category, sortOrder])
 }
 
 model Result {
@@ -483,14 +685,30 @@ model Partner {
   updatedAt DateTime @updatedAt
 }
 
+/// Hero slide (addendum 3, §6). `title`/`subtitle` are the English copy;
+/// the Bangla pair sits beside them. Empty image = a brand gradient slide.
 model Banner {
-  id        String  @id @default(cuid())
-  title     String?
-  subtitle  String?
-  image     String
-  link      String?
-  sortOrder Int     @default(0)
-  active    Boolean @default(true)
+  id           String       @id @default(cuid())
+  title        String?
+  subtitle     String?
+  titleBn      String?
+  subtitleBn   String?
+  image        String
+  mobileImage  String?
+  link         String?
+  ctaLabelBn   String?
+  ctaLabelEn   String?
+  ctaLink      String?
+  cta2LabelBn  String?
+  cta2LabelEn  String?
+  cta2Link     String?
+  /// Dark overlay strength, 0–80 percent.
+  overlay      Int          @default(40)
+  textPosition TextPosition @default(LEFT)
+  startAt      DateTime?
+  endAt        DateTime?
+  sortOrder    Int          @default(0)
+  active       Boolean      @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

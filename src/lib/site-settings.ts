@@ -64,6 +64,10 @@ const NEVER_BLANK: Record<keyof SiteSettings, string[]> = {
   seo: ["titleBn", "titleEn", "descriptionBn", "descriptionEn"],
   integrations: [],
   footer: ["aboutBn", "aboutEn"],
+  security: [],
+  results: [],
+  hero: [],
+  advisors: ["categories"],
 };
 
 function mergeWithDefaults(settings: SiteSettings): SiteSettings {

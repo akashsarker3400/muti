@@ -1,4 +1,5 @@
 import type { FormSection, FormValues } from "@/lib/admin/fields";
+import { GRANTABLE, PERMISSION_LABELS } from "@/lib/permissions";
 
 /** Staff account fields (section 7.12). */
 export function userFormSections(isNew: boolean): FormSection[] {
@@ -36,6 +37,17 @@ export function userFormSections(isNew: boolean): FormSection[] {
             : "পাসওয়ার্ড পরিবর্তন করতে চাইলে তবেই লিখুন; ফাঁকা রাখলে আগেরটিই থাকবে।",
         },
         { name: "active", label: "সক্রিয়", type: "checkbox" },
+        {
+          name: "permissions",
+          label: "অতিরিক্ত অনুমতি (শুধু স্টাফের জন্য)",
+          type: "multiselect",
+          full: true,
+          hint: "সুপার অ্যাডমিন সব পারেন। স্টাফ ডিফল্টে সার্টিফিকেট, ফলাফল, ইমপোর্ট, নেতৃত্ব, উপদেষ্টা ও ব্যানার সম্পাদনা করতে পারেন; নিচেরগুলো আলাদাভাবে দিতে হয়।",
+          options: GRANTABLE.map((value) => ({
+            value,
+            label: PERMISSION_LABELS[value],
+          })),
+        },
       ],
     },
   ];
@@ -49,5 +61,6 @@ export function userToForm(row: Record<string, unknown>): FormValues {
     role: text(row.role) || "STAFF",
     password: "",
     active: row.active === undefined ? true : Boolean(row.active),
+    permissions: Array.isArray(row.permissions) ? (row.permissions as string[]) : [],
   };
 }

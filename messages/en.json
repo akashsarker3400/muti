@@ -215,30 +215,96 @@
     "publishedOn": "Published"
   },
   "results": {
-    "title": "Exam results",
-    "subtitle": "Published results, searchable by roll",
+    "title": "Result Search",
+    "subtitle": "Find board examination results by roll number or registration number.",
+    "searchBy": "Search by",
+    "mode": {
+      "roll": "Roll No",
+      "registration": "Registration No"
+    },
+    "exam": "Examination",
+    "allExams": "All examinations",
+    "inputLabel": {
+      "roll": "Roll number",
+      "registration": "Registration number"
+    },
+    "placeholder": {
+      "roll": "e.g. 3825000128",
+      "registration": "Board registration number"
+    },
+    "hint": {
+      "roll": "The board's 10-digit roll. Bangla digits are accepted.",
+      "registration": "As printed on the admit card or registration card."
+    },
+    "searchButton": "Show result",
+    "status": {
+      "PASS": "Passed",
+      "FAIL": "Failed",
+      "WITHHELD": "Withheld",
+      "ABSENT": "Absent"
+    },
+    "roll": "Roll",
+    "registration": "Registration",
+    "studentName": "Name",
+    "course": "Course",
+    "publishedOn": "Published",
+    "remark": "Remark",
+    "failedSubjects": "Failed subjects",
+    "legend": "[T] = theory, [P] = practical. Hover a code for the subject name.",
+    "downloadNotice": "Board notice (PDF)",
+    "boardExamsTitle": "Published board results",
+    "noticesTitle": "Other results and notices",
+    "notFound": "No result found for this number. If you believe this is an error, please contact the office.",
+    "invalid": "Enter at least 4 digits.",
+    "captcha": "Verification did not complete — tick the checkbox below and try again.",
+    "rateLimited": "Too many attempts. Please try again in a minute.",
     "empty": "No results have been published yet.",
-    "searchLabel": "Search by roll",
-    "searchPlaceholder": "e.g. DMU-2026-014",
     "examDate": "Exam date",
-    "downloadPdf": "Download PDF",
-    "studentFound": "Found for this roll",
-    "studentNotFound": "No result found for this roll."
+    "downloadPdf": "Download PDF"
   },
   "verify": {
-    "title": "Verify a certificate",
-    "subtitle": "Check a certificate using its number or the student roll.",
-    "inputLabel": "Certificate number or roll",
-    "inputPlaceholder": "e.g. MUTI-2025-0142",
+    "title": "Certificate Verification",
+    "subtitle": "Enter a MUTI Certificate No or BMDC No to verify authenticity. If you cannot find your certificate, please contact our office.",
+    "searchBy": "Verify by",
+    "mode": {
+      "certificate": "Certificate No",
+      "bmdc": "BMDC No"
+    },
+    "inputLabel": {
+      "certificate": "Certificate number",
+      "bmdc": "BMDC registration number"
+    },
+    "placeholder": {
+      "certificate": "e.g. MUTI-C-2026-0117",
+      "bmdc": "e.g. A-12345"
+    },
+    "hint": {
+      "certificate": "Type the number exactly as printed on the certificate.",
+      "bmdc": "Dashes and spaces are fine; every certificate held by that doctor is listed."
+    },
     "verifyButton": "Verify",
-    "valid": "Valid",
-    "notFound": "No record found, please contact the office.",
+    "valid": "Verified — valid certificate",
+    "revoked": "This certificate has been revoked",
+    "notFound": "No record found. If you cannot find your certificate, please contact our office.",
+    "invalid": "Enter at least 3 characters.",
+    "captcha": "Verification did not complete — tick the checkbox below and try again.",
     "studentName": "Student name",
     "courseName": "Course",
-    "batchName": "Batch",
-    "completionDate": "Completion date",
+    "session": "Session / batch",
+    "certificateNo": "Certificate no",
+    "type": "Type",
+    "types": {
+      "COURSE": "Course certificate",
+      "SEMESTER": "Semester certificate",
+      "BOARD": "Board (BTEB) certificate"
+    },
+    "issuedAt": "Issue date",
+    "grade": "Grade",
     "status": "Status",
-    "rateLimited": "Too many attempts. Please try again in a little while."
+    "statusValid": "Valid",
+    "statusRevoked": "Revoked",
+    "revokedReason": "Reason",
+    "rateLimited": "Too many attempts. Please try again in a minute."
   },
   "gallery": {
     "title": "Gallery",

@@ -1,120 +1,145 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { BadgeCheck, SearchX, ShieldAlert } from "lucide-react";
+import { useCallback, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 
 import { Field } from "@/components/site/forms/field";
+import { Turnstile } from "@/components/site/turnstile";
+import { CertificateCard, LookupNotice } from "@/components/site/verify-result";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { verifyCertificate, type VerifyResult } from "@/app/actions/verify";
+import {
+  verifyCertificate,
+  type VerifyMode,
+  type VerifyResult,
+} from "@/app/actions/verify";
 import type { Locale } from "@/i18n/routing";
-import { formatDate } from "@/lib/format";
 
-export function VerifyForm({ locale }: { locale: Locale }) {
+/**
+ * Certificate lookup by certificate number or BMDC number (addendum 3, §1).
+ * The radio changes the helper text and the placeholder; the server does the
+ * normalisation so "A-12345", "a 12345" and "12345" all find the same doctor.
+ */
+export function VerifyForm({
+  locale,
+  turnstileSiteKey,
+  whatsappHref,
+}: {
+  locale: Locale;
+  turnstileSiteKey: string;
+  whatsappHref: string;
+}) {
   const t = useTranslations("verify");
   const common = useTranslations("common");
 
+  const [mode, setMode] = useState<VerifyMode>("certificate");
   const [query, setQuery] = useState("");
+  const [token, setToken] = useState("");
   const [result, setResult] = useState<VerifyResult | null>(null);
   const [pending, startTransition] = useTransition();
+  const onToken = useCallback((value: string) => setToken(value), []);
 
   function onSubmit(event: React.FormEvent) {
     event.preventDefault();
     startTransition(async () => {
-      setResult(await verifyCertificate(query));
+      setResult(await verifyCertificate({ mode, query, turnstileToken: token }));
     });
   }
 
   return (
-    <div className="max-w-xl">
+    <div className="mx-auto max-w-2xl">
       <form
         onSubmit={onSubmit}
+        method="post"
         className="rounded-[14px] border border-[color:var(--border)] bg-white p-5 shadow-[var(--shadow-card)] sm:p-6"
       >
-        <Field label={t("inputLabel")} required>
+        <fieldset className="mb-4">
+          <legend className="mb-2 text-sm font-medium">{t("searchBy")}</legend>
+          <div className="flex flex-wrap gap-2">
+            {(["certificate", "bmdc"] as const).map((option) => (
+              <label
+                key={option}
+                className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-4 text-sm font-medium transition ${
+                  mode === option
+                    ? "border-[color:var(--brand)] bg-[color:var(--brand-soft)] text-[color:var(--brand)]"
+                    : "border-[color:var(--border)] hover:bg-[color:var(--bg-soft)]"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="mode"
+                  value={option}
+                  checked={mode === option}
+                  onChange={() => {
+                    setMode(option);
+                    setResult(null);
+                  }}
+                  className="accent-[color:var(--brand)]"
+                />
+                {t(`mode.${option}`)}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <Field
+          label={t(`inputLabel.${mode}`)}
+          required
+          hint={t(`hint.${mode}`)}
+          error={result?.status === "invalid" ? t("invalid") : undefined}
+        >
           {(props) => (
             <Input
               {...props}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder={t("inputPlaceholder")}
+              placeholder={t(`placeholder.${mode}`)}
               dir="ltr"
-              required
-              minLength={3}
+              autoComplete="off"
               className="h-11 font-latin"
             />
           )}
         </Field>
 
+        <div className="mt-4">
+          <Turnstile siteKey={turnstileSiteKey} onToken={onToken} />
+        </div>
+
         <Button
           type="submit"
           variant="brand"
-          size="cta"
-          disabled={pending}
+          size="cta-lg"
           className="mt-4 w-full sm:w-auto"
+          disabled={pending || query.trim().length < 3}
         >
           {pending ? common("loading") : t("verifyButton")}
         </Button>
       </form>
 
-      {result?.status === "valid" && (
-        <div className="mt-5 rounded-[14px] border border-[color:var(--success)]/30 bg-[color:var(--success)]/8 p-5 sm:p-6">
-          <p className="flex items-center gap-2 font-semibold text-[color:var(--success-ink)]">
-            <BadgeCheck className="size-5" aria-hidden="true" />
-            {t("valid")}
-          </p>
-          <dl className="mt-4 space-y-2.5 text-sm">
-            <Row label={t("studentName")} value={result.name} latin />
-            <Row label={t("courseName")} value={result.course} latin />
-            {result.batch && <Row label={t("batchName")} value={result.batch} latin />}
-            {result.completionDate && (
-              <Row
-                label={t("completionDate")}
-                value={formatDate(result.completionDate, locale)}
-              />
-            )}
-            {result.grade && <Row label="Grade" value={result.grade} latin />}
-          </dl>
-        </div>
-      )}
+      <div aria-live="polite" className="mt-6 space-y-4">
+        {result?.status === "found" &&
+          result.certificates.map((certificate) => (
+            <CertificateCard
+              key={certificate.certificateNo}
+              certificate={certificate}
+              locale={locale}
+            />
+          ))}
 
-      {result?.status === "not-found" && (
-        <p className="mt-5 flex items-start gap-2.5 rounded-[14px] border border-[color:var(--border)] bg-[color:var(--bg-soft)] p-5 text-sm">
-          <SearchX
-            className="mt-0.5 size-5 shrink-0 text-[color:var(--muted-foreground)]"
-            aria-hidden="true"
+        {result?.status === "not-found" && (
+          <LookupNotice
+            tone="warning"
+            title={t("notFound")}
+            whatsappHref={whatsappHref}
           />
-          {t("notFound")}
-        </p>
-      )}
-
-      {result?.status === "rate-limited" && (
-        <p className="mt-5 flex items-start gap-2.5 rounded-[14px] border border-[color:var(--warning)]/30 bg-[color:var(--warning)]/10 p-5 text-sm">
-          <ShieldAlert
-            className="mt-0.5 size-5 shrink-0 text-[color:var(--warning-ink)]"
-            aria-hidden="true"
-          />
-          {t("rateLimited")}
-        </p>
-      )}
-    </div>
-  );
-}
-
-function Row({
-  label,
-  value,
-  latin = false,
-}: {
-  label: string;
-  value: string;
-  latin?: boolean;
-}) {
-  return (
-    <div className="flex flex-wrap justify-between gap-2">
-      <dt className="text-[color:var(--muted-foreground)]">{label}</dt>
-      <dd className={latin ? "font-latin font-medium" : "font-medium"}>{value}</dd>
+        )}
+        {result?.status === "rate-limited" && (
+          <LookupNotice tone="error" title={t("rateLimited")} />
+        )}
+        {result?.status === "captcha" && (
+          <LookupNotice tone="error" title={t("captcha")} />
+        )}
+      </div>
     </div>
   );
 }

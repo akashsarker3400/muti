@@ -70,3 +70,13 @@ export function parseImportDate(value: string): Date | null {
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
+
+/**
+ * Quotes one CSV cell. A leading =, +, - or @ is prefixed with an apostrophe
+ * so a spreadsheet never executes a cell that came from user input.
+ */
+export function csvCell(value: unknown): string {
+  const text = value == null ? "" : String(value);
+  const safe = /^[=+\-@]/.test(text) ? `'${text}` : text;
+  return `"${safe.replace(/"/g, '""')}"`;
+}

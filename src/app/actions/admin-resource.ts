@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import type { SaveResult } from "@/components/admin/resource-form";
-import { logActivity, requireAdmin } from "@/lib/admin-auth";
+import { logActivity, requireAdmin, requirePermission } from "@/lib/admin-auth";
 import { getResource, type ResourceConfig } from "@/lib/admin/resources";
 import { prisma } from "@/lib/prisma";
 
@@ -38,10 +38,10 @@ export async function saveResource(
   id: string | null,
   values: Record<string, unknown>,
 ): Promise<SaveResult> {
-  await requireAdmin();
-
   const resource = getResource(resourceKey);
   if (!resource) return { ok: false, error: "অজানা রিসোর্স।" };
+  if (resource.permission) await requirePermission(resource.permission);
+  else await requireAdmin();
 
   const parsed = resource.schema.safeParse(values);
   if (!parsed.success) {
@@ -84,13 +84,22 @@ export async function deleteResource(
   resourceKey: string,
   id: string,
 ): Promise<SaveResult> {
-  const admin = await requireAdmin();
-
   const resource = getResource(resourceKey);
   if (!resource) return { ok: false, error: "অজানা রিসোর্স।" };
+  const admin = resource.permission
+    ? await requirePermission(resource.permission)
+    : await requireAdmin();
 
   try {
-    await delegate(resource).delete({ where: { id } });
+    // Certificates are soft-deleted: a number once issued must stay unique.
+    if (resource.model === "certificate") {
+      await prisma.certificate.update({
+        where: { id },
+        data: { deletedAt: new Date() },
+      });
+    } else {
+      await delegate(resource).delete({ where: { id } });
+    }
     if (resource.afterWrite) await resource.afterWrite({ id }, {}, null);
     await logActivity(admin.id, "delete", resource.model, id);
 
@@ -110,10 +119,15 @@ export async function setResourceFlag(
   field: "published" | "active" | "pinned" | "verifiable",
   value: boolean,
 ): Promise<SaveResult> {
-  const admin = await requireAdmin();
-
   const resource = getResource(resourceKey);
   if (!resource) return { ok: false, error: "অজানা রিসোর্স।" };
+  const admin = resource.permission
+    ? await requirePermission(resource.permission)
+    : await requireAdmin();
+  // Publishing board results is its own permission (addendum 3, §8).
+  if (resource.key === "board-exams" && field === "published") {
+    await requirePermission("results.publish");
+  }
 
   try {
     await delegate(resource).update({ where: { id }, data: { [field]: value } });

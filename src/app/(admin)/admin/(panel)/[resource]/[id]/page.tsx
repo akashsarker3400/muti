@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { saveResource } from "@/app/actions/admin-resource";
 import { ResourceForm } from "@/components/admin/resource-form";
 import { AdminPageHeader } from "@/components/admin/ui";
+import { StudentCertificates } from "@/components/admin/student-certificates";
+import { requireAdmin, requirePermission } from "@/lib/admin-auth";
 import { getResource } from "@/lib/admin/resources";
 import { prisma } from "@/lib/prisma";
 
@@ -16,6 +18,8 @@ export default async function EditResourcePage({
   const { resource: key, id } = await params;
   const resource = getResource(key);
   if (!resource) notFound();
+  if (resource.permission) await requirePermission(resource.permission);
+  else await requireAdmin();
 
   const model = (
     prisma as unknown as Record<
@@ -52,6 +56,11 @@ export default async function EditResourcePage({
           "use server";
           return saveResource(key, id, values);
         }}
+        extra={
+          resource.detailPanel === "student-certificates" ? (
+            <StudentCertificates studentId={id} />
+          ) : undefined
+        }
       />
     </>
   );

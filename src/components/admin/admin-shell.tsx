@@ -32,6 +32,7 @@ import {
   Trophy,
   Users,
   X,
+  Upload,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -62,13 +63,24 @@ const NAV: NavGroup[] = [
       { href: "/admin/courses", label: "কোর্স", icon: BookOpen },
       { href: "/admin/batches", label: "ব্যাচ", icon: CalendarRange },
       { href: "/admin/students", label: "শিক্ষার্থী", icon: GraduationCap },
-      { href: "/admin/results", label: "ফলাফল", icon: Trophy },
+      { href: "/admin/certificates", label: "সার্টিফিকেট", icon: Award },
+      { href: "/admin/board-exams", label: "বোর্ড ফলাফল", icon: Trophy },
+      { href: "/admin/results", label: "ফলাফল (নোটিশ)", icon: Trophy },
+      { href: "/admin/import", label: "ইমপোর্ট (CSV/Excel)", icon: Upload },
+      { href: "/admin/verification-logs", label: "যাচাই লগ", icon: BadgeCheck },
     ],
   },
   {
     title: "কনটেন্ট",
     items: [
+      { href: "/admin/banners", label: "হিরো ব্যানার", icon: Images },
       { href: "/admin/notices", label: "নোটিশ", icon: Newspaper },
+      {
+        href: "/admin/leadership",
+        label: "নেতৃত্বের বক্তব্য",
+        icon: MessageSquareQuote,
+      },
+      { href: "/admin/advisors", label: "উপদেষ্টা মণ্ডলী", icon: Users },
       { href: "/admin/faculty", label: "শিক্ষকমণ্ডলী", icon: Users },
       { href: "/admin/testimonials", label: "অভিমত", icon: MessageSquareQuote },
       { href: "/admin/faq", label: "সাধারণ প্রশ্ন", icon: ScrollText },
@@ -87,7 +99,11 @@ const NAV: NavGroup[] = [
       { href: "/admin/payment-policy", label: "পেমেন্ট নীতিমালা", icon: CreditCard },
       { href: "/admin/admission-steps", label: "ভর্তির ধাপ", icon: ListOrdered },
       { href: "/admin/values", label: "লক্ষ্য ও মূল্যবোধ", icon: Target },
-      { href: "/admin/certificates", label: "প্রদত্ত সার্টিফিকেট", icon: Award },
+      {
+        href: "/admin/certificate-types",
+        label: "প্রদত্ত সার্টিফিকেটের তালিকা",
+        icon: Award,
+      },
     ],
   },
   {

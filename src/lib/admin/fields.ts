@@ -16,6 +16,7 @@ export type FieldType =
   | "image"
   | "file"
   | "images"
+  | "multiselect"
   | "tags";
 
 export type FieldDef = {

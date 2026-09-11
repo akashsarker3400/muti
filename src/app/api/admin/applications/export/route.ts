@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { currentAdmin, logActivity } from "@/lib/admin-auth";
 import { buildApplicationWhere } from "@/lib/admin/application-filters";
+import { csvCell } from "@/lib/admin/csv";
 import { displayPhone } from "@/lib/phone";
 import { prisma } from "@/lib/prisma";
 
@@ -141,7 +142,3 @@ function campaignOf(utm: unknown): string {
  * Quotes a CSV cell. A leading =, +, - or @ is prefixed with a single quote so
  * spreadsheet software cannot execute it as a formula.
  */
-function csvCell(value: string): string {
-  const safe = /^[=+\-@]/.test(value) ? `'${value}` : value;
-  return `"${safe.replace(/"/g, '""')}"`;
-}

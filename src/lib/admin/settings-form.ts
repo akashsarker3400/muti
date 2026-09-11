@@ -274,6 +274,16 @@ export const settingsFormSections: FormSection[] = [
         type: "checkbox",
       },
       {
+        name: "homepage.showLeadership",
+        label: "“নেতৃত্বের বক্তব্য” সেকশন দেখান",
+        type: "checkbox",
+      },
+      {
+        name: "homepage.showAdvisors",
+        label: "“উপদেষ্টা মণ্ডলী” সেকশন দেখান",
+        type: "checkbox",
+      },
+      {
         name: "homepage.showNoticeTicker",
         label: "নোটিশ টিকার দেখান",
         type: "checkbox",
@@ -407,6 +417,70 @@ export const settingsFormSections: FormSection[] = [
         latin: true,
         full: true,
         hint: "একাধিক হলে কমা দিয়ে আলাদা করুন। নতুন আবেদন এলে এখানে ইমেইল যাবে।",
+      },
+    ],
+  },
+  {
+    id: "hero",
+    label: "হিরো স্লাইডার",
+    description:
+      "ব্যানার মেনুতে সক্রিয় ব্যানার থাকলে হোমপেজের ওপরে পুরো প্রস্থের স্লাইডার দেখায়; না থাকলে আগের হিরো সেকশন।",
+    fields: [
+      { name: "hero.autoplay", label: "নিজে থেকে বদলাবে", type: "checkbox" },
+      {
+        name: "hero.intervalMs",
+        label: "প্রতি স্লাইড (মিলিসেকেন্ড)",
+        type: "number",
+        hint: "৫০০০ = ৫ সেকেন্ড।",
+      },
+      {
+        name: "hero.transition",
+        label: "ট্রানজিশন",
+        type: "select",
+        options: [
+          { value: "FADE", label: "ফেড" },
+          { value: "SLIDE", label: "স্লাইড" },
+        ],
+      },
+      { name: "hero.heightDesktop", label: "উচ্চতা — ডেস্কটপ (px)", type: "number" },
+      { name: "hero.heightMobile", label: "উচ্চতা — মোবাইল (px)", type: "number" },
+      { name: "hero.showDots", label: "ডট দেখান", type: "checkbox" },
+      { name: "hero.showArrows", label: "তীর দেখান", type: "checkbox" },
+      { name: "hero.pauseOnHover", label: "মাউস রাখলে থামবে", type: "checkbox" },
+    ],
+  },
+  {
+    id: "results",
+    label: "ফলাফল ও যাচাই",
+    fields: [
+      {
+        name: "results.subjectCodes",
+        label: "বিষয় কোডের নাম",
+        type: "textarea",
+        full: true,
+        latin: true,
+        hint: "প্রতি লাইনে একটি: 01101 = Basic Physics। ফেল করা বিষয়ের চিপে টুলটিপ হিসেবে দেখায়। [T] = থিওরি, [P] = প্র্যাকটিক্যাল।",
+      },
+      {
+        name: "advisors.categories",
+        label: "উপদেষ্টা ক্যাটাগরি",
+        type: "textarea",
+        full: true,
+        latin: true,
+        hint: "প্রতি লাইনে একটি: KEY = বাংলা নাম | English name। উপদেষ্টা যোগ করার সময় KEY বাছাই করা হয়।",
+      },
+      {
+        name: "security.turnstileSiteKey",
+        label: "Cloudflare Turnstile — Site key",
+        type: "text",
+        latin: true,
+        hint: "ফাঁকা রাখলে যাচাই ও ফলাফল পাতায় Turnstile দেখাবে না (রেট লিমিট তবুও থাকে)।",
+      },
+      {
+        name: "security.turnstileSecretKey",
+        label: "Cloudflare Turnstile — Secret key",
+        type: "text",
+        latin: true,
       },
     ],
   },

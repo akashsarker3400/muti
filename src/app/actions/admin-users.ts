@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 
+import { PERMISSIONS } from "@/lib/permissions";
+
 import type { SaveResult } from "@/components/admin/resource-form";
 import { logActivity, requireSuperAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
@@ -16,6 +18,13 @@ const userSchema = z.object({
   role: z.enum(["SUPER_ADMIN", "STAFF"]),
   password: z.string().default(""),
   active: z.boolean().default(true),
+  /** Extra grants for STAFF (addendum 3, §8); only known names are kept. */
+  permissions: z
+    .array(z.string())
+    .default([])
+    .transform((list) =>
+      list.filter((p) => (PERMISSIONS as readonly string[]).includes(p)),
+    ),
 });
 
 export async function saveUser(
@@ -34,7 +43,7 @@ export async function saveUser(
     return { ok: false, errors };
   }
 
-  const { name, email, role, password, active } = parsed.data;
+  const { name, email, role, password, active, permissions } = parsed.data;
 
   // A password is required when creating; on edit an empty field means "keep".
   if (!id && password.length < 8) {
@@ -69,6 +78,7 @@ export async function saveUser(
             email: email.toLowerCase(),
             role,
             active,
+            permissions,
             ...(passwordHash ? { passwordHash } : {}),
           },
         })
@@ -78,6 +88,7 @@ export async function saveUser(
             email: email.toLowerCase(),
             role,
             active,
+            permissions,
             passwordHash: passwordHash!,
           },
         });

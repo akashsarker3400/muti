@@ -97,6 +97,10 @@ export const siteSettingsSchema = z.object({
       showPracticalsPerBatch: booleanish.prefault(true),
       /** Scrolling notice ticker between the header and the hero. */
       showNoticeTicker: booleanish.prefault(true),
+      /** Homepage strip of up to four advisors (addendum 3, §5). */
+      showAdvisors: booleanish.prefault(true),
+      /** Homepage "Messages from leadership" cards (addendum 3, §4). */
+      showLeadership: booleanish.prefault(true),
       announcementTextBn: optionalString,
       announcementTextEn: optionalString,
       announcementLink: optionalString,
@@ -136,6 +140,38 @@ export const siteSettingsSchema = z.object({
     .object({
       aboutBn: optionalString,
       aboutEn: optionalString,
+    })
+    .prefault({}),
+  /** Addendum 3 §1 — Cloudflare Turnstile on /verify and /results. Blank = off. */
+  security: z
+    .object({
+      turnstileSiteKey: optionalString,
+      turnstileSecretKey: optionalString,
+    })
+    .prefault({}),
+  /** Addendum 3 §2 — subject code legend, one "code = name" per line. */
+  results: z
+    .object({
+      subjectCodes: optionalString,
+    })
+    .prefault({}),
+  /** Addendum 3 §6 — full-width hero slider behaviour. */
+  hero: z
+    .object({
+      autoplay: booleanish.prefault(true),
+      intervalMs: z.coerce.number().int().min(1500).max(60000).default(5000),
+      transition: z.enum(["FADE", "SLIDE"]).default("FADE"),
+      showDots: booleanish.prefault(true),
+      showArrows: booleanish.prefault(true),
+      pauseOnHover: booleanish.prefault(true),
+      heightDesktop: z.coerce.number().int().min(320).max(900).default(520),
+      heightMobile: z.coerce.number().int().min(240).max(700).default(360),
+    })
+    .prefault({}),
+  /** Addendum 3 §5 — advisor categories, one "KEY = বাংলা | English" per line. */
+  advisors: z
+    .object({
+      categories: optionalString,
     })
     .prefault({}),
 });
@@ -213,6 +249,8 @@ export const defaultSiteSettings: SiteSettings = siteSettingsSchema.parse({
     practicalsPerBatch: 30,
     showPracticalsPerBatch: true,
     showNoticeTicker: true,
+    showAdvisors: true,
+    showLeadership: true,
     announcementTextBn: "ভর্তি চলছে — CMU, DMU ও ADMU কোর্স, সেশন ২০২৬",
     announcementTextEn: "Admission open — CMU, DMU and ADMU courses, Session 2026",
     announcementLink: "/admission",
@@ -242,5 +280,15 @@ export const defaultSiteSettings: SiteSettings = siteSettingsSchema.parse({
       "২০০৯ সাল থেকে বৃহত্তর ময়মনসিংহে ডাক্তারদের জন্য সরকার অনুমোদিত আল্ট্রাসাউন্ড প্রশিক্ষণ। প্রতিষ্ঠান কোড ৫৭১২৫।",
     aboutEn:
       "Government approved ultrasound training for doctors in greater Mymensingh since 2009. Institute code 57125.",
+  },
+  security: { turnstileSiteKey: "", turnstileSecretKey: "" },
+  results: {
+    // TODO: real subject names from the BTEB syllabus (addendum 3, §2).
+    subjectCodes: "",
+  },
+  hero: {},
+  advisors: {
+    categories:
+      "ADVISOR = উপদেষ্টা | Advisors\nHONORARY = সম্মানিত উপদেষ্টা | Honorary advisors\nACADEMIC_COUNCIL = একাডেমিক কাউন্সিল | Academic council",
   },
 });

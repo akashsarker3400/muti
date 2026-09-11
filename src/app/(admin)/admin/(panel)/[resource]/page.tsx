@@ -1,6 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check, Minus } from "lucide-react";
+import { Check, Download, ListChecks, Minus, Upload } from "lucide-react";
 
 import { deleteResource, setResourceFlag } from "@/app/actions/admin-resource";
 import { AdminPagination } from "@/components/admin/admin-pagination";
@@ -16,7 +17,9 @@ import {
   NewButton,
   Panel,
 } from "@/components/admin/ui";
+import { requireAdmin, requirePermission } from "@/lib/admin-auth";
 import { getResource, type ResourceColumn } from "@/lib/admin/resources";
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 import { cn } from "cn";
@@ -40,6 +43,8 @@ export default async function ResourceListPage({
 
   const resource = getResource(key);
   if (!resource) notFound();
+  if (resource.permission) await requirePermission(resource.permission);
+  else await requireAdmin();
 
   const page = Math.max(1, Number.parseInt(pageParam ?? "1", 10) || 1);
 
@@ -86,7 +91,25 @@ export default async function ResourceListPage({
         title={resource.title}
         description={resource.description}
         action={
-          <NewButton href={`/admin/${resource.key}/new`} label={resource.newLabel} />
+          <div className="flex flex-wrap items-center gap-2">
+            {resource.exportCsv && (
+              <Button asChild variant="outline" size="cta">
+                <a href={`/api/admin/export/${resource.key}`}>
+                  <Download className="size-4" aria-hidden="true" />
+                  CSV
+                </a>
+              </Button>
+            )}
+            {resource.importEntity && (
+              <Button asChild variant="outline" size="cta">
+                <Link href={`/admin/import?entity=${resource.importEntity}`}>
+                  <Upload className="size-4" aria-hidden="true" />
+                  ইমপোর্ট
+                </Link>
+              </Button>
+            )}
+            <NewButton href={`/admin/${resource.key}/new`} label={resource.newLabel} />
+          </div>
         }
       />
 
@@ -163,6 +186,19 @@ export default async function ResourceListPage({
 
                       <td className="px-4 py-2.5">
                         <div className="flex items-center justify-end">
+                          {resource.rowTool === "board-results" && (
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="sm"
+                              className="me-2"
+                            >
+                              <Link href={`/admin/board-exams/${id}/results`}>
+                                <ListChecks className="size-4" aria-hidden="true" />
+                                ফলাফল
+                              </Link>
+                            </Button>
+                          )}
                           {resource.rowTool === "batch-clone" && (
                             <CloneBatchButton
                               batchId={id}

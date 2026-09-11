@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import type { Role } from "@/generated/prisma/enums";
+import { hasPermission, type Permission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -10,7 +11,13 @@ import { prisma } from "@/lib/prisma";
  * a server action is a public HTTP endpoint and must never rely on the page
  * that rendered its form having done the check.
  */
-export type AdminUser = { id: string; name: string; email: string; role: Role };
+export type AdminUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  permissions: string[];
+};
 
 export async function currentAdmin(): Promise<AdminUser | null> {
   const session = await auth();
@@ -20,11 +27,24 @@ export async function currentAdmin(): Promise<AdminUser | null> {
   // than when its 12-hour JWT expires.
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { id: true, name: true, email: true, role: true, active: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      active: true,
+      permissions: true,
+    },
   });
 
   if (!user || !user.active) return null;
-  return { id: user.id, name: user.name, email: user.email, role: user.role };
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    permissions: user.permissions,
+  };
 }
 
 export async function requireAdmin(): Promise<AdminUser> {
@@ -36,6 +56,17 @@ export async function requireAdmin(): Promise<AdminUser> {
 export async function requireSuperAdmin(): Promise<AdminUser> {
   const user = await requireAdmin();
   if (user.role !== "SUPER_ADMIN") redirect("/admin");
+  return user;
+}
+
+/**
+ * Page/action guard for one named permission (addendum 3, §8). A page
+ * redirects to the dashboard; a server action gets the same redirect, which
+ * the client sees as a failed call.
+ */
+export async function requirePermission(permission: Permission): Promise<AdminUser> {
+  const user = await requireAdmin();
+  if (!hasPermission(user, permission)) redirect("/admin?denied=1");
   return user;
 }
 

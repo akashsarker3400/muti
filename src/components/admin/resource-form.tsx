@@ -343,6 +343,7 @@ function FieldControl({
     field.type === "image" ||
     field.type === "file" ||
     field.type === "images" ||
+    field.type === "multiselect" ||
     field.type === "tags";
 
   const inputClass = cn("h-11", field.latin && "font-latin");
@@ -473,6 +474,36 @@ function FieldControl({
           value={Array.isArray(value) ? value : []}
           onChange={(urls) => setValue(field.name, urls)}
         />
+      )}
+
+      {field.type === "multiselect" && (
+        <div className="grid gap-2 sm:grid-cols-2" role="group" aria-labelledby={id}>
+          {field.options?.map((option) => {
+            const selected = Array.isArray(value) ? value : [];
+            const checked = selected.includes(option.value);
+            return (
+              <label
+                key={option.value}
+                className="flex min-h-10 cursor-pointer items-center gap-2.5 rounded-lg border border-[color:var(--border)] px-3 text-sm"
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={(event) =>
+                    setValue(
+                      field.name,
+                      event.target.checked
+                        ? [...selected, option.value]
+                        : selected.filter((item) => item !== option.value),
+                    )
+                  }
+                  className="size-4 accent-[color:var(--brand)]"
+                />
+                {option.label}
+              </label>
+            );
+          })}
+        </div>
       )}
 
       {field.type === "tags" && (
