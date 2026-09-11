@@ -196,17 +196,35 @@ export async function SiteFooter({
       </div>
 
       <div className="border-t border-white/10">
-        <div className="container-content flex flex-col items-center justify-between gap-2 py-5 text-xs text-[color:#9aa5c6] sm:flex-row">
+        {/* Extra end/bottom padding keeps the floating WhatsApp button from
+            covering the copyright and credit line. */}
+        <div className="container-content flex flex-col items-center justify-between gap-2 pt-5 pb-24 text-xs text-[color:#9aa5c6] sm:flex-row sm:pe-20 sm:pb-5">
           <p>
             © {yearLabel} {instituteName}. {footer("rights")}.
           </p>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
             <Link href="/privacy" className="transition hover:text-white">
               {footer("privacy")}
             </Link>
             <Link href="/terms" className="transition hover:text-white">
               {footer("terms")}
             </Link>
+
+            <span aria-hidden="true" className="hidden text-white/20 sm:inline">
+              |
+            </span>
+
+            <p>
+              {footer("developedBy")}{" "}
+              <a
+                href="https://ans.digital"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-latin font-semibold text-[color:#c3cbe4] transition hover:text-white"
+              >
+                ANS DIGITAL
+              </a>
+            </p>
           </div>
         </div>
       </div>
