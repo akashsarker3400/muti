@@ -733,7 +733,7 @@ const bannerResource: ResourceConfig = {
           name: "image",
           label: "ডেস্কটপ ছবি (১৯২০×৭০০)",
           type: "image",
-          hint: "ফাঁকা রাখলে নেভি গ্রেডিয়েন্টের ওপর লেখা দেখাবে।",
+          hint: "এমন ছবি বাছুন যার মূল বিষয় ডান দিকে আর বাম ৪০% সাদামাটা (দেয়াল, ফুল, আকাশ) — লেখা বাম দিকে বসে। ডেস্কটপ ১৯২০×৭০০, মোবাইল ১০৮০×১০৮০। একটু গাঢ় ছবিতে সবচেয়ে ভালো হয়। / Choose photos where the main subject is on the right and the left 40% is plain (wall, flowers, sky). Recommended 1920x700 desktop, 1080x1080 mobile. Slightly darker photos work best. ফাঁকা রাখলে নেভি গ্রেডিয়েন্টের ওপর লেখা দেখাবে।",
         },
         { name: "mobileImage", label: "মোবাইল ছবি (১০৮০×১০৮০, ঐচ্ছিক)", type: "image" },
         {
@@ -754,14 +754,15 @@ const bannerResource: ResourceConfig = {
         },
         {
           name: "overlay",
-          label: "কালো ওভারলে (০–৮০%)",
+          label: "স্ক্রিমের গাঢ়ত্ব (৮–৮০, ডিফল্ট ৪০)",
           type: "number",
-          hint: "ছবির ওপর লেখা পড়তে যতটা অন্ধকার দরকার। ৪০ সাধারণত ভালো।",
+          hint: "লেখার দিকে নেভি গ্রেডিয়েন্ট (ছবি ঝাপসা হয় না)। ৪০ = ডিজাইন করা মান; কম দিলে হালকা (সর্বনিম্ন ২০%), ৪০-এর বেশি দিলে আর বাড়ে না।",
         },
         {
           name: "textPosition",
           label: "লেখার অবস্থান",
           type: "select",
+          hint: "বাম: বাম দিক গাঢ়, ডান দিকের ছবি পরিষ্কার। মাঝখানে: চারদিক থেকে সমানভাবে গাঢ়।",
           options: [
             { value: "LEFT", label: "বাম" },
             { value: "CENTER", label: "মাঝখানে" },

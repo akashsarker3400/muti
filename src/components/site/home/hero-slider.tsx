@@ -194,11 +194,20 @@ function Slide({
 }) {
   const Heading = first ? "h1" : "h2";
   const centered = slide.textPosition === "CENTER";
-  const overlay = Math.min(80, Math.max(0, slide.overlay)) / 100;
+  // The admin "overlay" number scales the scrim: 40 is the designed strength,
+  // clamped so a slide can be softened to 20% or hardened to 100%, never more.
+  const strength = Math.min(1, Math.max(0.2, slide.overlay / 40));
+  const scrim = scrimFor(slide.textPosition, strength);
 
   return (
     <article
-      className="relative h-full min-w-0 flex-[0_0_100%]"
+      className="hero-scrim relative h-full min-w-0 flex-[0_0_100%]"
+      style={
+        {
+          "--hero-scrim-desktop": scrim.desktop,
+          "--hero-scrim-mobile": scrim.mobile,
+        } as React.CSSProperties
+      }
       role="group"
       aria-roledescription="slide"
       aria-label={label}
@@ -233,51 +242,48 @@ function Slide({
         />
       )}
 
-      {/* Readability gradient: heavier where the text sits. */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0"
-        style={{
-          background: centered
-            ? `linear-gradient(to top, rgba(10,16,40,${overlay + 0.2}) 0%, rgba(10,16,40,${overlay}) 55%, rgba(10,16,40,${overlay * 0.6}) 100%)`
-            : `linear-gradient(to right, rgba(10,16,40,${overlay + 0.25}) 0%, rgba(10,16,40,${overlay}) 50%, rgba(10,16,40,${overlay * 0.35}) 100%)`,
-        }}
-      />
-
+      {/*
+        Directional scrim (hero readability fix): a navy gradient painted by
+        the .hero-scrim::before pseudo-element — left→right on desktop so the
+        text side is dark and the photo's subject stays clear, top→bottom on
+        phones where the text sits low. The image is never blurred.
+      */}
       <div
         className={cn(
-          "container-content relative flex h-full flex-col justify-center py-10",
+          "container-content relative z-[2] flex h-full flex-col justify-end py-6 md:justify-center md:py-10",
           centered ? "items-center text-center" : "items-start text-start",
         )}
       >
-        <Heading className="max-w-3xl text-[clamp(1.6rem,4.2vw,3rem)] leading-[1.2] font-bold text-balance !text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
-          {slide.title}
-        </Heading>
-        {slide.subtitle && (
-          <p className="mt-3 max-w-2xl text-[clamp(0.95rem,1.8vw,1.25rem)] leading-relaxed text-white/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.35)]">
-            {slide.subtitle}
-          </p>
-        )}
-        {(slide.cta || slide.cta2) && (
-          <div
-            className={cn(
-              "mt-6 flex flex-wrap gap-3",
-              centered ? "justify-center" : "justify-start",
-            )}
-          >
-            {slide.cta && (
-              <Cta href={slide.cta.href} variant="accent" active={active}>
-                {slide.cta.label}
-              </Cta>
-            )}
-            {slide.cta2 && (
-              <Cta href={slide.cta2.href} variant="whatsapp" active={active}>
-                {slide.cta2.whatsapp && <WhatsAppIcon className="size-5" />}
-                {slide.cta2.label}
-              </Cta>
-            )}
-          </div>
-        )}
+        <div className={cn("relative max-w-[560px] p-6", centered && "mx-auto")}>
+          <Heading className="text-[clamp(1.6rem,4.2vw,3rem)] leading-[1.2] font-bold text-balance !text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.35)]">
+            {slide.title}
+          </Heading>
+          {slide.subtitle && (
+            <p className="mt-3 text-[clamp(0.95rem,1.8vw,1.25rem)] leading-relaxed text-white/90 [text-shadow:0_2px_12px_rgba(0,0,0,0.35)]">
+              {slide.subtitle}
+            </p>
+          )}
+          {(slide.cta || slide.cta2) && (
+            <div
+              className={cn(
+                "mt-6 flex flex-wrap gap-3",
+                centered ? "justify-center" : "justify-start",
+              )}
+            >
+              {slide.cta && (
+                <Cta href={slide.cta.href} variant="accent" active={active}>
+                  {slide.cta.label}
+                </Cta>
+              )}
+              {slide.cta2 && (
+                <Cta href={slide.cta2.href} variant="whatsapp" active={active}>
+                  {slide.cta2.whatsapp && <WhatsAppIcon className="size-5" />}
+                  {slide.cta2.label}
+                </Cta>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </article>
   );
@@ -317,6 +323,22 @@ function Cta({
       )}
     </Button>
   );
+}
+
+/**
+ * Scrim gradients as CSS strings. The alpha stops are the designed values
+ * multiplied by the per-banner strength. LEFT darkens the text side; CENTER
+ * darkens symmetrically around the middle. Phones always fade top→bottom.
+ */
+function scrimFor(position: "LEFT" | "CENTER", strength: number) {
+  const navy = (alpha: number) => `rgba(18,32,79,${(alpha * strength).toFixed(3)})`;
+  return {
+    desktop:
+      position === "CENTER"
+        ? `radial-gradient(ellipse at center, ${navy(0.8)} 0%, ${navy(0.6)} 45%, ${navy(0.2)} 100%)`
+        : `linear-gradient(90deg, ${navy(0.88)} 0%, ${navy(0.72)} 35%, ${navy(0.25)} 60%, ${navy(0)} 85%)`,
+    mobile: `linear-gradient(180deg, ${navy(0.35)} 0%, ${navy(0.85)} 70%)`,
+  };
 }
 
 function ArrowButton({

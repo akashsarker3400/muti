@@ -307,6 +307,24 @@
   }
 }
 
+/* Hero slider scrim (readability fix): painted by a pseudo-element so it sits
+   above the photo and below the text without an extra DOM node. Phones get
+   the vertical gradient; from 769px the directional one. */
+.hero-scrim::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Above the absolutely positioned <Image>, below the text (z-index 2). */
+  z-index: 1;
+  pointer-events: none;
+  background: var(--hero-scrim-mobile);
+}
+@media (min-width: 769px) {
+  .hero-scrim::before {
+    background: var(--hero-scrim-desktop);
+  }
+}
+
 /* Homepage notice ticker — a seamless CSS marquee (see notice-ticker.tsx) */
 @keyframes notice-ticker {
   from {
