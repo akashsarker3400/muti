@@ -37,6 +37,28 @@ RUN npm run build
 RUN node scripts/build-seed.mjs
 
 
+# --- prisma runtime --------------------------------------------------------
+# The entrypoint runs `migrate deploy` and the seed, and neither the Prisma CLI
+# nor the driver adapter survives Next's standalone trace. Installing them into
+# their own prefix lets npm resolve the whole tree: hand-picking directories
+# missed @prisma/config's `effect`, and @prisma/studio-core, which the CLI
+# loads eagerly even for `migrate deploy`.
+#
+# The versions are read from the installed tree, so this can never drift from
+# package-lock.json.
+FROM base AS prisma-runtime
+WORKDIR /prisma-runtime
+COPY --from=deps /app/node_modules/prisma/package.json ./v-prisma.json
+COPY --from=deps /app/node_modules/@prisma/adapter-pg/package.json ./v-adapter.json
+COPY --from=deps /app/node_modules/dotenv/package.json ./v-dotenv.json
+RUN npm init -y > /dev/null \
+  && npm install --omit=dev --no-audit --no-fund \
+    "prisma@$(node -p "require('./v-prisma.json').version")" \
+    "@prisma/adapter-pg@$(node -p "require('./v-adapter.json').version")" \
+    "dotenv@$(node -p "require('./v-dotenv.json').version")" \
+  && rm v-prisma.json v-adapter.json v-dotenv.json
+
+
 # --- runtime ---------------------------------------------------------------
 FROM base AS runner
 ENV NODE_ENV=production
@@ -49,6 +71,11 @@ RUN addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
+
+# Copied before the standalone bundle so the app's own traced modules win
+# wherever the two trees overlap.
+COPY --from=prisma-runtime /prisma-runtime/node_modules ./node_modules
+
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
@@ -57,16 +84,6 @@ COPY --from=builder /app/prisma/migrations ./prisma/migrations
 COPY --from=builder /app/prisma/schema.prisma ./prisma/schema.prisma
 COPY --from=builder /app/prisma/seed.mjs ./prisma/seed.mjs
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
-
-# The Prisma CLI (for `migrate deploy`) is not part of the traced standalone
-# bundle, so bring it in explicitly. Studio and the local dev server are
-# dropped: they are never used inside the container.
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-# prisma.config.ts loads the connection string with dotenv (Prisma 7 no longer
-# reads .env by itself).
-COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
-RUN rm -rf node_modules/@prisma/studio-core node_modules/@prisma/dev
 
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh
