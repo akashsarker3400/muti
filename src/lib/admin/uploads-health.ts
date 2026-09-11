@@ -4,11 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/site-settings";
 import { storage } from "@/lib/storage";
 
+export type MissingFile = { url: string; where: string };
+
 export type UploadsHealth = {
   driver: "r2" | "local";
   writable: boolean;
-  /** Paths the site references that are not on disk — the sign of a lost volume. */
-  missing: string[];
+  /** Referenced paths that are not in storage, with the setting or table each belongs to. */
+  missing: MissingFile[];
   checked: number;
 };
 
@@ -23,17 +25,28 @@ export async function uploadsHealth(): Promise<UploadsHealth> {
   const writable = await store.healthy();
 
   const settings = await getSiteSettings();
-  const referenced = new Set<string>();
-  const add = (value: unknown) => {
-    if (typeof value === "string" && value.startsWith("/uploads/"))
-      referenced.add(value);
+  const referenced = new Map<string, string>();
+  const add = (value: unknown, where: string) => {
+    if (
+      typeof value === "string" &&
+      value.startsWith("/uploads/") &&
+      !referenced.has(value)
+    ) {
+      referenced.set(value, where);
+    }
   };
-  add(settings.branding.logo);
-  add(settings.branding.favicon);
-  add(settings.homepage.heroImage);
-  settings.homepage.heroImages.forEach(add);
-  add(settings.homepage.practicalImage);
-  add(settings.health.heroImage);
+  add(settings.branding.logo, "সাইট সেটিংস → ব্র্যান্ডিং → লোগো");
+  add(settings.branding.favicon, "সাইট সেটিংস → ব্র্যান্ডিং → ফেভিকন");
+  add(settings.homepage.heroImage, "সাইট সেটিংস → হোমপেজ → হিরো ছবি (পুরনো একক ঘর)");
+  settings.homepage.heroImages.forEach((url, index) =>
+    add(url, `সাইট সেটিংস → হোমপেজ → হিরো ছবি (স্লাইডশো) #${index + 1}`),
+  );
+  add(
+    settings.homepage.practicalImage,
+    "সাইট সেটিংস → হোমপেজ → প্র্যাকটিক্যাল সেকশনের ছবি",
+  );
+  add(settings.health.heroImage, "সাইট সেটিংস → স্বাস্থ্যসেবা → পাতার ছবি");
+  add(settings.health.ogImage, "সাইট সেটিংস → স্বাস্থ্যসেবা → সোশ্যাল শেয়ার কার্ড");
 
   // A handful of the most recent uploads from the content tables as well.
   try {
@@ -54,16 +67,17 @@ export async function uploadsHealth(): Promise<UploadsHealth> {
         take: 5,
       }),
     ]);
-    courses.forEach((c) => add(c.image));
-    banners.forEach((b) => add(b.image));
-    images.forEach((i) => add(i.url));
+    courses.forEach((c) => add(c.image, "কোর্সের ছবি"));
+    banners.forEach((b) => add(b.image, "হিরো ব্যানার"));
+    images.forEach((i) => add(i.url, "গ্যালারি"));
   } catch {
     // Diagnostics only; never let this break the dashboard.
   }
 
-  const missing: string[] = [];
-  for (const url of referenced) {
-    if (!(await store.exists(url.replace(/^\/uploads\//, "")))) missing.push(url);
+  const missing: MissingFile[] = [];
+  for (const [url, where] of referenced) {
+    if (!(await store.exists(url.replace(/^\/uploads\//, ""))))
+      missing.push({ url, where });
   }
 
   return { driver: store.name, writable, missing, checked: referenced.size };

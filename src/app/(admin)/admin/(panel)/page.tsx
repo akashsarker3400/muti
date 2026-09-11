@@ -87,7 +87,7 @@ export default async function AdminDashboard() {
               ? uploads.driver === "r2"
                 ? "Cloudflare R2 বাকেটে সংযোগ করা যাচ্ছে না — R2_* environment variable গুলো মিলিয়ে দেখুন। "
                 : "আপলোড ফোল্ডারে লেখা যাচ্ছে না। "
-              : `${uploads.checked}টি ফাইলের মধ্যে ${uploads.missing.length}টি নেই (যেমন ${uploads.missing[0]})। `}
+              : `${uploads.checked}টি ফাইলের মধ্যে ${uploads.missing.length}টি নেই। `}
             {uploads.driver === "r2" ? (
               <>
                 ফাইলগুলো Cloudflare R2-তে রাখা হয়। যেগুলো নেই, সেগুলো হয় বাকেট থেকে
@@ -105,6 +105,18 @@ export default async function AdminDashboard() {
               </>
             )}
           </p>
+          {uploads.missing.length > 0 && (
+            <ul className="mt-2 space-y-1">
+              {uploads.missing.map((file) => (
+                <li key={file.url} className="flex flex-wrap gap-x-2">
+                  <span className="font-medium">{file.where}</span>
+                  <code className="font-latin text-xs text-[color:var(--muted-foreground)]">
+                    {file.url}
+                  </code>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
