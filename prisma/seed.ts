@@ -7,6 +7,12 @@ import { PrismaPg } from "@prisma/adapter-pg";
 
 import { defaultSiteSettings } from "../src/lib/site-settings-schema";
 import {
+  certificatesOffered,
+  paymentPolicy,
+  requiredDocuments,
+  whyChooseMuti,
+} from "../src/lib/content";
+import {
   eligibility,
   seedCourses,
   seedFaqs,
@@ -200,6 +206,143 @@ async function seedPostRows() {
   console.log(`+ ${seedPosts.length} draft posts ensured`);
 }
 
+/**
+ * The fixed lists the office can edit from the admin panel. They are seeded
+ * from src/lib/content.ts, which stays the canonical source of the wording in
+ * the build spec (section 3).
+ */
+async function seedContentItems() {
+  const existing = await prisma.contentItem.count();
+  if (existing > 0) {
+    console.log(`· ${existing} content items already present`);
+    return;
+  }
+
+  const rows: Array<{
+    kind:
+      | "WHY_CHOOSE"
+      | "DOCUMENT"
+      | "PAYMENT_POLICY"
+      | "ADMISSION_STEP"
+      | "VALUE"
+      | "CERTIFICATE";
+    icon?: string | null;
+    titleBn?: string | null;
+    titleEn?: string | null;
+    bodyBn: string;
+    bodyEn: string;
+    sortOrder: number;
+  }> = [];
+
+  whyChooseMuti.forEach((item, index) =>
+    rows.push({
+      kind: "WHY_CHOOSE",
+      icon: item.icon,
+      bodyBn: item.bn,
+      bodyEn: item.en,
+      sortOrder: (index + 1) * 10,
+    }),
+  );
+
+  requiredDocuments.forEach((item, index) =>
+    rows.push({
+      kind: "DOCUMENT",
+      bodyBn: item.bn,
+      bodyEn: item.en,
+      sortOrder: (index + 1) * 10,
+    }),
+  );
+
+  paymentPolicy.forEach((item, index) =>
+    rows.push({
+      kind: "PAYMENT_POLICY",
+      bodyBn: item.bn,
+      bodyEn: item.en,
+      sortOrder: (index + 1) * 10,
+    }),
+  );
+
+  const steps: Array<[string, string, string, string]> = [
+    [
+      "WhatsApp করুন বা অফিসে আসুন",
+      "WhatsApp us or visit the office",
+      "কোর্স, ফি ও ব্যাচ সম্পর্কে জেনে নিন।",
+      "Ask about courses, fees and the upcoming batch.",
+    ],
+    [
+      "ফ্রি ক্লাস করুন",
+      "Attend a free class",
+      "ভর্তির আগে একটি ক্লাস ফ্রি করে দেখে নিন।",
+      "See a real class before you decide to enrol.",
+    ],
+    [
+      "কাগজপত্র ও ৫০% ফি জমা দিন",
+      "Submit documents and 50% of the fee",
+      "স্ক্যান কপি ও হার্ড কপি অফিসে জমা দিয়ে আসন নিশ্চিত করুন।",
+      "Hand in scan copies plus hard copies at the office to confirm your seat.",
+    ],
+    [
+      "ক্লাস শুরু করুন",
+      "Start your classes",
+      "ব্যাচের সাথে ক্লাস ও রিয়েল পেশেন্ট প্র্যাকটিস শুরু।",
+      "Join the batch and begin real-patient practice.",
+    ],
+  ];
+  steps.forEach(([titleBn, titleEn, bodyBn, bodyEn], index) =>
+    rows.push({
+      kind: "ADMISSION_STEP",
+      titleBn,
+      titleEn,
+      bodyBn,
+      bodyEn,
+      sortOrder: (index + 1) * 10,
+    }),
+  );
+
+  const values: Array<[string, string, string, string]> = [
+    [
+      "লক্ষ্য",
+      "Mission",
+      "হাতে-কলমে, রিয়েল পেশেন্ট ভিত্তিক শিক্ষার মাধ্যমে দক্ষ ও আত্মবিশ্বাসী সোনোলজিস্ট তৈরি করা।",
+      "Train competent, confident sonologists through hands-on, real-patient education.",
+    ],
+    [
+      "দৃষ্টিভঙ্গি",
+      "Vision",
+      "উত্তর ও মধ্য বাংলাদেশের সবচেয়ে নির্ভরযোগ্য আল্ট্রাসাউন্ড প্রশিক্ষণ প্রতিষ্ঠান হয়ে ওঠা।",
+      "Be the most trusted ultrasound training institute in northern and central Bangladesh.",
+    ],
+    [
+      "মূল্যবোধ",
+      "Values",
+      "রোগীর নিরাপত্তা, একাডেমিক মান, মেন্টরশিপ এবং আজীবন শেখা।",
+      "Patient safety, academic rigour, mentorship, lifelong learning.",
+    ],
+  ];
+  values.forEach(([titleBn, titleEn, bodyBn, bodyEn], index) =>
+    rows.push({
+      kind: "VALUE",
+      titleBn,
+      titleEn,
+      bodyBn,
+      bodyEn,
+      sortOrder: (index + 1) * 10,
+    }),
+  );
+
+  certificatesOffered.forEach((item, index) =>
+    rows.push({
+      kind: "CERTIFICATE",
+      bodyBn: item.bn,
+      bodyEn: item.en,
+      sortOrder: (index + 1) * 10,
+    }),
+  );
+
+  await prisma.contentItem.createMany({ data: rows });
+  console.log(`+ ${rows.length} content items`);
+}
+
 async function main() {
   console.log("Seeding MUTI database…");
 
@@ -222,6 +365,7 @@ async function main() {
 
   await seedCoursesAndRoutines();
   await seedBatches();
+  await seedContentItems();
   await seedPartnerRows();
   await seedFaqRows();
   await seedNoticeRows();

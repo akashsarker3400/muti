@@ -43,14 +43,18 @@ export default async function ResourceListPage({
 
   const page = Math.max(1, Number.parseInt(pageParam ?? "1", 10) || 1);
 
-  const where =
-    q && q.trim()
+  // `baseWhere` keeps the six ContentItem editors looking at their own slice
+  // of the shared table.
+  const where = {
+    ...resource.baseWhere,
+    ...(q && q.trim()
       ? {
           OR: resource.searchFields.map((field) => ({
             [field]: { contains: q.trim(), mode: "insensitive" as const },
           })),
         }
-      : {};
+      : {}),
+  };
 
   const model = (
     prisma as unknown as Record<

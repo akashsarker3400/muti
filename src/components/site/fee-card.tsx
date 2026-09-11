@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import type { Locale } from "@/i18n/routing";
-import { paymentPolicy, localize } from "@/lib/content";
+import { getContent } from "@/lib/content-items";
 import { feeBreakdown, offerLabel, type FeeFields } from "@/lib/course";
 import { formatMoney } from "@/lib/format";
 
@@ -17,9 +17,10 @@ export async function FeeCard({
   course: FeeFields;
   locale: Locale;
 }) {
-  const [t, common] = await Promise.all([
+  const [t, common, paymentPolicy] = await Promise.all([
     getTranslations("course"),
     getTranslations("common"),
+    getContent("PAYMENT_POLICY", locale),
   ]);
 
   const fees = feeBreakdown(course);
@@ -66,11 +67,11 @@ export async function FeeCard({
             <h3 className="text-sm font-semibold">{t("paymentPolicyTitle")}</h3>
             <ul className="mt-2 space-y-1.5 text-sm text-[color:var(--muted-foreground)]">
               {paymentPolicy.map((item) => (
-                <li key={item.en} className="flex gap-2">
+                <li key={item.id} className="flex gap-2">
                   <span aria-hidden="true" className="text-[color:var(--brand)]">
                     •
                   </span>
-                  <span>{localize(item, locale)}</span>
+                  <span>{item.body}</span>
                 </li>
               ))}
             </ul>

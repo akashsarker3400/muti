@@ -15,10 +15,13 @@ import { Input } from "@/components/ui/input";
  */
 export function UploadField({
   value,
+  id,
   onChange,
   accept = "image/*",
   kind = "image",
 }: {
+  /** Ties the field's <label> to the path input below. */
+  id?: string;
   value: string;
   onChange: (url: string) => void;
   accept?: string;
@@ -57,7 +60,7 @@ export function UploadField({
   return (
     <div className="space-y-2">
       {value && (
-        <div className="flex items-center gap-3 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-soft)] p-2">
+        <div className="flex min-w-0 items-center gap-3 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-soft)] p-2">
           {kind === "image" ? (
             <span className="relative size-16 shrink-0 overflow-hidden rounded-md bg-white">
               <Image src={value} alt="" fill sizes="64px" className="object-contain" />
@@ -90,7 +93,7 @@ export function UploadField({
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
         <input
           ref={inputRef}
           type="file"
@@ -118,15 +121,17 @@ export function UploadField({
 
         {/* Manual path entry, for files already on the volume. */}
         <Input
+          id={id}
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder="/uploads/…"
+          aria-label="ফাইলের পাথ"
           dir="ltr"
-          className="h-11 max-w-xs font-latin text-xs"
+          className="h-11 w-full min-w-0 font-latin text-xs sm:max-w-xs"
         />
       </div>
 
-      <p className="text-xs text-[color:var(--muted-foreground)]">
+      <p className="text-xs break-words text-[color:var(--muted-foreground)]">
         সর্বোচ্চ ১০ MB। ছবি স্বয়ংক্রিয়ভাবে webp-এ রূপান্তরিত হয় (সর্বোচ্চ ১৬০০px)।
       </p>
     </div>

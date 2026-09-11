@@ -49,7 +49,7 @@ export async function SiteFooter({
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <span className="grid size-12 place-items-center rounded-xl bg-white p-1.5">
-              <Logo size={40} />
+              <Logo src={settings.branding.logo} size={40} />
             </span>
             <span className="font-latin text-xl font-bold text-white">
               {settings.general.shortName || "MUTI"}

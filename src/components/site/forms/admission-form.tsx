@@ -165,6 +165,9 @@ export function AdmissionForm({
     <form
       onSubmit={handleSubmit(onSubmit)}
       noValidate
+      // Before hydration a native submit would otherwise be a GET, putting the
+      // applicant's phone number in the URL.
+      method="post"
       className="relative space-y-5 rounded-[14px] border border-[color:var(--border)] bg-white p-5 shadow-[var(--shadow-card)] sm:p-6"
     >
       <Honeypot {...register("website")} />

@@ -10,7 +10,7 @@ import { Section, SectionHeading } from "@/components/site/section";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/i18n/routing";
-import { admissionRequirement, localize, paymentPolicy } from "@/lib/content";
+import { getContent } from "@/lib/content-items";
 import { pick } from "@/lib/format";
 import { getDownloads, getPublishedCourses, getUpcomingBatches } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
@@ -37,20 +37,22 @@ export default async function AdmissionPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [settings, courses, batches, downloads, t] = await Promise.all([
-    getSiteSettings(),
-    getPublishedCourses(),
-    getUpcomingBatches(),
-    getDownloads(),
-    getTranslations("admission"),
-  ]);
+  const [settings, courses, batches, downloads, paymentPolicy, steps, t] =
+    await Promise.all([
+      getSiteSettings(),
+      getPublishedCourses(),
+      getUpcomingBatches(),
+      getDownloads(),
+      getContent("PAYMENT_POLICY", locale),
+      getContent("ADMISSION_STEP", locale),
+      getTranslations("admission"),
+    ]);
 
-  const steps = [
-    { title: t("step1"), body: t("step1Body") },
-    { title: t("step2"), body: t("step2Body") },
-    { title: t("step3"), body: t("step3Body") },
-    { title: t("step4"), body: t("step4Body") },
-  ];
+  const eligibility = pick(
+    locale,
+    settings.content.eligibilityBn,
+    settings.content.eligibilityEn,
+  );
 
   return (
     <>
@@ -66,9 +68,7 @@ export default async function AdmissionPage({
               />
               <h2 className="text-lg font-semibold">{t("eligibilityTitle")}</h2>
             </div>
-            <p className="mt-3 leading-relaxed">
-              {localize(admissionRequirement, locale)}
-            </p>
+            <p className="mt-3 leading-relaxed">{eligibility}</p>
           </div>
 
           <div className="rounded-[14px] border border-[color:var(--border)] bg-white p-5 shadow-[var(--shadow-card)] sm:p-6">
@@ -81,11 +81,11 @@ export default async function AdmissionPage({
             </div>
             <ul className="mt-3 space-y-2">
               {paymentPolicy.map((item) => (
-                <li key={item.en} className="flex gap-2">
+                <li key={item.id} className="flex gap-2">
                   <span aria-hidden="true" className="text-[color:var(--brand)]">
                     •
                   </span>
-                  <span>{localize(item, locale)}</span>
+                  <span>{item.body}</span>
                 </li>
               ))}
             </ul>
@@ -102,7 +102,7 @@ export default async function AdmissionPage({
         <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, index) => (
             <li
-              key={step.title}
+              key={step.id}
               className="rounded-[14px] border border-[color:var(--border)] bg-white p-5 shadow-[var(--shadow-card)]"
             >
               <span

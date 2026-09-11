@@ -8,6 +8,7 @@ import "@/app/globals.css";
 
 import { Analytics } from "@/components/site/analytics";
 import { AnnouncementBar } from "@/components/site/announcement-bar";
+import { BrandTheme } from "@/components/site/brand-theme";
 import { LeadTracker } from "@/components/site/lead-tracker";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
@@ -16,7 +17,7 @@ import { routing } from "@/i18n/routing";
 import { fontVariables } from "@/lib/fonts";
 import { getPublishedCourses } from "@/lib/queries";
 import { siteUrl } from "@/lib/env";
-import { getSiteSettings } from "@/lib/site-settings";
+import { faviconUrl, getSiteSettings } from "@/lib/site-settings";
 import { pick } from "@/lib/format";
 
 export const viewport: Viewport = {
@@ -82,6 +83,7 @@ export async function generateMetadata({
       description,
     },
     robots: { index: true, follow: true },
+    icons: { icon: faviconUrl(settings) },
   };
 }
 
@@ -143,6 +145,7 @@ export default async function SiteLayout({
           <Toaster position="top-center" richColors />
         </NextIntlClientProvider>
 
+        <BrandTheme settings={settings} />
         <LeadTracker />
         <Analytics settings={settings} />
       </body>

@@ -35,6 +35,14 @@ export function LoginForm({ next }: { next: string }) {
   return (
     <form
       onSubmit={onSubmit}
+      /*
+       * Sign-in runs through a server action, so this form is submitted by
+       * JavaScript. `method="post"` matters for the moment before hydration
+       * finishes: without it a browser would submit natively as a GET and put
+       * the password in the URL, where it would reach server logs and browser
+       * history.
+       */
+      method="post"
       className="space-y-4 rounded-[14px] border border-[color:var(--border)] bg-white p-6 shadow-[var(--shadow-card)]"
     >
       {error && (

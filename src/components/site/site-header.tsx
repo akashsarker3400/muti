@@ -55,7 +55,7 @@ export async function SiteHeader({
         {/* No aria-label: the visible short name and institute name already
             give the link its accessible name. */}
         <Link href="/" className="flex shrink-0 items-center gap-2.5">
-          <Logo size={40} className="size-9 lg:size-11" />
+          <Logo src={settings.branding.logo} size={44} className="size-9 lg:size-11" />
           <span className="flex flex-col leading-tight">
             <span className="font-latin text-lg font-bold tracking-tight text-[color:var(--brand)] lg:text-xl">
               {shortName}

@@ -38,6 +38,7 @@ export type ResourceConfig = {
   key: string;
   /** Prisma delegate name on the client. */
   model:
+    | "contentItem"
     | "notice"
     | "faculty"
     | "testimonial"
@@ -54,6 +55,11 @@ export type ResourceConfig = {
   singular: string;
   description?: string;
   newLabel: string;
+  /**
+   * Restricts the list to one slice of a shared table, and is merged into the
+   * data of every create — this is how the six ContentItem editors work.
+   */
+  baseWhere?: Record<string, unknown>;
   columns: ResourceColumn[];
   /** Renders an extra tool above the list, e.g. the students CSV importer. */
   listTool?: "student-import";
@@ -1241,6 +1247,227 @@ const studentResource: ResourceConfig = {
   },
 };
 
+/* -------------------------------------------------------------------------- */
+/* Editable content lists (one ContentItem table, six admin screens)          */
+/* -------------------------------------------------------------------------- */
+
+/** Icons an admin can choose for a "why choose MUTI" card. */
+const WHY_ICON_OPTIONS: OptionList = [
+  { value: "ShieldCheck", label: "ঢাল ✓ (সরকার অনুমোদিত)" },
+  { value: "Stethoscope", label: "স্টেথোস্কোপ (প্র্যাকটিক্যাল)" },
+  { value: "GraduationCap", label: "গ্র্যাজুয়েশন ক্যাপ (শিক্ষক)" },
+  { value: "MonitorSmartphone", label: "মেশিন / ডিভাইস" },
+  { value: "Gift", label: "উপহার (ফ্রি ক্লাস)" },
+  { value: "Infinity", label: "অসীম (আজীবন সুবিধা)" },
+  { value: "Users", label: "মানুষ (মেন্টরশিপ)" },
+  { value: "UsersRound", label: "দল (গ্রুপ ছাড়)" },
+  { value: "Award", label: "পদক (সার্টিফিকেট)" },
+  { value: "CreditCard", label: "কার্ড (কিস্তি)" },
+  { value: "BadgeCheck", label: "ব্যাজ ✓" },
+  { value: "BookOpen", label: "বই" },
+  { value: "Clock", label: "ঘড়ি" },
+  { value: "HeartHandshake", label: "হাত মেলানো" },
+  { value: "Sparkles", label: "ঝিলিক" },
+  { value: "Trophy", label: "ট্রফি" },
+];
+
+/**
+ * Builds one of the six content editors. They differ only in which fields are
+ * shown, so the shape is generated rather than repeated six times.
+ */
+function contentResource(options: {
+  key: string;
+  kind: string;
+  title: string;
+  singular: string;
+  newLabel: string;
+  description: string;
+  withTitle?: boolean;
+  withIcon?: boolean;
+  bodyLabelBn: string;
+  bodyLabelEn: string;
+}): ResourceConfig {
+  const {
+    key,
+    kind,
+    title,
+    singular,
+    newLabel,
+    description,
+    withTitle = false,
+    withIcon = false,
+    bodyLabelBn,
+    bodyLabelEn,
+  } = options;
+
+  return {
+    key,
+    model: "contentItem",
+    title,
+    singular,
+    description,
+    newLabel,
+    baseWhere: { kind },
+    columns: [
+      ...(withTitle ? [{ key: "titleBn", label: "শিরোনাম" } as ResourceColumn] : []),
+      { key: "bodyBn", label: "লেখা" },
+      { key: "sortOrder", label: "ক্রম", type: "number", hideOnMobile: true },
+    ],
+    searchFields: ["bodyBn", "bodyEn", "titleBn", "titleEn"],
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    schema: z.object({
+      titleBn: optionalText,
+      titleEn: optionalText,
+      bodyBn: requiredText,
+      bodyEn: optionalText,
+      icon: optionalText,
+      sortOrder: z.coerce.number().int().default(0),
+      published: z.boolean().default(true),
+    }),
+    sections: () => [
+      {
+        id: "main",
+        label: singular,
+        fields: [
+          ...(withTitle
+            ? [
+                {
+                  name: "titleBn",
+                  label: "শিরোনাম (বাংলা)",
+                  type: "text" as const,
+                  required: true,
+                  lang: "bn" as const,
+                  full: true,
+                },
+              ]
+            : []),
+          {
+            name: "bodyBn",
+            label: bodyLabelBn,
+            type: "textarea",
+            required: true,
+            lang: "bn",
+          },
+          ...(withTitle
+            ? [
+                {
+                  name: "titleEn",
+                  label: "Title (English)",
+                  type: "text" as const,
+                  lang: "en" as const,
+                  full: true,
+                },
+              ]
+            : []),
+          { name: "bodyEn", label: bodyLabelEn, type: "textarea", lang: "en" },
+          ...(withIcon
+            ? [
+                {
+                  name: "icon",
+                  label: "আইকন",
+                  type: "select" as const,
+                  options: WHY_ICON_OPTIONS,
+                  hint: "না বাছাই করলে একটি টিক চিহ্ন দেখানো হবে।",
+                },
+              ]
+            : []),
+          sortOrderField,
+          publishedField,
+        ],
+      },
+    ],
+    toForm: (row) => ({
+      titleBn: str(row.titleBn),
+      titleEn: str(row.titleEn),
+      bodyBn: str(row.bodyBn),
+      bodyEn: str(row.bodyEn),
+      icon: str(row.icon),
+      sortOrder: toInt(row.sortOrder),
+      published: row.published === undefined ? true : Boolean(row.published),
+    }),
+    toData: (values) => ({
+      kind,
+      titleBn: nullable(values.titleBn),
+      titleEn: nullable(values.titleEn),
+      bodyBn: str(values.bodyBn),
+      bodyEn: nullable(values.bodyEn),
+      icon: nullable(values.icon),
+      sortOrder: toInt(values.sortOrder),
+      published: Boolean(values.published),
+    }),
+  };
+}
+
+const whyChooseResource = contentResource({
+  key: "why-choose",
+  kind: "WHY_CHOOSE",
+  title: "কেন MUTI",
+  singular: "পয়েন্ট",
+  newLabel: "নতুন পয়েন্ট",
+  description: "হোমপেজের “কেন MUTI বেছে নেবেন” কার্ডগুলো। প্রথম ৮টি দেখানো হয়।",
+  withIcon: true,
+  bodyLabelBn: "লেখা (বাংলা)",
+  bodyLabelEn: "Text (English)",
+});
+
+const documentResource = contentResource({
+  key: "documents",
+  kind: "DOCUMENT",
+  title: "প্রয়োজনীয় কাগজপত্র",
+  singular: "কাগজ",
+  newLabel: "নতুন কাগজ",
+  description:
+    "প্রতিটি কোর্স পেজ ও ভর্তি পাতায় দেখানো হয়। সব মুছে ফেললে অংশটি আর দেখাবে না।",
+  bodyLabelBn: "কাগজের নাম (বাংলা)",
+  bodyLabelEn: "Document (English)",
+});
+
+const paymentPolicyResource = contentResource({
+  key: "payment-policy",
+  kind: "PAYMENT_POLICY",
+  title: "পেমেন্ট নীতিমালা",
+  singular: "নিয়ম",
+  newLabel: "নতুন নিয়ম",
+  description: "প্রতিটি কোর্সের ফি কার্ড ও ভর্তি পাতায় দেখানো হয়।",
+  bodyLabelBn: "নিয়ম (বাংলা)",
+  bodyLabelEn: "Rule (English)",
+});
+
+const admissionStepResource = contentResource({
+  key: "admission-steps",
+  kind: "ADMISSION_STEP",
+  title: "ভর্তির ধাপ",
+  singular: "ধাপ",
+  newLabel: "নতুন ধাপ",
+  description: "ভর্তি পাতার ১-২-৩-৪ ধাপ। ক্রম অনুযায়ী নম্বর বসে।",
+  withTitle: true,
+  bodyLabelBn: "বিবরণ (বাংলা)",
+  bodyLabelEn: "Description (English)",
+});
+
+const valueResource = contentResource({
+  key: "values",
+  kind: "VALUE",
+  title: "লক্ষ্য ও মূল্যবোধ",
+  singular: "কার্ড",
+  newLabel: "নতুন কার্ড",
+  description: "“আমাদের সম্পর্কে” পাতার তিনটি কার্ড — লক্ষ্য, দৃষ্টিভঙ্গি ও মূল্যবোধ।",
+  withTitle: true,
+  bodyLabelBn: "বিবরণ (বাংলা)",
+  bodyLabelEn: "Description (English)",
+});
+
+const certificateResource = contentResource({
+  key: "certificates",
+  kind: "CERTIFICATE",
+  title: "প্রদত্ত সার্টিফিকেট",
+  singular: "সার্টিফিকেট",
+  newLabel: "নতুন সার্টিফিকেট",
+  description: "অনুমোদন পাতায় দেখানো সার্টিফিকেটের তালিকা।",
+  bodyLabelBn: "সার্টিফিকেটের নাম (বাংলা)",
+  bodyLabelEn: "Certificate (English)",
+});
+
 export const RESOURCES: Record<string, ResourceConfig> = {
   notices: noticeResource,
   faculty: facultyResource,
@@ -1254,6 +1481,12 @@ export const RESOURCES: Record<string, ResourceConfig> = {
   batches: batchResource,
   results: resultResource,
   students: studentResource,
+  "why-choose": whyChooseResource,
+  documents: documentResource,
+  "payment-policy": paymentPolicyResource,
+  "admission-steps": admissionStepResource,
+  values: valueResource,
+  certificates: certificateResource,
 };
 
 export function getResource(key: string): ResourceConfig | null {

@@ -316,8 +316,8 @@ export default async function CourseDetailPage({
               <p className="mt-2 text-sm text-[color:var(--muted-foreground)]">
                 {pick(
                   locale,
-                  "ন্যূনতম যোগ্যতা MBBS বা সমমান। ইন্টার্ন ডাক্তাররাও আবেদন করতে পারবেন।",
-                  "Minimum qualification: MBBS or equivalent. Intern doctors can also apply.",
+                  settings.content.eligibilityBn,
+                  settings.content.eligibilityEn,
                 )}
               </p>
 

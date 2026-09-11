@@ -247,7 +247,10 @@ function FieldControl({
   const inputClass = cn("h-11", field.latin && "font-latin");
 
   return (
-    <div className={cn("space-y-1.5", wide && "md:col-span-2")}>
+    // `min-w-0` lets the cell shrink below its content's intrinsic width —
+    // without it a grid item's default `min-width: auto` pushes the whole
+    // form wider than a phone screen.
+    <div className={cn("min-w-0 space-y-1.5", wide && "md:col-span-2")}>
       {field.type !== "checkbox" && (
         <Label htmlFor={id}>
           {field.label}
@@ -352,6 +355,7 @@ function FieldControl({
 
       {(field.type === "image" || field.type === "file") && (
         <UploadField
+          id={id}
           value={String(value ?? "")}
           onChange={(url) => setValue(field.name, url)}
           kind={field.type === "image" ? "image" : "file"}

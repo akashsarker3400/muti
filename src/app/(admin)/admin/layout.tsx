@@ -4,12 +4,17 @@ import { Toaster } from "sonner";
 import "@/app/globals.css";
 
 import { fontVariables } from "@/lib/fonts";
+import { faviconUrl, getSiteSettings } from "@/lib/site-settings";
 
-export const metadata: Metadata = {
-  title: { default: "MUTI Admin", template: "%s | MUTI Admin" },
-  // The admin panel must never be indexed.
-  robots: { index: false, follow: false, nocache: true },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  return {
+    title: { default: "MUTI Admin", template: "%s | MUTI Admin" },
+    // The admin panel must never be indexed.
+    robots: { index: false, follow: false, nocache: true },
+    icons: { icon: faviconUrl(settings) },
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",

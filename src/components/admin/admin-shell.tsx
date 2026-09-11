@@ -4,8 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Award,
   BadgeCheck,
   BookOpen,
+  CreditCard,
+  FileCheck2,
+  ListOrdered,
+  Sparkles,
+  Target,
   CalendarRange,
   ExternalLink,
   FileText,
@@ -71,6 +77,17 @@ const NAV: NavGroup[] = [
       { href: "/admin/downloads", label: "ডাউনলোড", icon: FileText },
       { href: "/admin/blog", label: "ব্লগ", icon: NotebookPen },
       { href: "/admin/pages", label: "পেজ", icon: FolderOpen },
+    ],
+  },
+  {
+    title: "সাইটের লেখা",
+    items: [
+      { href: "/admin/why-choose", label: "কেন MUTI", icon: Sparkles },
+      { href: "/admin/documents", label: "প্রয়োজনীয় কাগজপত্র", icon: FileCheck2 },
+      { href: "/admin/payment-policy", label: "পেমেন্ট নীতিমালা", icon: CreditCard },
+      { href: "/admin/admission-steps", label: "ভর্তির ধাপ", icon: ListOrdered },
+      { href: "/admin/values", label: "লক্ষ্য ও মূল্যবোধ", icon: Target },
+      { href: "/admin/certificates", label: "প্রদত্ত সার্টিফিকেট", icon: Award },
     ],
   },
   {

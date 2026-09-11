@@ -1,10 +1,12 @@
 import type { Locale } from "@/i18n/routing";
 
 /**
- * Bilingual content that is identical for every course and is part of the
- * institute's fixed policy (section 3). It lives in code rather than the
- * database because it is quoted verbatim in several places (course detail,
- * /admission, /faq) and must not drift between them.
+ * The institute's fixed policy copy from section 3 of the build spec.
+ *
+ * These constants are now only the **seed source** for the `ContentItem`
+ * table — the public site reads the database so the office can edit every
+ * line from the admin panel (see `src/lib/content-items.ts`). Changing a
+ * string here affects new installations only.
  */
 
 export type BilingualItem = { bn: string; en: string };

@@ -67,6 +67,22 @@ enum PartnerType {
   COLLABORATION
 }
 
+/// The fixed lists the office can edit without a developer.
+enum ContentKind {
+  /// "Why choose MUTI" cards on the homepage
+  WHY_CHOOSE
+  /// Required documents, shown on every course page and /admission
+  DOCUMENT
+  /// Payment policy lines, shown on every course fee card and /admission
+  PAYMENT_POLICY
+  /// The numbered "how to enrol" steps on /admission
+  ADMISSION_STEP
+  /// Mission / Vision / Values cards on /about
+  VALUE
+  /// Certificates offered, listed on /accreditation
+  CERTIFICATE
+}
+
 /// Where an enquiry came from (addendum 2, A3).
 enum LeadSource {
   FACEBOOK
@@ -455,6 +471,31 @@ model Banner {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/**
+ * One row per bullet, card or step in the site's fixed lists. A single model
+ * keeps six small editors working through the same admin screens instead of
+ * six near-identical tables.
+ */
+model ContentItem {
+  id   String      @id @default(cuid())
+  kind ContentKind
+
+  /// Lucide icon name, used by the "why choose" cards only.
+  icon    String?
+  titleBn String?
+  titleEn String?
+  bodyBn  String  @db.Text
+  bodyEn  String? @db.Text
+
+  sortOrder Int     @default(0)
+  published Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([kind, published, sortOrder])
 }
 
 model ActivityLog {

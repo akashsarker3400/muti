@@ -65,6 +65,86 @@ export const settingsFormSections: FormSection[] = [
     ],
   },
   {
+    id: "branding",
+    label: "ব্র্যান্ডিং",
+    description:
+      "লোগো ও রং এখান থেকে বদলালে পুরো ওয়েবসাইটে সাথে সাথে বদলে যাবে। রঙের ঘর ফাঁকা রাখলে ডিফল্ট নেভি-লাল-হলুদ রংই থাকবে।",
+    fields: [
+      {
+        name: "branding.logo",
+        label: "লোগো",
+        type: "image",
+        hint: "স্বচ্ছ ব্যাকগ্রাউন্ডের PNG বা WEBP সবচেয়ে ভালো দেখায়। বর্গাকার হলে উত্তম।",
+      },
+      {
+        name: "branding.favicon",
+        label: "ফেভিকন (ব্রাউজার ট্যাবের ছোট আইকন)",
+        type: "image",
+        hint: "বর্গাকার ছবি দিন (৫১২×৫১২ যথেষ্ট)। ওয়েবসাইটে এটি স্বয়ংক্রিয়ভাবে ছোট করে দেখানো হয়, তাই বড় ফাইল দিলেও সাইট ধীর হবে না।",
+      },
+      {
+        name: "branding.brandColor",
+        label: "প্রধান রং (নেভি)",
+        type: "text",
+        latin: true,
+        placeholder: "#1B2A6B",
+        hint: "হেক্স কোড দিন, যেমন #1B2A6B। ভুল ফরম্যাট দিলে ডিফল্ট রংই থাকবে।",
+      },
+      {
+        name: "branding.brandDarkColor",
+        label: "গাঢ় রং (ফুটার ও সাইডবার)",
+        type: "text",
+        latin: true,
+        placeholder: "#12204F",
+      },
+      {
+        name: "branding.accentColor",
+        label: "অ্যাকসেন্ট রং (লাল বাটন ও ব্যাজ)",
+        type: "text",
+        latin: true,
+        placeholder: "#D62828",
+      },
+      {
+        name: "branding.highlightColor",
+        label: "হাইলাইট রং (হলুদ)",
+        type: "text",
+        latin: true,
+        placeholder: "#F4C20D",
+      },
+    ],
+  },
+  {
+    id: "sitecontent",
+    label: "সাধারণ লেখা",
+    description: "এই দুটি বাক্য একাধিক পাতায় দেখানো হয় — কোর্স পেজ ও ভর্তি পাতায়।",
+    fields: [
+      {
+        name: "content.eligibilityBn",
+        label: "ভর্তির যোগ্যতা (বাংলা)",
+        type: "textarea",
+        lang: "bn",
+      },
+      {
+        name: "content.eligibilityEn",
+        label: "Eligibility (English)",
+        type: "textarea",
+        lang: "en",
+      },
+      {
+        name: "content.documentsNoteBn",
+        label: "কাগজপত্র সংক্রান্ত নোট (বাংলা)",
+        type: "textarea",
+        lang: "bn",
+      },
+      {
+        name: "content.documentsNoteEn",
+        label: "Documents note (English)",
+        type: "textarea",
+        lang: "en",
+      },
+    ],
+  },
+  {
     id: "contact",
     label: "যোগাযোগ",
     fields: [

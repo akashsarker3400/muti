@@ -33,6 +33,11 @@ export default async function EditResourcePage({
 
   if (!row) notFound();
 
+  // Guard against editing a row from another slice of a shared table by URL.
+  for (const [field, value] of Object.entries(resource.baseWhere ?? {})) {
+    if (row[field] !== value) notFound();
+  }
+
   return (
     <>
       <AdminPageHeader

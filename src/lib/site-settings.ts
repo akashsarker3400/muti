@@ -43,6 +43,10 @@ export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
  */
 const NEVER_BLANK: Record<keyof SiteSettings, string[]> = {
   general: ["nameBn", "nameEn", "shortName", "taglineBn", "taglineEn", "govtCode"],
+  // Branding is optional everywhere: an empty value falls back to the
+  // built-in logo and palette.
+  branding: [],
+  content: ["eligibilityBn", "eligibilityEn", "documentsNoteBn", "documentsNoteEn"],
   contact: ["addressBn", "addressEn", "phone1", "whatsapp", "email"],
   homepage: ["heroTitleBn", "heroTitleEn", "heroSubBn", "heroSubEn"],
   whatsapp: ["defaultMessageBn", "defaultMessageEn"],
@@ -71,4 +75,20 @@ function mergeWithDefaults(settings: SiteSettings): SiteSettings {
   }
 
   return merged;
+}
+
+/**
+ * A favicon is displayed at 16–64px, but the upload pipeline keeps images at
+ * up to 1600px — a photo uploaded as a favicon would otherwise be downloaded
+ * at full size on every page view. Local uploads are routed through Next's
+ * image optimiser at 64px; anything else (an absolute URL, say) is left alone.
+ */
+export function faviconUrl(settings: SiteSettings): string {
+  const favicon = settings.branding.favicon.trim();
+
+  // No upload yet: the institute mark, not the framework's default icon.
+  if (!favicon) return "/logo.svg";
+
+  if (!favicon.startsWith("/uploads/")) return favicon;
+  return `/_next/image?url=${encodeURIComponent(favicon)}&w=64&q=75`;
 }

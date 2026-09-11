@@ -6,7 +6,7 @@ import { PageHero } from "@/components/site/page-hero";
 import { PartnersRow } from "@/components/site/partners-row";
 import { Section, SectionHeading } from "@/components/site/section";
 import type { Locale } from "@/i18n/routing";
-import { certificatesOffered, localize } from "@/lib/content";
+import { getContent } from "@/lib/content-items";
 import { toBanglaDigits } from "@/lib/format";
 import { getPartners } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
@@ -35,9 +35,10 @@ export default async function AccreditationPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [settings, partners, t] = await Promise.all([
+  const [settings, partners, certificates, t] = await Promise.all([
     getSiteSettings(),
     getPartners(),
+    getContent("CERTIFICATE", locale),
     getTranslations("accreditation"),
   ]);
 
@@ -74,29 +75,31 @@ export default async function AccreditationPage({
 
       <PartnersRow partners={partners} showGroups soft />
 
-      <Section>
-        <SectionHeading title={t("certificatesTitle")} />
-        <ul className="grid gap-3 sm:grid-cols-2">
-          {certificatesOffered.map((certificate) => (
-            <li
-              key={certificate.en}
-              className="flex items-start gap-3 rounded-[14px] border border-[color:var(--border)] bg-white p-4 shadow-[var(--shadow-card)]"
-            >
-              <Award
-                className="mt-0.5 size-5 shrink-0 text-[color:var(--highlight)]"
-                aria-hidden="true"
-              />
-              <span className="font-medium">{localize(certificate, locale)}</span>
-            </li>
-          ))}
-        </ul>
+      {certificates.length > 0 && (
+        <Section>
+          <SectionHeading title={t("certificatesTitle")} />
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {certificates.map((certificate) => (
+              <li
+                key={certificate.id}
+                className="flex items-start gap-3 rounded-[14px] border border-[color:var(--border)] bg-white p-4 shadow-[var(--shadow-card)]"
+              >
+                <Award
+                  className="mt-0.5 size-5 shrink-0 text-[color:var(--highlight)]"
+                  aria-hidden="true"
+                />
+                <span className="font-medium">{certificate.body}</span>
+              </li>
+            ))}
+          </ul>
 
-        {/*
-          Approval document images (e.g. the BTEB letter) are only shown once an
-          admin uploads them under Gallery or Downloads — never the owner's
-          personal documents (section 1). See HANDOVER.md.
-        */}
-      </Section>
+          {/*
+            Approval document images (e.g. the BTEB letter) are only shown once
+            an admin uploads them under Gallery or Downloads — never the
+            owner's personal documents (section 1). See HANDOVER.md.
+          */}
+        </Section>
+      )}
     </>
   );
 }

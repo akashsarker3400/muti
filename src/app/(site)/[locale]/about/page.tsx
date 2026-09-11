@@ -9,6 +9,7 @@ import { RichText } from "@/components/site/rich-text";
 import { Section, SectionHeading } from "@/components/site/section";
 import type { Locale } from "@/i18n/routing";
 import { pick } from "@/lib/format";
+import { getContent } from "@/lib/content-items";
 import { getPageBySlug, getPartners } from "@/lib/queries";
 import { isEmptyRichText } from "@/lib/sanitize";
 import { getSiteSettings } from "@/lib/site-settings";
@@ -34,40 +35,18 @@ export default async function AboutPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [settings, story, partners, t] = await Promise.all([
+  const [settings, story, partners, pillars, t] = await Promise.all([
     getSiteSettings(),
     getPageBySlug("about-story"),
     getPartners(),
+    getContent("VALUE", locale),
     getTranslations("about"),
   ]);
 
-  const storyHtml = story ? pick(locale, story.bodyBn, story.bodyEn) : "";
+  // The three cards keep a fixed icon order; the words come from the admin.
+  const PILLAR_ICONS = [Target, Compass, HeartHandshake];
 
-  /**
-   * Mission / Vision / Values seed copy (section 5.2). These live here rather
-   * than in the database because the spec provides the exact wording; the
-   * about-story page is the admin-editable part.
-   */
-  const pillars = [
-    {
-      icon: Target,
-      title: t("missionTitle"),
-      bn: "হাতে-কলমে, রিয়েল পেশেন্ট ভিত্তিক শিক্ষার মাধ্যমে দক্ষ ও আত্মবিশ্বাসী সোনোলজিস্ট তৈরি করা।",
-      en: "Train competent, confident sonologists through hands-on, real-patient education.",
-    },
-    {
-      icon: Compass,
-      title: t("visionTitle"),
-      bn: "উত্তর ও মধ্য বাংলাদেশের সবচেয়ে নির্ভরযোগ্য আল্ট্রাসাউন্ড প্রশিক্ষণ প্রতিষ্ঠান হয়ে ওঠা।",
-      en: "Be the most trusted ultrasound training institute in northern and central Bangladesh.",
-    },
-    {
-      icon: HeartHandshake,
-      title: t("valuesTitle"),
-      bn: "রোগীর নিরাপত্তা, একাডেমিক মান, মেন্টরশিপ এবং আজীবন শেখা।",
-      en: "Patient safety, academic rigour, mentorship, lifelong learning.",
-    },
-  ];
+  const storyHtml = story ? pick(locale, story.bodyBn, story.bodyEn) : "";
 
   return (
     <>
@@ -85,24 +64,29 @@ export default async function AboutPage({
         </Section>
       )}
 
-      <Section soft>
-        <div className="grid gap-4 md:grid-cols-3">
-          {pillars.map((pillar) => (
-            <div
-              key={pillar.title}
-              className="rounded-[14px] border border-[color:var(--border)] bg-white p-5 shadow-[var(--shadow-card)] sm:p-6"
-            >
-              <span className="grid size-10 place-items-center rounded-xl bg-[color:var(--brand-soft)] text-[color:var(--brand)]">
-                <pillar.icon className="size-5" aria-hidden="true" />
-              </span>
-              <h2 className="mt-4 text-lg font-semibold">{pillar.title}</h2>
-              <p className="mt-2 leading-relaxed text-[color:var(--muted-foreground)]">
-                {locale === "bn" ? pillar.bn : pillar.en}
-              </p>
-            </div>
-          ))}
-        </div>
-      </Section>
+      {pillars.length > 0 && (
+        <Section soft>
+          <div className="grid gap-4 md:grid-cols-3">
+            {pillars.map((pillar, index) => {
+              const Icon = PILLAR_ICONS[index % PILLAR_ICONS.length]!;
+              return (
+                <div
+                  key={pillar.id}
+                  className="rounded-[14px] border border-[color:var(--border)] bg-white p-5 shadow-[var(--shadow-card)] sm:p-6"
+                >
+                  <span className="grid size-10 place-items-center rounded-xl bg-[color:var(--brand-soft)] text-[color:var(--brand)]">
+                    <Icon className="size-5" aria-hidden="true" />
+                  </span>
+                  <h2 className="mt-4 text-lg font-semibold">{pillar.title}</h2>
+                  <p className="mt-2 leading-relaxed text-[color:var(--muted-foreground)]">
+                    {pillar.body}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </Section>
+      )}
 
       {/*
         Director's message: every field is TODO in the spec, so the whole block

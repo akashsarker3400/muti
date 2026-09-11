@@ -101,7 +101,11 @@ with no cache to purge.
 - Never hardcode the WhatsApp number — build links with `waLink()` and the
   number from Site Settings.
 - Admin HTML is sanitised by `sanitizeRichText()` before it ever reaches
-  `dangerouslySetInnerHTML`.
+  `dangerouslySetInnerHTML`. Brand colours are validated as hex before being
+  written into a `<style>` tag.
+- The logo, favicon, brand colours and six fixed content lists (why choose,
+  documents, payment policy, admission steps, values, certificates) are all
+  admin-editable. `src/lib/content.ts` is now only the seed source for them.
 - Every server action re-checks authentication with `requireAdmin()`. A server
   action is a public endpoint; it can never trust the page that rendered it.
 
@@ -141,7 +145,7 @@ paths, not files.
 ```bash
 npm test                     # 58 unit tests: phone, Bangla digits, fees, CSV,
                              # slugs, HTML sanitising, seat counter, lead source
-npm run test:e2e             # 31 smoke tests across desktop and mobile
+npm run test:e2e             # 41 smoke tests across desktop and mobile
 ```
 
 The Playwright suite starts `npm run dev` itself unless `E2E_BASE_URL` is set,
@@ -153,8 +157,12 @@ A `setup` project signs in once and shares the session with every other
 project; logging in per test would trip the panel's own login rate limit (10
 attempts per 15 minutes per IP) part-way through a full run.
 
-Lighthouse (mobile) on the production build: performance 89–93 on the home
-page and 92–93 elsewhere, accessibility 100, best practices 100, SEO 100.
+Lighthouse (mobile) on the production build: performance 85–95 depending on
+the page and the run, accessibility 100, best practices 100, SEO 100.
+
+`./scripts/serve.sh` starts the production server, first freeing port 3000 —
+a stale listener silently serves the previous build, which is easy to mistake
+for a code change not working.
 
 ---
 

@@ -37,6 +37,29 @@ export const siteSettingsSchema = z.object({
     })
     .prefault({}),
 
+  /** Logo, favicon and the brand colours (all editable from the admin). */
+  branding: z
+    .object({
+      logo: optionalString,
+      favicon: optionalString,
+      /** Hex colours. Empty means "use the built-in palette". */
+      brandColor: optionalString,
+      brandDarkColor: optionalString,
+      accentColor: optionalString,
+      highlightColor: optionalString,
+    })
+    .prefault({}),
+
+  /** Single sentences that appear on more than one page. */
+  content: z
+    .object({
+      eligibilityBn: optionalString,
+      eligibilityEn: optionalString,
+      documentsNoteBn: optionalString,
+      documentsNoteEn: optionalString,
+    })
+    .prefault({}),
+
   contact: z
     .object({
       addressBn: optionalString,
@@ -126,6 +149,26 @@ export const defaultSiteSettings: SiteSettings = siteSettingsSchema.parse({
     positioningEn: "Stepping into our 16th year of success",
     establishedYear: 2009,
     govtCode: "57125",
+  },
+  branding: {
+    // Empty = the placeholder mark in public/logo.svg and the palette in
+    // globals.css. Both are replaced from Site Settings -> ব্র্যান্ডিং.
+    logo: "",
+    favicon: "",
+    brandColor: "",
+    brandDarkColor: "",
+    accentColor: "",
+    highlightColor: "",
+  },
+  content: {
+    eligibilityBn:
+      "ন্যূনতম যোগ্যতা MBBS বা সমমান। ইন্টার্ন ডাক্তাররাও আবেদন করতে পারবেন।",
+    eligibilityEn:
+      "Minimum qualification: MBBS or equivalent. Intern doctors can also apply.",
+    documentsNoteBn:
+      "ভর্তির সময় সব কাগজপত্রের স্ক্যান কপি ও হার্ড কপি অফিসে জমা দিতে হবে।",
+    documentsNoteEn:
+      "A scan copy plus a hard copy of every document must be submitted at the office at admission time.",
   },
   contact: {
     addressBn:
