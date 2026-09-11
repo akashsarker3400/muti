@@ -25,10 +25,13 @@ const CONTENT_TYPES: Record<string, string> = {
 };
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ path: string[] }> },
 ) {
   const { path: segments } = await params;
+  // `?download=1` asks the browser to save; otherwise PDFs and images open
+  // in the tab (or an iframe), which is what the downloads page relies on.
+  const forceDownload = new URL(request.url).searchParams.get("download") === "1";
 
   // Reject traversal attempts before touching the filesystem (section 11).
   if (
@@ -70,15 +73,21 @@ export async function GET(
       createReadStream(filePath),
     ) as unknown as ReadableStream;
 
+    const fileName = segments[segments.length - 1]!;
     return new NextResponse(stream, {
       headers: {
         "Content-Type": contentType,
         "Content-Length": String(stats.size),
+        "Content-Disposition": `${forceDownload ? "attachment" : "inline"}; filename="${fileName}"`,
         // Uploaded files get a random name and are never overwritten, so they
         // can be cached aggressively.
         "Cache-Control": "public, max-age=31536000, immutable",
-        // SVGs are rendered by the browser; stop them executing script.
-        "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'",
+        // SVGs are rendered by the browser; stop them executing script. The
+        // policy is not sent for PDFs: browser PDF viewers need their own
+        // scripts and styles, and the file cannot run anything anyway.
+        ...(extension === ".svg"
+          ? { "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'" }
+          : {}),
         "X-Content-Type-Options": "nosniff",
       },
     });

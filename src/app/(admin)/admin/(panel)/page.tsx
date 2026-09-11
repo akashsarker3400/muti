@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { CalendarRange, GraduationCap, Inbox, Newspaper, Phone } from "lucide-react";
+import {
+  CalendarRange,
+  GraduationCap,
+  Inbox,
+  Newspaper,
+  Phone,
+  AlertTriangle,
+} from "lucide-react";
 
 import { ApplicationsChart } from "@/components/admin/applications-chart";
 import { ApplicationStatusSelect } from "@/components/admin/application-status-select";
@@ -9,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { requireAdmin } from "@/lib/admin-auth";
 import { formatDate, toBanglaDigits } from "@/lib/format";
 import { displayPhone, telHref } from "@/lib/phone";
+import { uploadsHealth } from "@/lib/admin/uploads-health";
 import { prisma } from "@/lib/prisma";
 import { waLink } from "@/lib/whatsapp";
 
@@ -24,6 +32,7 @@ const APPLICATION_TYPE_LABELS: Record<string, string> = {
 
 export default async function AdminDashboard() {
   const admin = await requireAdmin();
+  const uploads = await uploadsHealth();
 
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   const thirtyDaysAgo = startOfUtcDay(new Date(Date.now() - 29 * 24 * 60 * 60 * 1000));
@@ -62,6 +71,29 @@ export default async function AdminDashboard() {
         title={`স্বাগতম, ${admin.name}`}
         description="ওয়েবসাইটের সর্বশেষ অবস্থা এক নজরে"
       />
+
+      {(!uploads.writable || uploads.missing.length > 0) && (
+        <div
+          role="alert"
+          className="mb-5 rounded-[14px] border border-[color:var(--error)]/40 bg-[color:var(--error)]/8 p-4 text-sm"
+          data-testid="uploads-alert"
+        >
+          <p className="flex items-center gap-2 font-semibold text-[color:var(--error)]">
+            <AlertTriangle className="size-4" aria-hidden="true" />
+            আপলোড করা ফাইল সার্ভারে পাওয়া যাচ্ছে না
+          </p>
+          <p className="mt-1">
+            {!uploads.writable
+              ? "আপলোড ফোল্ডারে লেখা যাচ্ছে না। "
+              : `${uploads.checked}টি ফাইলের মধ্যে ${uploads.missing.length}টি নেই (যেমন ${uploads.missing[0]})। `}
+            সাইটে লোগো, হিরো বা গ্যালারির ছবি ভাঙা দেখাচ্ছে? কারণ সাধারণত একটাই:
+            Coolify-তে অ্যাপের <strong>Storages</strong>-এ{" "}
+            <code className="font-latin">/app/uploads</code> পাথে persistent volume যোগ
+            করা নেই, তাই প্রতিটি redeploy-তে আপলোড মুছে যায়। ভলিউম যোগ করে (deploy
+            guide ধাপ ৫) redeploy করুন, তারপর ছবিগুলো আবার আপলোড করুন।
+          </p>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard

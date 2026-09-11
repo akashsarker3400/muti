@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { CreditCard, Download, GraduationCap } from "lucide-react";
+import { CreditCard, FileText, GraduationCap } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { DocumentsList } from "@/components/site/documents-list";
 import { AdmissionForm } from "@/components/site/forms/admission-form";
 import { PageHero } from "@/components/site/page-hero";
 import { Section, SectionHeading } from "@/components/site/section";
-import { Button } from "@/components/ui/button";
+import { FileViewer } from "@/components/site/file-viewer";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/i18n/routing";
 import { getContent } from "@/lib/content-items";
@@ -125,18 +125,18 @@ export default async function AdmissionPage({
           <SectionHeading title={t("downloadsTitle")} />
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {downloads.map((file) => (
-              <li key={file.id}>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="cta"
-                  className="h-auto w-full justify-start py-3 text-start"
-                >
-                  <a href={file.fileUrl} target="_blank" rel="noopener noreferrer">
-                    <Download className="size-4 shrink-0" aria-hidden="true" />
-                    <span className="truncate">{file.title}</span>
-                  </a>
-                </Button>
+              <li
+                key={file.id}
+                className="flex items-center gap-3 rounded-[14px] border border-[color:var(--border)] bg-white p-3 shadow-[var(--shadow-card)]"
+              >
+                <FileText
+                  className="size-5 shrink-0 text-[color:var(--brand)]"
+                  aria-hidden="true"
+                />
+                <span className="min-w-0 flex-1 truncate font-medium">
+                  {file.title}
+                </span>
+                <FileViewer url={file.fileUrl} title={file.title} compact />
               </li>
             ))}
           </ul>

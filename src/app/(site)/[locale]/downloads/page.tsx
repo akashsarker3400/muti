@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Download, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { PageHero } from "@/components/site/page-hero";
 import { Section } from "@/components/site/section";
-import { Button } from "@/components/ui/button";
+import { FileViewer } from "@/components/site/file-viewer";
 import type { Locale } from "@/i18n/routing";
 import { getDownloads } from "@/lib/queries";
 
@@ -30,10 +30,9 @@ export default async function DownloadsPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [downloads, t, common] = await Promise.all([
+  const [downloads, t] = await Promise.all([
     getDownloads(),
     getTranslations("downloads"),
-    getTranslations("common"),
   ]);
 
   // Group by the optional category so long lists stay scannable.
@@ -70,17 +69,7 @@ export default async function DownloadsPage({
                       <span className="min-w-0 flex-1 truncate font-medium">
                         {file.title}
                       </span>
-                      <Button asChild variant="brandOutline" size="cta">
-                        <a
-                          href={file.fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          download
-                        >
-                          <Download className="size-4" aria-hidden="true" />
-                          <span className="hidden sm:inline">{common("download")}</span>
-                        </a>
-                      </Button>
+                      <FileViewer url={file.fileUrl} title={file.title} compact />
                     </li>
                   ))}
                 </ul>

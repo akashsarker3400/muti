@@ -59,7 +59,9 @@
     "backHome": "Back to home",
     "errorTitle": "Something went wrong",
     "errorBody": "Sorry, this page could not be loaded. Please try again.",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "view": "View",
+    "openInNewTab": "Open in new tab"
   },
   "levels": {
     "ALL": "All courses",
