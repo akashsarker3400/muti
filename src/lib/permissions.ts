@@ -15,6 +15,8 @@ export const PERMISSIONS = [
   "advisors.manage",
   "banners.manage",
   "verification.logs.view",
+  "health.manage",
+  "health.appointments",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -28,6 +30,8 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   "advisors.manage": "উপদেষ্টা মণ্ডলী সম্পাদনা",
   "banners.manage": "হিরো ব্যানার সম্পাদনা",
   "verification.logs.view": "যাচাই লগ দেখা",
+  "health.manage": "স্বাস্থ্যসেবার সেটিংস ও লেখা",
+  "health.appointments": "স্বাস্থ্যসেবার সিরিয়াল দেখা ও আপডেট",
 };
 
 /**
@@ -42,6 +46,8 @@ const STAFF_DEFAULTS: ReadonlySet<Permission> = new Set([
   "leadership.manage",
   "advisors.manage",
   "banners.manage",
+  "health.manage",
+  "health.appointments",
 ]);
 
 export function hasPermission(

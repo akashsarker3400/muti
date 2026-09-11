@@ -16,6 +16,7 @@ export const primaryNav: NavItem[] = [
   { href: "/about", labelKey: "about" },
   { href: "/courses", labelKey: "courses" },
   { href: "/admission", labelKey: "admission" },
+  { href: "/health-service", labelKey: "healthService" },
   { href: "/results", labelKey: "results" },
   { href: "/verify", labelKey: "verify" },
   { href: "/notices", labelKey: "notices" },
@@ -42,6 +43,11 @@ export const secondaryNav: NavItem[] = [
 export function aboutMenu(leadership: NavItem[]): NavItem[] {
   const [about, ...rest] = aboutNav;
   return [about!, ...leadership, ...rest];
+}
+
+/** Items that depend on a switch in Site Settings (addendum 4: the health page). */
+export function visibleNav(items: NavItem[], flags: { health: boolean }): NavItem[] {
+  return items.filter((item) => item.href !== "/health-service" || flags.health);
 }
 
 /** Everything, flat, for the drawer and the footer. */

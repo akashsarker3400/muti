@@ -1,4 +1,4 @@
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone, HeartPulse } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { FacebookIcon, WhatsAppIcon, YouTubeIcon } from "@/components/site/icons";
@@ -7,7 +7,7 @@ import { MapEmbed } from "@/components/site/map-embed";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { pick, toBanglaDigits } from "@/lib/format";
-import { allNav } from "@/lib/nav";
+import { allNav, visibleNav } from "@/lib/nav";
 import { getLeadershipMessages } from "@/lib/queries";
 import { displayPhone, telHref } from "@/lib/phone";
 import type { PublicCourse } from "@/lib/queries";
@@ -23,12 +23,13 @@ export async function SiteFooter({
   locale: Locale;
   courses: PublicCourse[];
 }) {
-  const [nav, footer, contact, common, leadership] = await Promise.all([
+  const [nav, footer, contact, common, leadership, health] = await Promise.all([
     getTranslations("nav"),
     getTranslations("footer"),
     getTranslations("contact"),
     getTranslations("common"),
     getLeadershipMessages(),
+    getTranslations("health"),
   ]);
   const leadershipLinks = leadership.map((message) => ({
     href: `/messages/${message.key}`,
@@ -63,6 +64,17 @@ export async function SiteFooter({
           </div>
           <p className="text-sm font-medium text-white">{instituteName}</p>
           <p className="text-sm leading-relaxed text-[color:#b9c2dd]">{about}</p>
+          {settings.health.published && (
+            <p className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-[color:#c3cbe4]">
+              <HeartPulse
+                className="mt-0.5 size-4 shrink-0 text-[color:var(--success)]"
+                aria-hidden="true"
+              />
+              <Link href="/health-service" className="hover:text-white hover:underline">
+                {health("footerLine")}
+              </Link>
+            </p>
+          )}
           <p className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white">
             {locale === "bn"
               ? `সরকারি প্রতিষ্ঠান কোড ${govtCode}`
@@ -78,7 +90,7 @@ export async function SiteFooter({
             {footer("quickLinks")}
           </h2>
           <ul className="space-y-2 text-sm">
-            {allNav(leadershipLinks)
+            {visibleNav(allNav(leadershipLinks), { health: settings.health.published })
               .filter((item) => item.href !== "/")
               .map((item) => (
                 <li key={item.href}>

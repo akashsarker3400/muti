@@ -29,6 +29,12 @@ export const albumFormSections: FormSection[] = [
         type: "image",
         hint: "ছবি তালিকা থেকেও “কভার” বাটনে ক্লিক করে সেট করা যায়।",
       },
+      {
+        name: "isHealthService",
+        label: "স্বাস্থ্যসেবা অ্যালবাম (ছবিগুলো /health-service পাতায় দেখাবে)",
+        type: "checkbox",
+        hint: "রোগীর ছবি শুধু লিখিত সম্মতিতে, মুখ ঝাপসা করে বা মুখ ছাড়া।",
+      },
     ],
   },
 ];
@@ -41,5 +47,6 @@ export function albumToForm(row: Record<string, unknown>): FormValues {
     slug: text(row.slug),
     cover: text(row.cover),
     sortOrder: row.sortOrder == null ? 0 : Number(row.sortOrder),
+    isHealthService: Boolean(row.isHealthService),
   };
 }

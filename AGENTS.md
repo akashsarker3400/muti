@@ -2,7 +2,7 @@
 
 Official website plus admin panel for **Mymensingh Ultrasound Training
 Institute (MUTI)**. The specifications are kept in `docs/build-spec.md`,
-`docs/addendum-2.md` and `docs/addendum-3.md`; section numbers in code comments refer to them
+`docs/addendum-2.md`, `docs/addendum-3.md` and `docs/addendum-4.md`; section numbers in code comments refer to them
 ("section 5.4" is the build spec, "addendum 2, A1" the addendum).
 `HANDOVER.md` records every outstanding TODO and every deliberate deviation.
 
@@ -63,3 +63,6 @@ database access, so nothing can be prerendered at build time.
 - Bulk imports are defined once in `src/lib/admin/import/entities.ts`
   (columns, templates, header matching) with the database side in
   `src/app/actions/admin-import.ts`. Add a new importable entity in both.
+- Health appointments are health data (addendum 4 §5): never render a
+  patient's name or phone on a public page, and keep `anonymizeOldAppointments`
+  in the path of anything that lists them.

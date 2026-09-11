@@ -250,7 +250,7 @@ function Slide({
           centered ? "items-center text-center" : "items-start text-start",
         )}
       >
-        <Heading className="max-w-3xl text-[clamp(1.6rem,4.2vw,3rem)] leading-[1.2] font-bold text-balance drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+        <Heading className="max-w-3xl text-[clamp(1.6rem,4.2vw,3rem)] leading-[1.2] font-bold text-balance !text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
           {slide.title}
         </Heading>
         {slide.subtitle && (

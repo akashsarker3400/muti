@@ -558,7 +558,11 @@ const partnerResource: ResourceConfig = {
       key: "type",
       label: "ধরন",
       type: "badge",
-      labels: { AFFILIATION: "অনুমোদন", COLLABORATION: "সহযোগিতা" },
+      labels: {
+        AFFILIATION: "অনুমোদন",
+        COLLABORATION: "সহযোগিতা",
+        COMMUNITY: "স্বাস্থ্যসেবা",
+      },
       hideOnMobile: true,
     },
     { key: "sortOrder", label: "ক্রম", type: "number", hideOnMobile: true },
@@ -567,7 +571,7 @@ const partnerResource: ResourceConfig = {
   orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
   schema: z.object({
     name: requiredText,
-    type: z.enum(["AFFILIATION", "COLLABORATION"]),
+    type: z.enum(["AFFILIATION", "COLLABORATION", "COMMUNITY"]),
     logo: optionalText,
     description: optionalText,
     url: optionalText,
@@ -587,6 +591,10 @@ const partnerResource: ResourceConfig = {
           options: [
             { value: "AFFILIATION", label: "অনুমোদন (Affiliation)" },
             { value: "COLLABORATION", label: "সহযোগিতা (Collaboration)" },
+            {
+              value: "COMMUNITY",
+              label: "স্বাস্থ্যসেবার সহযোগী (শুধু /health-service পাতায়)",
+            },
           ],
         },
         { name: "url", label: "ওয়েবসাইট", type: "text", latin: true },
@@ -2250,6 +2258,19 @@ const advisorResource: ResourceConfig = {
   }),
 };
 
+const healthServiceResource = contentResource({
+  key: "health-services",
+  kind: "HEALTH_SERVICE",
+  title: "স্বাস্থ্যসেবা — আমরা যা দিই",
+  singular: "সেবা",
+  newLabel: "নতুন সেবা",
+  description:
+    "/health-service পাতার “আমরা যা দিই” কার্ড। আইকন নাম lucide থেকে (যেমন Stethoscope, FileText)। TODO: কোন কোন স্ক্যান হয় (abdomen, pregnancy, KUB…) অফিস নিশ্চিত করবে।",
+  bodyLabelBn: "সেবার নাম (বাংলা)",
+  bodyLabelEn: "Service (English)",
+  withIcon: true,
+});
+
 export const RESOURCES: Record<string, ResourceConfig> = {
   notices: noticeResource,
   faculty: facultyResource,
@@ -2273,6 +2294,7 @@ export const RESOURCES: Record<string, ResourceConfig> = {
   "board-exams": boardExamResource,
   leadership: leadershipResource,
   advisors: advisorResource,
+  "health-services": healthServiceResource,
 };
 
 export function getResource(key: string): ResourceConfig | null {

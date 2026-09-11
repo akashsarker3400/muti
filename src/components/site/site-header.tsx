@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { pick } from "@/lib/format";
-import { aboutMenu, allNav, primaryNav, type NavItem } from "@/lib/nav";
+import { aboutMenu, allNav, primaryNav, visibleNav, type NavItem } from "@/lib/nav";
 import { getLeadershipMessages, type PublicCourse } from "@/lib/queries";
 import type { SiteSettings } from "@/lib/site-settings";
 import { waLink } from "@/lib/whatsapp";
@@ -55,6 +55,8 @@ export async function SiteHeader({
     label: pick(locale, message.roleTitleBn, message.roleTitleEn),
   }));
   const about = aboutMenu(leadership);
+  const flags = { health: settings.health.published };
+  const bar = visibleNav(primaryNav, flags);
   const text = (item: NavItem) => item.label ?? nav(item.labelKey ?? "");
 
   return (
@@ -76,7 +78,7 @@ export async function SiteHeader({
 
         <nav className="ms-auto hidden items-center lg:flex" aria-label={nav("menu")}>
           <ul className="flex items-center gap-0.5">
-            {primaryNav.map((item) =>
+            {bar.map((item) =>
               item.href === "/about" ? (
                 // CSS-only dropdown: works on hover and on keyboard focus.
                 <li key={item.href} className="group relative">
@@ -151,7 +153,7 @@ export async function SiteHeader({
           <MobileNav
             courseLinks={courseLinks}
             applyLabel={common("applyNow")}
-            items={allNav(leadership).map((item) => ({
+            items={visibleNav(allNav(leadership), flags).map((item) => ({
               href: item.href,
               label: text(item),
             }))}

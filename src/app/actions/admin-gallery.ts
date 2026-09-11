@@ -16,6 +16,7 @@ const albumSchema = z.object({
   slug: z.string().trim().default(""),
   cover: z.string().trim().default(""),
   sortOrder: z.coerce.number().int().default(0),
+  isHealthService: z.boolean().default(false),
 });
 
 export async function saveAlbum(
@@ -40,6 +41,7 @@ export async function saveAlbum(
     slug: slugify(parsed.data.slug || parsed.data.title),
     cover: parsed.data.cover || null,
     sortOrder: parsed.data.sortOrder,
+    isHealthService: parsed.data.isHealthService,
   };
 
   try {

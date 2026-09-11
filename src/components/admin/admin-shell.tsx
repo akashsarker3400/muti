@@ -33,6 +33,7 @@ import {
   Users,
   X,
   Upload,
+  HeartPulse,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -68,6 +69,22 @@ const NAV: NavGroup[] = [
       { href: "/admin/results", label: "ফলাফল (নোটিশ)", icon: Trophy },
       { href: "/admin/import", label: "ইমপোর্ট (CSV/Excel)", icon: Upload },
       { href: "/admin/verification-logs", label: "যাচাই লগ", icon: BadgeCheck },
+    ],
+  },
+  {
+    title: "স্বাস্থ্যসেবা",
+    items: [
+      { href: "/admin/health", label: "সিরিয়াল ও দিনের হিসাব", icon: HeartPulse },
+      {
+        href: "/admin/health-services",
+        label: "আমরা যা দিই (তালিকা)",
+        icon: ListOrdered,
+      },
+      {
+        href: "/admin/settings",
+        label: "সেটিংস (সাইট সেটিংস → স্বাস্থ্যসেবা)",
+        icon: Settings,
+      },
     ],
   },
   {

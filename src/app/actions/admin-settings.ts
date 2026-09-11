@@ -15,6 +15,15 @@ export async function saveSiteSettings(
   const admin = await requireAdmin();
 
   const parsed = siteSettingsSchema.safeParse(formToSettings(values));
+  // A chosen preset writes the text and clears itself (addendum 4, §1.5).
+  if (parsed.success && parsed.data.homepage.announcementPreset === "HEALTH") {
+    const phone = parsed.data.contact.phone1 || parsed.data.contact.whatsapp;
+    parsed.data.homepage.announcementTextBn = `আজ বিনামূল্যে আল্ট্রাসাউন্ড সেবা চালু আছে, সিরিয়ালের জন্য কল করুন ${phone}`;
+    parsed.data.homepage.announcementTextEn = `Free ultrasound service is open today — call ${phone} for a serial`;
+    parsed.data.homepage.announcementLink = "/health-service";
+    parsed.data.homepage.announcementActive = true;
+    parsed.data.homepage.announcementPreset = "";
+  }
   if (!parsed.success) {
     const errors: Record<string, string> = {};
     for (const issue of parsed.error.issues) {

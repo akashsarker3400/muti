@@ -65,6 +65,16 @@ enum RoutineType {
 enum PartnerType {
   AFFILIATION
   COLLABORATION
+  /// Supporters of the free health service (addendum 4, §2.10)
+  COMMUNITY
+}
+
+/// Serial request for the free health service (addendum 4, §3).
+enum HealthStatus {
+  REQUESTED
+  CONFIRMED
+  SEEN
+  CANCELLED
 }
 
 /// The fixed lists the office can edit without a developer.
@@ -77,6 +87,8 @@ enum ContentKind {
   PAYMENT_POLICY
   /// The numbered "how to enrol" steps on /admission
   ADMISSION_STEP
+  /// "What we provide" cards on /health-service (addendum 4)
+  HEALTH_SERVICE
   /// Mission / Vision / Values cards on /about
   VALUE
   /// Certificates offered, listed on /accreditation
@@ -592,6 +604,8 @@ model GalleryAlbum {
   titleBn   String?
   cover     String?
   sortOrder Int     @default(0)
+  /// Shown on /health-service (addendum 4, §2.9). Consented photos only.
+  isHealthService Boolean @default(false)
 
   images GalleryImage[]
 
@@ -760,4 +774,50 @@ model RateLimit {
   createdAt DateTime @default(now())
 
   @@index([scope, key, createdAt])
+}
+
+/* ---- Addendum 4: free health service ------------------------------------ */
+
+/// Patient serial for the free ultrasound service. Health data: the form
+/// collects the minimum, nothing here is ever public, and name/phone are
+/// replaced by a hash 90 days after the visit (`anonymizedAt`).
+model HealthAppointment {
+  id            String       @id @default(cuid())
+  /// Calendar day the serial belongs to, "YYYYMMDD"; numbers restart daily.
+  serialDate    String
+  serialNo      Int
+  name          String
+  phone         String
+  age           Int?
+  gender        String?
+  area          String?
+  complaint     String?
+  preferredDate DateTime?
+  referredBy    String?
+  status        HealthStatus @default(REQUESTED)
+  note          String?
+  anonymizedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([serialDate, serialNo])
+  @@index([status, createdAt])
+  @@index([createdAt])
+}
+
+/// Atomic counters, e.g. "health-serial-20260912" (addendum 4, §3).
+model Counter {
+  key   String @id
+  value Int    @default(0)
+}
+
+/// One row per service day: how many patients were seen and reports given.
+/// Feeds the public impact stats on top of the base figures in Site Settings.
+model HealthDailyCount {
+  date     String @id
+  patients Int    @default(0)
+  reports  Int    @default(0)
+
+  updatedAt DateTime @updatedAt
 }

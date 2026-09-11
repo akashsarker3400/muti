@@ -107,6 +107,8 @@ export const siteSettingsSchema = z.object({
       announcementActive: booleanish,
       /** "accent" (red) or "brand" (navy) */
       announcementColor: z.enum(["accent", "brand", "highlight"]).default("accent"),
+      /** Picking a preset fills the announcement text on save, then clears itself. */
+      announcementPreset: z.enum(["", "HEALTH"]).default(""),
     })
     .prefault({}),
 
@@ -166,6 +168,39 @@ export const siteSettingsSchema = z.object({
       pauseOnHover: booleanish.prefault(true),
       heightDesktop: z.coerce.number().int().min(320).max(900).default(520),
       heightMobile: z.coerce.number().int().min(240).max(700).default(360),
+    })
+    .prefault({}),
+  /** Addendum 4 — free health service. Hidden everywhere until `published`. */
+  health: z
+    .object({
+      published: booleanish,
+      heroImage: optionalString,
+      introBn: optionalString,
+      introEn: optionalString,
+      daysBn: optionalString,
+      daysEn: optionalString,
+      timeBn: optionalString,
+      timeEn: optionalString,
+      /** Weekday codes the service runs, e.g. ["SAT","SUN"]; drives the open-today badge. */
+      openDays: z.array(z.string()).default([]),
+      /** Days per week the service runs, for the homepage stat tile. 0 hides it. */
+      daysPerWeek: z.coerce.number().int().min(0).max(7).default(0),
+      /** Year the service started, for the "since" tile. 0 hides it. */
+      sinceYear: z.coerce.number().int().min(0).max(2100).default(0),
+      /** Admin "closed today" switch, e.g. a holiday. */
+      holiday: booleanish,
+      holidayNoteBn: optionalString,
+      holidayNoteEn: optionalString,
+      eligibilityBn: optionalString,
+      eligibilityEn: optionalString,
+      transparencyBn: optionalString,
+      transparencyEn: optionalString,
+      /** Patients / reports before daily counting started; daily counts add on top. */
+      statsBasePatients: z.coerce.number().int().min(0).default(0),
+      statsBaseReports: z.coerce.number().int().min(0).default(0),
+      showSupportCta: booleanish,
+      supportTextBn: optionalString,
+      supportTextEn: optionalString,
     })
     .prefault({}),
   /** Addendum 3 §5 — advisor categories, one "KEY = বাংলা | English" per line. */
@@ -287,6 +322,30 @@ export const defaultSiteSettings: SiteSettings = siteSettingsSchema.parse({
     subjectCodes: "",
   },
   hero: {},
+  health: {
+    published: false,
+    introBn:
+      "প্রশিক্ষণের পাশাপাশি MUTI প্রতিদিন গরীব ও অসহায় মানুষের জন্য বিনামূল্যে আল্ট্রাসাউন্ড পরীক্ষা, লিখিত রিপোর্ট ও ডাক্তার পরামর্শ দেয়। অভিজ্ঞ সোনোলজিস্টের তত্ত্বাবধানে প্রশিক্ষণরত MBBS ডাক্তাররা পরীক্ষা করেন।",
+    introEn:
+      "Alongside its training, MUTI provides free ultrasound examinations, written reports and doctor consultations every day for poor and underprivileged people. Examinations are performed by MBBS doctors in training under the supervision of experienced sonologists.",
+    // TODO: real schedule from the office (addendum 4, §2.4).
+    daysBn: "TODO: শনিবার থেকে বৃহস্পতিবার",
+    daysEn: "TODO: Saturday to Thursday",
+    timeBn: "TODO: সকাল ১০টা থেকে দুপুর ১টা",
+    timeEn: "TODO: 10:00 am to 1:00 pm",
+    eligibilityBn:
+      "<p>গরীব ও অসহায় রোগীরা এই সেবা পাবেন।</p><p>সাথে আনুন: আগের প্রেসক্রিপশন বা রিপোর্ট (থাকলে) এবং একটি মোবাইল নম্বর।</p><p><em>TODO: যোগ্যতার কোনো নিয়ম থাকলে এখানে লিখুন।</em></p>",
+    eligibilityEn:
+      "<p>Poor and underprivileged patients are welcome.</p><p>Please bring: any previous prescription or reports, and a phone number.</p><p><em>TODO: add any eligibility rule.</em></p>",
+    transparencyBn:
+      "<p>এই সেবায় পরীক্ষাগুলো প্রশিক্ষণরত MBBS ডাক্তাররা অভিজ্ঞ সোনোলজিস্টের তত্ত্বাবধানে করেন। প্রদত্ত রিপোর্টটি একটি স্ক্রিনিং রিপোর্ট; চিকিৎসার জন্য বিশেষজ্ঞ ডাক্তারের পরামর্শ নিন।</p>",
+    transparencyEn:
+      "<p>Examinations are performed by MBBS doctors in training under the supervision of experienced sonologists. The report is a screening report; please consult a specialist for treatment.</p>",
+    supportTextBn:
+      "দাতা, হাসপাতাল বা সংস্থা হিসেবে এই সেবায় সহযোগিতা করতে বা রোগী রেফার করতে চাইলে আমাদের সাথে যোগাযোগ করুন।",
+    supportTextEn:
+      "Donors, hospitals and organisations that want to support the service or refer patients are welcome to get in touch.",
+  },
   advisors: {
     categories:
       "ADVISOR = উপদেষ্টা | Advisors\nHONORARY = সম্মানিত উপদেষ্টা | Honorary advisors\nACADEMIC_COUNCIL = একাডেমিক কাউন্সিল | Academic council",

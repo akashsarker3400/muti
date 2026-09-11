@@ -47,9 +47,10 @@ export async function PartnersRow({
   const affiliations = partners.filter((p) => p.type === "AFFILIATION");
   const collaborations = partners.filter((p) => p.type === "COLLABORATION");
 
-  const labels = {
+  const labels: Record<string, string> = {
     AFFILIATION: accreditation("affiliationTitle"),
     COLLABORATION: accreditation("collaborationTitle"),
+    COMMUNITY: accreditation("communityTitle"),
   };
 
   return (

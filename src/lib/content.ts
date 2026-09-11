@@ -109,6 +109,30 @@ export const paymentPolicy: BilingualItem[] = [
   },
 ];
 
+/**
+ * Addendum 4 — "What we provide" cards on /health-service. `icon` maps to
+ * a lucide icon name from WHY_ICONS. TODO: the office confirms the exact list
+ * and which scan types are covered (abdomen, pregnancy, KUB, …).
+ */
+export const healthServices: Array<BilingualItem & { icon: string }> = [
+  {
+    icon: "ScanLine",
+    bn: "বিনামূল্যে আল্ট্রাসাউন্ড পরীক্ষা",
+    en: "Free ultrasound examination",
+  },
+  { icon: "FileText", bn: "একই দিনে লিখিত রিপোর্ট", en: "Written report the same day" },
+  {
+    icon: "Stethoscope",
+    bn: "বিনামূল্যে ডাক্তার পরামর্শ",
+    en: "Free doctor consultation",
+  },
+  {
+    icon: "Hospital",
+    bn: "প্রয়োজনে হাসপাতালে রেফারের পরামর্শ",
+    en: "Referral advice to a hospital when needed",
+  },
+];
+
 /** Section 5.9 — certificates offered, shown on /accreditation. */
 export const certificatesOffered: BilingualItem[] = [
   {

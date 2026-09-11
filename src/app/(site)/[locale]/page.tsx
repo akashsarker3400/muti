@@ -8,6 +8,7 @@ import { GalleryGrid } from "@/components/site/gallery-grid";
 import { AdvisorsStrip } from "@/components/site/advisors-section";
 import { Hero } from "@/components/site/home/hero";
 import { HeroBanner } from "@/components/site/home/hero-banner";
+import { HealthBand } from "@/components/site/health/health-band";
 import { LeadershipCards } from "@/components/site/leadership-cards";
 import { NextBatchCta } from "@/components/site/home/next-batch";
 import { NoticeTicker } from "@/components/site/home/notice-ticker";
@@ -120,6 +121,8 @@ export default async function HomePage({
       )}
 
       <WhyChoose locale={locale} limit={8} />
+
+      <HealthBand settings={settings} locale={locale} />
 
       <PracticalBlock settings={settings} locale={locale} />
 

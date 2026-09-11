@@ -204,16 +204,24 @@ export const getTestimonials = cache(async (take?: number) => {
   }
 });
 
-export const getPartners = cache(async () => {
-  try {
-    return await prisma.partner.findMany({
-      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-    });
-  } catch (error) {
-    console.error("getPartners failed", error);
-    return [];
-  }
-});
+export const getPartners = cache(
+  async (
+    types: Array<"AFFILIATION" | "COLLABORATION" | "COMMUNITY"> = [
+      "AFFILIATION",
+      "COLLABORATION",
+    ],
+  ) => {
+    try {
+      return await prisma.partner.findMany({
+        where: { type: { in: types } },
+        orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+      });
+    } catch (error) {
+      console.error("getPartners failed", error);
+      return [];
+    }
+  },
+);
 
 export const getGalleryAlbums = cache(async () => {
   try {

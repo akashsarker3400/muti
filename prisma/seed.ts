@@ -11,6 +11,7 @@ import {
   paymentPolicy,
   requiredDocuments,
   whyChooseMuti,
+  healthServices,
 } from "../src/lib/content";
 import {
   eligibility,
@@ -244,7 +245,8 @@ async function seedContentItems() {
       | "PAYMENT_POLICY"
       | "ADMISSION_STEP"
       | "VALUE"
-      | "CERTIFICATE";
+      | "CERTIFICATE"
+      | "HEALTH_SERVICE";
     icon?: string | null;
     titleBn?: string | null;
     titleEn?: string | null;
@@ -352,6 +354,16 @@ async function seedContentItems() {
   certificatesOffered.forEach((item, index) =>
     rows.push({
       kind: "CERTIFICATE",
+      bodyBn: item.bn,
+      bodyEn: item.en,
+      sortOrder: (index + 1) * 10,
+    }),
+  );
+
+  healthServices.forEach((item, index) =>
+    rows.push({
+      kind: "HEALTH_SERVICE",
+      icon: item.icon,
       bodyBn: item.bn,
       bodyEn: item.en,
       sortOrder: (index + 1) * 10,

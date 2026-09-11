@@ -15,6 +15,11 @@ import {
   Trophy,
   Users,
   UsersRound,
+  FileText,
+  ScanLine,
+  HeartPulse,
+  Hospital,
+  Baby,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
@@ -44,6 +49,11 @@ export const WHY_ICONS = {
   HeartHandshake,
   Sparkles,
   Trophy,
+  FileText,
+  ScanLine,
+  HeartPulse,
+  Hospital,
+  Baby,
 } as const;
 
 export type WhyIconName = keyof typeof WHY_ICONS;
