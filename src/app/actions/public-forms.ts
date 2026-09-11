@@ -39,6 +39,26 @@ const QUALIFICATION_LABELS: Record<string, string> = {
   OTHER: "Other",
 };
 
+const EMPLOYMENT_LABELS: Record<string, string> = {
+  GOVT: "Government",
+  PRIVATE: "Private",
+  OTHER: "Other",
+};
+
+/** "SSC 2010 · GPA 5.00 · Dhaka Board" per row, for the office email. */
+function educationSummary(
+  rows: Array<{ exam: string; year: string; gpa: string; board: string }> | undefined,
+): string {
+  if (!rows || rows.length === 0) return "—";
+  return rows
+    .map((row) =>
+      [row.exam, row.year, row.gpa && `GPA ${row.gpa}`, row.board]
+        .filter(Boolean)
+        .join(" · "),
+    )
+    .join("\n");
+}
+
 export async function submitAdmissionApplication(raw: unknown): Promise<FormResult> {
   const parsed = admissionApplicationSchema.safeParse(raw);
   if (!parsed.success) {
@@ -93,6 +113,17 @@ export async function submitAdmissionApplication(raw: unknown): Promise<FormResu
       bmdc: data.bmdc || null,
       location: data.location || null,
       message,
+      fatherName: data.fatherName || null,
+      motherName: data.motherName || null,
+      dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
+      religion: data.religion || null,
+      nationalId: data.nationalId || null,
+      bloodGroup: data.bloodGroup || null,
+      employment: data.employment || null,
+      presentAddress: data.presentAddress || null,
+      permanentAddress: data.permanentAddress || null,
+      education:
+        data.education && data.education.length > 0 ? data.education : undefined,
       source: lead.source,
       utm: lead.utm ?? undefined,
       referralCode: lead.referralCode,
@@ -109,9 +140,19 @@ export async function submitAdmissionApplication(raw: unknown): Promise<FormResu
       ["Email", data.email || "—"],
       ["Course", `${course.nameEn} (${course.code})`],
       ["Batch", batch?.name ?? "—"],
+      ["Father's name", data.fatherName || "—"],
+      ["Mother's name", data.motherName || "—"],
+      ["Date of birth", data.dateOfBirth || "—"],
+      ["Religion", data.religion || "—"],
+      ["Blood group", data.bloodGroup || "—"],
+      ["Employment", data.employment ? EMPLOYMENT_LABELS[data.employment] : "—"],
+      ["National ID", data.nationalId || "—"],
+      ["Present address", data.presentAddress || "—"],
+      ["Permanent address", data.permanentAddress || "—"],
       ["Qualification", QUALIFICATION_LABELS[data.qualification]],
       ["Medical college", data.medicalCollege || "—"],
       ["BMDC", data.bmdc || "—"],
+      ["Education", educationSummary(data.education)],
       ["Location", data.location || "—"],
       ["Message", message || "—"],
       ["Source", application.source ?? "—"],

@@ -36,6 +36,17 @@ export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
 });
 
 /**
+ * Hero slides in display order. The list wins; an older row that only set the
+ * single `heroImage` still shows it; nothing set means the placeholder panel.
+ */
+export function heroSlides(settings: SiteSettings): string[] {
+  const list = settings.homepage.heroImages.map((s) => s.trim()).filter(Boolean);
+  if (list.length > 0) return list;
+  const single = settings.homepage.heroImage.trim();
+  return single ? [single] : [];
+}
+
+/**
  * Fields the site cannot sensibly render blank: if staff (or an older row)
  * leaves them empty we fall back to the seeded institute facts. Everything
  * else — announcement text, office hours, image paths, analytics IDs — stays

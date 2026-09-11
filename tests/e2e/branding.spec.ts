@@ -14,6 +14,50 @@ async function saveSettings(page: Page) {
 }
 
 test.describe("branding", () => {
+  test("hero images set in the admin become an auto-advancing slideshow", async ({
+    page,
+  }) => {
+    const heroTab = async () => {
+      await page.goto("/admin/settings");
+      await page.getByRole("tab", { name: "হোমপেজ" }).click();
+    };
+    const pathInput = () => page.locator("#field-homepage\\.heroImages");
+    const seconds = () => page.locator("#field-homepage\\.heroSlideSeconds");
+
+    await heroTab();
+    await pathInput().fill("/partners/bangladesh-govt-emblem.png");
+    await pathInput().press("Enter");
+    await pathInput().fill("/logo.svg");
+    await pathInput().press("Enter");
+    await seconds().fill("1");
+    await saveSettings(page);
+
+    await page.goto("/");
+    const show = page.getByTestId("hero-slideshow");
+    await expect(show).toBeVisible();
+    expect(await show.locator("img").count()).toBeGreaterThanOrEqual(2);
+    await expect(show.getByRole("tab")).toHaveCount(await show.locator("img").count());
+    // It moves on its own…
+    await expect(show).toHaveAttribute("data-active", "0");
+    await expect(show).not.toHaveAttribute("data-active", "0", { timeout: 3000 });
+    // …and the dots let the reader pick a slide directly.
+    await show.getByRole("tab").first().click();
+    await expect(show).toHaveAttribute("data-active", "0");
+
+    // Restore: drop the two paths this test added, back to 5 seconds. The
+    // removals are scoped to the hero list — the other image fields on this
+    // tab have a "সরান" button too, and clearing one of those would wipe a
+    // real upload.
+    await heroTab();
+    const heroList = page.getByTestId("field-homepage.heroImages-list");
+    const remove = heroList.getByRole("button", { name: "সরান" });
+    await remove.last().click();
+    await remove.last().click();
+    await expect(heroList.getByRole("listitem")).toHaveCount(0);
+    await seconds().fill("5");
+    await saveSettings(page);
+  });
+
   test("a brand colour set in the admin reaches the public site", async ({ page }) => {
     await page.goto("/admin/settings");
     await page.getByRole("tab", { name: "ব্র্যান্ডিং" }).click();

@@ -42,6 +42,16 @@ export type AdminApplication = {
   batchName: string | null;
   qualification: string | null;
   medicalCollege: string | null;
+  fatherName: string | null;
+  motherName: string | null;
+  dateOfBirth: string | null;
+  religion: string | null;
+  nationalId: string | null;
+  bloodGroup: string | null;
+  employment: string | null;
+  presentAddress: string | null;
+  permanentAddress: string | null;
+  education: Array<{ exam: string; year: string; gpa: string; board: string }>;
   bmdc: string | null;
   location: string | null;
   preferredDate: string | null;
@@ -51,6 +61,12 @@ export type AdminApplication = {
   referralCode: string | null;
   campaign: string | null;
   createdAt: string;
+};
+
+const EMPLOYMENT_LABELS: Record<string, string> = {
+  GOVT: "সরকারি",
+  PRIVATE: "বেসরকারি",
+  OTHER: "অন্যান্য",
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -277,10 +293,70 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                 {detail.qualification && (
                   <Row label="যোগ্যতা" value={detail.qualification} />
                 )}
+                {detail.fatherName && (
+                  <Row label="পিতার নাম" value={detail.fatherName} />
+                )}
+                {detail.motherName && (
+                  <Row label="মাতার নাম" value={detail.motherName} />
+                )}
+                {detail.dateOfBirth && (
+                  <Row label="জন্মতারিখ" value={formatDate(detail.dateOfBirth, "bn")} />
+                )}
+                {detail.religion && <Row label="ধর্ম" value={detail.religion} />}
+                {detail.bloodGroup && (
+                  <Row label="রক্তের গ্রুপ" value={detail.bloodGroup} latin />
+                )}
+                {detail.employment && (
+                  <Row
+                    label="পেশা"
+                    value={EMPLOYMENT_LABELS[detail.employment] ?? detail.employment}
+                  />
+                )}
+                {detail.nationalId && (
+                  <Row label="জাতীয় পরিচয়পত্র" value={detail.nationalId} latin />
+                )}
+                {detail.presentAddress && (
+                  <Row label="বর্তমান ঠিকানা" value={detail.presentAddress} />
+                )}
+                {detail.permanentAddress &&
+                  detail.permanentAddress !== detail.presentAddress && (
+                    <Row label="স্থায়ী ঠিকানা" value={detail.permanentAddress} />
+                  )}
                 {detail.medicalCollege && (
                   <Row label="মেডিকেল কলেজ" value={detail.medicalCollege} />
                 )}
                 {detail.bmdc && <Row label="BMDC" value={detail.bmdc} latin />}
+                {detail.education.length > 0 && (
+                  <div>
+                    <dt className="text-xs text-[color:var(--muted-foreground)]">
+                      শিক্ষাগত যোগ্যতা
+                    </dt>
+                    <dd className="mt-1 overflow-x-auto">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="text-start text-[color:var(--muted-foreground)]">
+                            <th className="pe-3 text-start font-medium">পরীক্ষা</th>
+                            <th className="pe-3 text-start font-medium">সাল</th>
+                            <th className="pe-3 text-start font-medium">GPA</th>
+                            <th className="text-start font-medium">
+                              বোর্ড/বিশ্ববিদ্যালয়
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {detail.education.map((row) => (
+                            <tr key={row.exam} className="font-latin">
+                              <td className="py-0.5 pe-3 font-semibold">{row.exam}</td>
+                              <td className="py-0.5 pe-3">{row.year || "—"}</td>
+                              <td className="py-0.5 pe-3">{row.gpa || "—"}</td>
+                              <td className="py-0.5 font-sans">{row.board || "—"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </dd>
+                  </div>
+                )}
                 {detail.location && <Row label="এলাকা" value={detail.location} />}
                 {detail.preferredDate && (
                   <Row

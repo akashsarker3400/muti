@@ -96,6 +96,23 @@ export default async function ApplicationsPage({
     qualification: row.qualification,
     medicalCollege: row.medicalCollege,
     bmdc: row.bmdc,
+    fatherName: row.fatherName,
+    motherName: row.motherName,
+    dateOfBirth: row.dateOfBirth?.toISOString() ?? null,
+    religion: row.religion,
+    nationalId: row.nationalId,
+    bloodGroup: row.bloodGroup,
+    employment: row.employment,
+    presentAddress: row.presentAddress,
+    permanentAddress: row.permanentAddress,
+    education: Array.isArray(row.education)
+      ? (row.education as Array<{
+          exam: string;
+          year: string;
+          gpa: string;
+          board: string;
+        }>)
+      : [],
     location: row.location,
     preferredDate: row.preferredDate?.toISOString() ?? null,
     message: row.message,

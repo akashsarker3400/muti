@@ -13,21 +13,38 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { submitAdmissionApplication } from "@/app/actions/public-forms";
+import { EXAMS, type Exam } from "@/lib/validation";
 import { waLink } from "@/lib/whatsapp";
 
 export type CourseOption = { id: string; slug: string; label: string };
 export type BatchOption = { id: string; label: string };
 
+const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
+const RELIGIONS = ["islam", "hinduism", "buddhism", "christianity", "other"] as const;
+
+type EducationRow = { exam: Exam; year: string; gpa: string; board: string };
+
 type FormValues = {
   name: string;
+  fatherName: string;
+  motherName: string;
+  dateOfBirth: string;
+  religion: string;
+  bloodGroup: string;
+  nationalId: string;
+  employment: "" | "GOVT" | "PRIVATE" | "OTHER";
   phone: string;
   whatsapp: string;
   sameWhatsapp: boolean;
   email: string;
+  presentAddress: string;
+  permanentAddress: string;
+  sameAddress: boolean;
   courseId: string;
   qualification: "" | "MBBS" | "INTERN" | "OTHER";
   medicalCollege: string;
   bmdc: string;
+  education: EducationRow[];
   location: string;
   batchId: string;
   message: string;
@@ -35,7 +52,13 @@ type FormValues = {
   website: string;
 };
 
-/** Online admission application (section 5.6). */
+/**
+ * Online admission application (section 5.6). It mirrors the institute's
+ * paper admission form section by section — personal details, contact,
+ * education, course — so a completed online form leaves nothing for the
+ * office to chase. Only the fields needed to call the applicant back are
+ * required; everything else can be completed at admission.
+ */
 export function AdmissionForm({
   courses,
   batches,
@@ -76,14 +99,25 @@ export function AdmissionForm({
   } = useForm<FormValues>({
     defaultValues: {
       name: "",
+      fatherName: "",
+      motherName: "",
+      dateOfBirth: "",
+      religion: "",
+      bloodGroup: "",
+      nationalId: "",
+      employment: "",
       phone: "",
       whatsapp: "",
       sameWhatsapp: true,
       email: "",
+      presentAddress: "",
+      permanentAddress: "",
+      sameAddress: true,
       courseId: preselected?.id ?? "",
       qualification: "",
       medicalCollege: "",
       bmdc: "",
+      education: EXAMS.map((exam) => ({ exam, year: "", gpa: "", board: "" })),
       location: "",
       batchId: "",
       message: "",
@@ -93,6 +127,7 @@ export function AdmissionForm({
   });
 
   const sameWhatsapp = watch("sameWhatsapp");
+  const sameAddress = watch("sameAddress");
 
   function onSubmit(values: FormValues) {
     startTransition(async () => {
@@ -108,6 +143,18 @@ export function AdmissionForm({
         location: values.location || undefined,
         batchId: values.batchId || undefined,
         message: values.message || undefined,
+        fatherName: values.fatherName || undefined,
+        motherName: values.motherName || undefined,
+        dateOfBirth: values.dateOfBirth || undefined,
+        religion: values.religion || undefined,
+        nationalId: values.nationalId || undefined,
+        bloodGroup: values.bloodGroup || undefined,
+        employment: values.employment || undefined,
+        presentAddress: values.presentAddress || undefined,
+        permanentAddress: values.sameAddress
+          ? values.presentAddress || undefined
+          : values.permanentAddress || undefined,
+        education: values.education,
         consent: values.consent,
         waitlist,
         website: values.website,
@@ -121,6 +168,7 @@ export function AdmissionForm({
 
       if (result.errors) {
         for (const [field, key] of Object.entries(result.errors)) {
+          // "education.2.year" -> the row's input; anything else maps 1:1.
           setError(field as keyof FormValues, {
             message: errorText(t, key),
           });
@@ -171,7 +219,7 @@ export function AdmissionForm({
       // Before hydration a native submit would otherwise be a GET, putting the
       // applicant's phone number in the URL.
       method="post"
-      className="relative space-y-5 rounded-[14px] border border-[color:var(--border)] bg-white p-5 shadow-[var(--shadow-card)] sm:p-6"
+      className="relative space-y-8 rounded-[14px] border border-[color:var(--border)] bg-white p-5 shadow-[var(--shadow-card)] sm:p-6"
     >
       <Honeypot {...register("website")} />
 
@@ -181,7 +229,8 @@ export function AdmissionForm({
         </p>
       )}
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      {/* ---- 1. Personal ------------------------------------------------ */}
+      <FormSection title={t("sectionPersonal")}>
         <Field
           label={t("fullName")}
           required
@@ -199,6 +248,89 @@ export function AdmissionForm({
           )}
         </Field>
 
+        <Field label={t("fatherName")} error={errors.fatherName?.message}>
+          {(props) => <Input {...props} {...register("fatherName")} className="h-11" />}
+        </Field>
+
+        <Field label={t("motherName")} error={errors.motherName?.message}>
+          {(props) => <Input {...props} {...register("motherName")} className="h-11" />}
+        </Field>
+
+        <Field label={t("dateOfBirth")} error={errors.dateOfBirth?.message}>
+          {(props) => (
+            <Input
+              {...props}
+              {...register("dateOfBirth")}
+              type="date"
+              dir="ltr"
+              autoComplete="bday"
+              className="h-11 font-latin"
+            />
+          )}
+        </Field>
+
+        <Field label={t("religion")} error={errors.religion?.message}>
+          {(props) => (
+            <select {...props} {...register("religion")} className={selectClass}>
+              <option value="">{t("selectPlaceholder")}</option>
+              {RELIGIONS.map((key) => (
+                <option key={key} value={t(`religionOptions.${key}`)}>
+                  {t(`religionOptions.${key}`)}
+                </option>
+              ))}
+            </select>
+          )}
+        </Field>
+
+        <Field label={t("bloodGroup")} error={errors.bloodGroup?.message}>
+          {(props) => (
+            <select
+              {...props}
+              {...register("bloodGroup")}
+              className={`${selectClass} font-latin`}
+            >
+              <option value="">{t("selectPlaceholder")}</option>
+              {BLOOD_GROUPS.map((group) => (
+                <option key={group} value={group}>
+                  {group}
+                </option>
+              ))}
+            </select>
+          )}
+        </Field>
+
+        <Field label={t("employment")} error={errors.employment?.message}>
+          {(props) => (
+            <select {...props} {...register("employment")} className={selectClass}>
+              <option value="">{t("selectPlaceholder")}</option>
+              <option value="GOVT">{t("employmentGovt")}</option>
+              <option value="PRIVATE">{t("employmentPrivate")}</option>
+              <option value="OTHER">{t("employmentOther")}</option>
+            </select>
+          )}
+        </Field>
+
+        <Field
+          label={t("nationalId")}
+          error={errors.nationalId?.message}
+          hint={t("nationalIdHint")}
+          className="sm:col-span-2"
+        >
+          {(props) => (
+            <Input
+              {...props}
+              {...register("nationalId")}
+              inputMode="numeric"
+              dir="ltr"
+              placeholder={t("nationalIdPlaceholder")}
+              className="h-11 font-latin"
+            />
+          )}
+        </Field>
+      </FormSection>
+
+      {/* ---- 2. Contact ------------------------------------------------- */}
+      <FormSection title={t("sectionContact")}>
         <Field label={t("phone")} required error={errors.phone?.message}>
           {(props) => (
             <Input
@@ -259,25 +391,53 @@ export function AdmissionForm({
           </Field>
         )}
 
-        <Field label={t("course")} required error={errors.courseId?.message}>
+        <Field
+          label={t("presentAddress")}
+          error={errors.presentAddress?.message}
+          className="sm:col-span-2"
+        >
           {(props) => (
-            <select
+            <Textarea
               {...props}
-              {...register("courseId", {
-                required: errorText(t, "courseRequired"),
-              })}
-              className={selectClass}
-            >
-              <option value="">{t("coursePlaceholder")}</option>
-              {courses.map((course) => (
-                <option key={course.id} value={course.id}>
-                  {course.label}
-                </option>
-              ))}
-            </select>
+              {...register("presentAddress")}
+              rows={2}
+              autoComplete="street-address"
+              placeholder={t("addressPlaceholder")}
+            />
           )}
         </Field>
 
+        <div className="sm:col-span-2">
+          <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm">
+            <input
+              type="checkbox"
+              {...register("sameAddress")}
+              className="size-4 accent-[color:var(--brand)]"
+            />
+            {t("addressSame")}
+          </label>
+        </div>
+
+        {!sameAddress && (
+          <Field
+            label={t("permanentAddress")}
+            error={errors.permanentAddress?.message}
+            className="sm:col-span-2"
+          >
+            {(props) => (
+              <Textarea
+                {...props}
+                {...register("permanentAddress")}
+                rows={2}
+                placeholder={t("addressPlaceholder")}
+              />
+            )}
+          </Field>
+        )}
+      </FormSection>
+
+      {/* ---- 3. Education ----------------------------------------------- */}
+      <FormSection title={t("sectionEducation")}>
         <Field
           label={t("qualification")}
           required
@@ -299,11 +459,7 @@ export function AdmissionForm({
           )}
         </Field>
 
-        <Field
-          label={t("medicalCollege")}
-          error={errors.medicalCollege?.message}
-          hint={t("optional")}
-        >
+        <Field label={t("medicalCollege")} error={errors.medicalCollege?.message}>
           {(props) => (
             <Input
               {...props}
@@ -326,23 +482,86 @@ export function AdmissionForm({
           )}
         </Field>
 
-        <Field label={t("location")} error={errors.location?.message}>
+        {/*
+          The paper form's exam table: one row per exam with passing year,
+          GPA and board/university. On phones each row stacks into a card.
+        */}
+        <fieldset className="sm:col-span-2">
+          <legend className="mb-2 text-sm font-medium">{t("educationTable")}</legend>
+          <div className="overflow-hidden rounded-lg border border-[color:var(--border)]">
+            <div className="hidden grid-cols-[7rem_1fr_1fr_2fr] gap-2 border-b border-[color:var(--border)] bg-[color:var(--bg-soft)] px-3 py-2 text-xs font-semibold text-[color:var(--muted-foreground)] sm:grid">
+              <span>{t("exam")}</span>
+              <span>{t("passingYear")}</span>
+              <span>{t("gpa")}</span>
+              <span>{t("board")}</span>
+            </div>
+            {EXAMS.map((exam, index) => {
+              const rowErrors = errors.education?.[index];
+              return (
+                <div
+                  key={exam}
+                  className="grid gap-2 border-b border-[color:var(--border)] px-3 py-3 last:border-b-0 sm:grid-cols-[7rem_1fr_1fr_2fr] sm:items-center sm:py-2"
+                >
+                  <span className="font-latin text-sm font-semibold">
+                    {t(`examOptions.${exam}`)}
+                  </span>
+                  <Input
+                    {...register(`education.${index}.year` as const)}
+                    inputMode="numeric"
+                    dir="ltr"
+                    placeholder={t("passingYear")}
+                    aria-label={`${t(`examOptions.${exam}`)} — ${t("passingYear")}`}
+                    aria-invalid={rowErrors?.year ? true : undefined}
+                    className="h-10 font-latin"
+                  />
+                  <Input
+                    {...register(`education.${index}.gpa` as const)}
+                    dir="ltr"
+                    placeholder={t("gpa")}
+                    aria-label={`${t(`examOptions.${exam}`)} — ${t("gpa")}`}
+                    className="h-10 font-latin"
+                  />
+                  <Input
+                    {...register(`education.${index}.board` as const)}
+                    placeholder={t("board")}
+                    aria-label={`${t(`examOptions.${exam}`)} — ${t("board")}`}
+                    className="h-10"
+                  />
+                  {rowErrors?.year && (
+                    <p className="text-xs font-medium text-[color:var(--error)] sm:col-span-4">
+                      {rowErrors.year.message}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </fieldset>
+      </FormSection>
+
+      {/* ---- 4. Course -------------------------------------------------- */}
+      <FormSection title={t("sectionCourse")}>
+        <Field label={t("course")} required error={errors.courseId?.message}>
           {(props) => (
-            <Input
+            <select
               {...props}
-              {...register("location")}
-              placeholder={t("locationPlaceholder")}
-              className="h-11"
-            />
+              {...register("courseId", {
+                required: errorText(t, "courseRequired"),
+              })}
+              className={selectClass}
+            >
+              <option value="">{t("coursePlaceholder")}</option>
+              {courses.map((course) => (
+                <option key={course.id} value={course.id}>
+                  {course.label}
+                </option>
+              ))}
+            </select>
           )}
         </Field>
 
         {batches.length > 0 && (
-          <Field
-            label={t("batch")}
-            error={errors.batchId?.message}
-            className="sm:col-span-2"
-          >
+          <Field label={t("batch")} error={errors.batchId?.message}>
             {(props) => (
               <select {...props} {...register("batchId")} className={selectClass}>
                 <option value="">{t("batchPlaceholder")}</option>
@@ -357,6 +576,21 @@ export function AdmissionForm({
         )}
 
         <Field
+          label={t("location")}
+          error={errors.location?.message}
+          className="sm:col-span-2"
+        >
+          {(props) => (
+            <Input
+              {...props}
+              {...register("location")}
+              placeholder={t("locationPlaceholder")}
+              className="h-11"
+            />
+          )}
+        </Field>
+
+        <Field
           label={t("message")}
           error={errors.message?.message}
           className="sm:col-span-2"
@@ -365,12 +599,12 @@ export function AdmissionForm({
             <Textarea
               {...props}
               {...register("message")}
-              rows={4}
+              rows={3}
               placeholder={t("messagePlaceholder")}
             />
           )}
         </Field>
-      </div>
+      </FormSection>
 
       <div>
         <label className="flex cursor-pointer items-start gap-2.5 text-sm">
@@ -411,5 +645,24 @@ export function AdmissionForm({
             : t("submitApplication")}
       </Button>
     </form>
+  );
+}
+
+/** A titled group of fields, laid out two-up on wider screens. */
+function FormSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="space-y-4">
+      <h2 className="flex items-center gap-3 text-base font-semibold text-[color:var(--brand)]">
+        {title}
+        <span className="h-px flex-1 bg-[color:var(--border)]" aria-hidden="true" />
+      </h2>
+      <div className="grid gap-5 sm:grid-cols-2">{children}</div>
+    </section>
   );
 }

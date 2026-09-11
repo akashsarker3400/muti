@@ -112,7 +112,8 @@
     "contactSubtitle": "যেকোনো প্রশ্নে সরাসরি WhatsApp করুন বা অফিসে আসুন।",
     "classDaysLabel": "ক্লাসের দিন",
     "seatsLabel": "আসন",
-    "tickerLabel": "নোটিশ"
+    "tickerLabel": "নোটিশ",
+    "slide": "ছবি {n}"
   },
   "about": {
     "title": "ডাক্তারদের জন্য, ডাক্তারদের দ্বারা পরিচালিত",
@@ -308,6 +309,45 @@
     "submitApplication": "আবেদন জমা দিন",
     "submitFreeClass": "ফ্রি ক্লাস বুক করুন",
     "submitContact": "মেসেজ পাঠান",
+    "sectionPersonal": "ব্যক্তিগত তথ্য",
+    "sectionContact": "যোগাযোগ ও ঠিকানা",
+    "sectionEducation": "শিক্ষাগত যোগ্যতা",
+    "sectionCourse": "কোর্স",
+    "fatherName": "পিতার নাম",
+    "motherName": "মাতার নাম",
+    "dateOfBirth": "জন্মতারিখ",
+    "religion": "ধর্ম",
+    "religionOptions": {
+      "islam": "ইসলাম",
+      "hinduism": "হিন্দু",
+      "buddhism": "বৌদ্ধ",
+      "christianity": "খ্রিস্টান",
+      "other": "অন্যান্য"
+    },
+    "bloodGroup": "রক্তের গ্রুপ",
+    "employment": "পেশা",
+    "employmentGovt": "সরকারি",
+    "employmentPrivate": "বেসরকারি",
+    "employmentOther": "অন্যান্য",
+    "nationalId": "জাতীয় পরিচয়পত্র নম্বর",
+    "nationalIdPlaceholder": "১০, ১৩ বা ১৭ সংখ্যার NID নম্বর",
+    "nationalIdHint": "ঐচ্ছিক — ভর্তির সময় অফিসেও দিতে পারবেন।",
+    "presentAddress": "বর্তমান ঠিকানা",
+    "permanentAddress": "স্থায়ী ঠিকানা",
+    "addressSame": "স্থায়ী ঠিকানা বর্তমান ঠিকানার মতোই",
+    "addressPlaceholder": "গ্রাম/রোড, থানা, জেলা",
+    "educationTable": "পরীক্ষার বিবরণ (ঐচ্ছিক)",
+    "exam": "পরীক্ষা",
+    "examOptions": {
+      "SSC": "SSC",
+      "HSC": "HSC",
+      "MBBS": "MBBS",
+      "OTHER": "অন্যান্য"
+    },
+    "passingYear": "পাশের সাল",
+    "gpa": "GPA / ফলাফল",
+    "board": "বোর্ড / বিশ্ববিদ্যালয়",
+    "selectPlaceholder": "— বাছাই করুন —",
     "errors": {
       "nameRequired": "নাম লিখুন",
       "nameTooShort": "নাম কমপক্ষে ৩ অক্ষরের হতে হবে",
@@ -320,7 +360,10 @@
       "consentRequired": "সম্মতি দিন",
       "queryRequired": "সার্টিফিকেট নম্বর বা রোল লিখুন",
       "rateLimited": "অনেকবার চেষ্টা করা হয়েছে। এক ঘণ্টা পর আবার চেষ্টা করুন।",
-      "generic": "জমা দেওয়া যায়নি। আবার চেষ্টা করুন অথবা WhatsApp করুন।"
+      "generic": "জমা দেওয়া যায়নি। আবার চেষ্টা করুন অথবা WhatsApp করুন।",
+      "nidInvalid": "NID নম্বর ১০, ১৩ বা ১৭ সংখ্যার হতে হবে",
+      "yearInvalid": "সঠিক সাল লিখুন (যেমন 2015)",
+      "dateInvalid": "সঠিক তারিখ দিন"
     }
   },
   "footer": {

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { Panel } from "@/components/admin/ui";
+import { MultiUploadField } from "@/components/admin/multi-upload-field";
 import { UploadField } from "@/components/admin/upload-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -341,6 +342,7 @@ function FieldControl({
     field.type === "textarea" ||
     field.type === "image" ||
     field.type === "file" ||
+    field.type === "images" ||
     field.type === "tags";
 
   const inputClass = cn("h-11", field.latin && "font-latin");
@@ -462,6 +464,14 @@ function FieldControl({
           onChange={(url) => setValue(field.name, url)}
           kind={field.type === "image" ? "image" : "file"}
           accept={field.type === "image" ? "image/*" : "application/pdf,image/*"}
+        />
+      )}
+
+      {field.type === "images" && (
+        <MultiUploadField
+          id={id}
+          value={Array.isArray(value) ? value : []}
+          onChange={(urls) => setValue(field.name, urls)}
         />
       )}
 

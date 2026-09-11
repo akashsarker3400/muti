@@ -1,12 +1,13 @@
 import { getTranslations } from "next-intl/server";
 
+import { HeroSlideshow } from "@/components/site/home/hero-slideshow";
 import { WhatsAppIcon } from "@/components/site/icons";
 import { SiteImage } from "@/components/site/media";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { pick, toBanglaDigits } from "@/lib/format";
-import type { SiteSettings } from "@/lib/site-settings";
+import { heroSlides, type SiteSettings } from "@/lib/site-settings";
 import { waLink } from "@/lib/whatsapp";
 
 export async function Hero({
@@ -40,6 +41,7 @@ export async function Hero({
     locale === "bn"
       ? toBanglaDigits(settings.general.govtCode)
       : settings.general.govtCode;
+  const slides = heroSlides(settings);
   const established =
     locale === "bn"
       ? toBanglaDigits(settings.general.establishedYear)
@@ -92,18 +94,30 @@ export async function Hero({
           </p>
         </div>
 
-        <SiteImage
-          src={settings.homepage.heroImage}
-          alt={home("practicalTitle")}
-          className="aspect-[4/3] w-full lg:aspect-[5/4]"
-          sizes="(max-width: 1024px) 100vw, 50vw"
-          priority
-          placeholderLabel={
-            locale === "bn"
-              ? "প্র্যাকটিক্যাল ক্লাসের ছবি অ্যাডমিন প্যানেল থেকে যোগ করুন"
-              : "Add a practical class photo from the admin panel"
-          }
-        />
+        {slides.length > 0 ? (
+          <HeroSlideshow
+            images={slides}
+            alt={home("practicalTitle")}
+            intervalSeconds={settings.homepage.heroSlideSeconds}
+            className="aspect-[4/3] w-full lg:aspect-[5/4]"
+            dotLabels={slides.map((_, index) =>
+              home("slide", {
+                n: locale === "bn" ? toBanglaDigits(String(index + 1)) : index + 1,
+              }),
+            )}
+          />
+        ) : (
+          <SiteImage
+            src=""
+            alt={home("practicalTitle")}
+            className="aspect-[4/3] w-full lg:aspect-[5/4]"
+            placeholderLabel={
+              locale === "bn"
+                ? "প্র্যাকটিক্যাল ক্লাসের ছবি অ্যাডমিন প্যানেল থেকে যোগ করুন"
+                : "Add a practical class photo from the admin panel"
+            }
+          />
+        )}
       </div>
     </section>
   );

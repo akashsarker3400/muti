@@ -15,6 +15,7 @@ export type FieldType =
   | "date"
   | "image"
   | "file"
+  | "images"
   | "tags";
 
 export type FieldDef = {

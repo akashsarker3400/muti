@@ -235,7 +235,18 @@ export const settingsFormSections: FormSection[] = [
         type: "textarea",
         lang: "en",
       },
-      { name: "homepage.heroImage", label: "হিরো ছবি", type: "image" },
+      {
+        name: "homepage.heroImages",
+        label: "হিরো ছবি (স্লাইডশো)",
+        type: "images",
+        hint: "একটি ছবি দিলে সেটিই দেখাবে; একাধিক দিলে নিজে থেকে বদলাবে। প্রথম ছবিটি সবার আগে লোড হয় — সবচেয়ে ভালোটা আগে রাখুন।",
+      },
+      {
+        name: "homepage.heroSlideSeconds",
+        label: "প্রতি স্লাইড কত সেকেন্ড",
+        type: "number",
+        hint: "০ দিলে নিজে থেকে বদলাবে না, দর্শক ডট চেপে বদলাতে পারবেন।",
+      },
       {
         name: "homepage.practicalImage",
         label: "প্র্যাকটিক্যাল সেকশনের ছবি",
@@ -426,8 +437,8 @@ export function settingsToForm(settings: SiteSettings): FormValues {
   for (const [group, entries] of Object.entries(settings)) {
     for (const [key, value] of Object.entries(entries as Record<string, unknown>)) {
       values[`${group}.${key}`] =
-        typeof value === "boolean" || typeof value === "number"
-          ? value
+        typeof value === "boolean" || typeof value === "number" || Array.isArray(value)
+          ? (value as FormValues[string])
           : String(value ?? "");
     }
   }

@@ -112,7 +112,8 @@
     "contactSubtitle": "Message us on WhatsApp or visit the office for anything you need.",
     "classDaysLabel": "Class days",
     "seatsLabel": "Seats",
-    "tickerLabel": "Notice"
+    "tickerLabel": "Notice",
+    "slide": "Photo {n}"
   },
   "about": {
     "title": "Built for doctors, run by doctors",
@@ -308,6 +309,45 @@
     "submitApplication": "Submit application",
     "submitFreeClass": "Book a free class",
     "submitContact": "Send message",
+    "sectionPersonal": "Personal details",
+    "sectionContact": "Contact & address",
+    "sectionEducation": "Education",
+    "sectionCourse": "Course",
+    "fatherName": "Father's name",
+    "motherName": "Mother's name",
+    "dateOfBirth": "Date of birth",
+    "religion": "Religion",
+    "religionOptions": {
+      "islam": "Islam",
+      "hinduism": "Hinduism",
+      "buddhism": "Buddhism",
+      "christianity": "Christianity",
+      "other": "Other"
+    },
+    "bloodGroup": "Blood group",
+    "employment": "Employment",
+    "employmentGovt": "Government",
+    "employmentPrivate": "Private",
+    "employmentOther": "Other",
+    "nationalId": "National ID number",
+    "nationalIdPlaceholder": "10, 13 or 17 digit NID",
+    "nationalIdHint": "Optional — you can also provide it at the office.",
+    "presentAddress": "Present address",
+    "permanentAddress": "Permanent address",
+    "addressSame": "Permanent address is the same as present address",
+    "addressPlaceholder": "Village/road, thana, district",
+    "educationTable": "Exam details (optional)",
+    "exam": "Exam",
+    "examOptions": {
+      "SSC": "SSC",
+      "HSC": "HSC",
+      "MBBS": "MBBS",
+      "OTHER": "Others"
+    },
+    "passingYear": "Passing year",
+    "gpa": "GPA / result",
+    "board": "Board / university",
+    "selectPlaceholder": "— select —",
     "errors": {
       "nameRequired": "Please enter your name",
       "nameTooShort": "Name must be at least 3 characters",
@@ -320,7 +360,10 @@
       "consentRequired": "Please give your consent",
       "queryRequired": "Enter a certificate number or roll",
       "rateLimited": "Too many attempts. Please try again in an hour.",
-      "generic": "Could not submit. Please try again or message us on WhatsApp."
+      "generic": "Could not submit. Please try again or message us on WhatsApp.",
+      "nidInvalid": "NID must be 10, 13 or 17 digits",
+      "yearInvalid": "Enter a valid year (e.g. 2015)",
+      "dateInvalid": "Enter a valid date"
     }
   },
   "footer": {

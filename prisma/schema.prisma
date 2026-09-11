@@ -84,6 +84,13 @@ enum ContentKind {
 }
 
 /// Where an enquiry came from (addendum 2, A3).
+/// Employment sector, from the paper admission form's Govt / Private / Others.
+enum Employment {
+  GOVT
+  PRIVATE
+  OTHER
+}
+
 enum LeadSource {
   FACEBOOK
   GOOGLE
@@ -241,11 +248,25 @@ model Application {
   batch    Batch?  @relation(fields: [batchId], references: [id], onDelete: SetNull)
 
   qualification String?
-  /// Which medical college the applicant graduated from (paper form: Board/University).
+  /// Which medical college the applicant graduated from.
   medicalCollege String?
   bmdc          String?
   location      String?
   preferredDate DateTime?
+
+  /// The remaining fields of the paper admission form. All optional online:
+  /// the office completes anything missing at admission time.
+  fatherName       String?
+  motherName       String?
+  dateOfBirth      DateTime?
+  religion         String?
+  nationalId       String?
+  bloodGroup       String?
+  employment       Employment?
+  presentAddress   String? @db.Text
+  permanentAddress String? @db.Text
+  /// [{ exam: "SSC" | "HSC" | "MBBS" | "OTHER", year, gpa, board }]
+  education        Json?
   message       String?   @db.Text
 
   adminNote String? @db.Text

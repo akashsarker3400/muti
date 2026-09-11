@@ -86,6 +86,10 @@ export const siteSettingsSchema = z.object({
       heroSubBn: optionalString,
       heroSubEn: optionalString,
       heroImage: optionalString,
+      /** Hero slides, in order. Falls back to `heroImage` when empty. */
+      heroImages: z.array(z.string().trim()).max(8).default([]),
+      /** Seconds per slide; 0 means no automatic change. */
+      heroSlideSeconds: z.coerce.number().int().min(0).max(60).default(5),
       practicalImage: optionalString,
       doctorsTrained: z.coerce.number().int().min(0).default(0),
       showDoctorsTrained: booleanish,
@@ -200,6 +204,8 @@ export const defaultSiteSettings: SiteSettings = siteSettingsSchema.parse({
     heroSubEn:
       "Admission open for CMU, DMU, ADMU and special courses. Hands-on practice on real patients in every class.",
     heroImage: "",
+    heroImages: [],
+    heroSlideSeconds: 5,
     practicalImage: "",
     // TODO: real "doctors trained" figure not provided — tile stays hidden.
     doctorsTrained: 0,

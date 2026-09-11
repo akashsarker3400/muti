@@ -44,6 +44,16 @@ export async function GET(request: Request) {
     "Qualification",
     "Medical college",
     "BMDC",
+    "Father's name",
+    "Mother's name",
+    "Date of birth",
+    "Religion",
+    "Blood group",
+    "Employment",
+    "National ID",
+    "Present address",
+    "Permanent address",
+    "Education",
     "Location",
     "Preferred date",
     "Message",
@@ -69,6 +79,27 @@ export async function GET(request: Request) {
         row.qualification ?? "",
         row.medicalCollege ?? "",
         row.bmdc ?? "",
+        row.fatherName ?? "",
+        row.motherName ?? "",
+        row.dateOfBirth?.toISOString().slice(0, 10) ?? "",
+        row.religion ?? "",
+        row.bloodGroup ?? "",
+        row.employment ?? "",
+        row.nationalId ?? "",
+        row.presentAddress ?? "",
+        row.permanentAddress ?? "",
+        Array.isArray(row.education)
+          ? (
+              row.education as Array<{
+                exam: string;
+                year: string;
+                gpa: string;
+                board: string;
+              }>
+            )
+              .map((e) => [e.exam, e.year, e.gpa, e.board].filter(Boolean).join(" "))
+              .join(" | ")
+          : "",
         row.location ?? "",
         row.preferredDate?.toISOString().slice(0, 10) ?? "",
         row.message ?? "",
