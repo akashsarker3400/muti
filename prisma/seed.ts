@@ -19,6 +19,8 @@ import {
   seedNotices,
   seedPages,
   seedPartners,
+  seedLeadership,
+  seedBanners,
   seedPosts,
 } from "./seed-data";
 
@@ -159,6 +161,23 @@ async function seedPartnerRows() {
     await prisma.partner.create({ data: partner });
     console.log(`+ partner ${partner.name}`);
   }
+}
+
+async function seedLeadershipRows() {
+  for (const row of seedLeadership) {
+    const existing = await prisma.leadershipMessage.findUnique({
+      where: { key: row.key },
+    });
+    if (existing) continue;
+    await prisma.leadershipMessage.create({ data: row });
+    console.log(`+ leadership ${row.key} (unpublished)`);
+  }
+}
+
+async function seedBannerRows() {
+  if ((await prisma.banner.count()) > 0) return;
+  await prisma.banner.createMany({ data: seedBanners });
+  console.log(`+ ${seedBanners.length} hero banners`);
 }
 
 async function seedFaqRows() {
@@ -367,6 +386,8 @@ async function main() {
   await seedBatches();
   await seedContentItems();
   await seedPartnerRows();
+  await seedLeadershipRows();
+  await seedBannerRows();
   await seedFaqRows();
   await seedNoticeRows();
   await seedPageRows();

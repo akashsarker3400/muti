@@ -8,6 +8,7 @@ import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { pick, toBanglaDigits } from "@/lib/format";
 import { allNav } from "@/lib/nav";
+import { getLeadershipMessages } from "@/lib/queries";
 import { displayPhone, telHref } from "@/lib/phone";
 import type { PublicCourse } from "@/lib/queries";
 import type { SiteSettings } from "@/lib/site-settings";
@@ -22,12 +23,17 @@ export async function SiteFooter({
   locale: Locale;
   courses: PublicCourse[];
 }) {
-  const [nav, footer, contact, common] = await Promise.all([
+  const [nav, footer, contact, common, leadership] = await Promise.all([
     getTranslations("nav"),
     getTranslations("footer"),
     getTranslations("contact"),
     getTranslations("common"),
+    getLeadershipMessages(),
   ]);
+  const leadershipLinks = leadership.map((message) => ({
+    href: `/messages/${message.key}`,
+    label: pick(locale, message.roleTitleBn, message.roleTitleEn),
+  }));
 
   const instituteName = pick(locale, settings.general.nameBn, settings.general.nameEn);
   const about = pick(locale, settings.footer.aboutBn, settings.footer.aboutEn);
@@ -72,7 +78,7 @@ export async function SiteFooter({
             {footer("quickLinks")}
           </h2>
           <ul className="space-y-2 text-sm">
-            {allNav
+            {allNav(leadershipLinks)
               .filter((item) => item.href !== "/")
               .map((item) => (
                 <li key={item.href}>
@@ -80,7 +86,7 @@ export async function SiteFooter({
                     href={item.href}
                     className="text-[color:#b9c2dd] transition hover:text-white"
                   >
-                    {nav(item.labelKey)}
+                    {item.label ?? nav(item.labelKey ?? "")}
                   </Link>
                 </li>
               ))}

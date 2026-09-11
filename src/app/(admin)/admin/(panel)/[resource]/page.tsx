@@ -9,7 +9,6 @@ import { CloneBatchButton } from "@/components/admin/clone-batch-button";
 import { FlagToggle } from "@/components/admin/flag-toggle";
 import { RowActions } from "@/components/admin/row-actions";
 import { SearchBox } from "@/components/admin/search-box";
-import { StudentImport } from "@/components/admin/student-import";
 import {
   AdminBadge,
   AdminPageHeader,
@@ -112,8 +111,6 @@ export default async function ResourceListPage({
           </div>
         }
       />
-
-      {resource.listTool === "student-import" && <StudentImport />}
 
       <div className="mb-4">
         <SearchBox placeholder={`${resource.title} খুঁজুন…`} />

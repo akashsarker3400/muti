@@ -612,3 +612,73 @@ export const seedPosts = [
     tags: ["cmu", "dmu"],
   },
 ];
+
+/* ---- Addendum 3 --------------------------------------------------------- */
+
+/**
+ * Leadership messages (addendum 3, §4). Seeded unpublished with TODO copy:
+ * the office fills in the person, photo and message, then publishes.
+ */
+export const seedLeadership = [
+  {
+    key: "chairman",
+    roleTitleBn: "প্রতিষ্ঠান চেয়ারম্যান",
+    roleTitleEn: "Chairman",
+    personName: "TODO: Chairman's name",
+    personNameBn: "TODO: চেয়ারম্যানের নাম",
+    messageBn: "<p>TODO: প্রতিষ্ঠান চেয়ারম্যান এর বক্তব্য এখানে লিখুন।</p>",
+    messageEn: "<p>TODO: Message from the Chairman.</p>",
+    excerptBn: "TODO: হোমপেজ কার্ডের জন্য দুই লাইনের উদ্ধৃতি।",
+    excerptEn: "TODO: Two-line excerpt for the homepage card.",
+    sortOrder: 1,
+    published: false,
+  },
+  {
+    key: "managing-director",
+    roleTitleBn: "ব্যবস্থাপনা পরিচালক",
+    roleTitleEn: "Managing Director",
+    personName: "TODO: Managing Director's name",
+    personNameBn: "TODO: ব্যবস্থাপনা পরিচালকের নাম",
+    messageBn: "<p>TODO: ব্যবস্থাপনা পরিচালক এর বক্তব্য এখানে লিখুন।</p>",
+    messageEn: "<p>TODO: Message from the Managing Director.</p>",
+    excerptBn: "TODO: হোমপেজ কার্ডের জন্য দুই লাইনের উদ্ধৃতি।",
+    excerptEn: "TODO: Two-line excerpt for the homepage card.",
+    sortOrder: 2,
+    published: false,
+  },
+];
+
+/**
+ * Hero slides (addendum 3, §6). No photos are shipped — the office uploads
+ * them from Admin → হিরো ব্যানার; until then each slide is a brand gradient
+ * carrying the copy from the addendum.
+ */
+export const seedBanners = [
+  {
+    titleBn: "ময়মনসিংহে সর্বপ্রথম সরকার অনুমোদিত আল্ট্রাসাউন্ড ট্রেনিং ইনস্টিটিউট",
+    subtitleBn: "CMU, DMU, ADMU কোর্সে ভর্তি চলছে",
+    title: "The first government-approved ultrasound training institute in Mymensingh",
+    subtitle: "Admission open for CMU, DMU and ADMU",
+    image: "",
+    sortOrder: 1,
+    active: true,
+  },
+  {
+    titleBn: "প্রতিটি ক্লাসে রিয়েল পেশেন্টে হাতে-কলমে প্র্যাকটিক্যাল",
+    subtitleBn: "অভিজ্ঞ সোনোলজিস্ট দ্বারা পরিচালিত",
+    title: "Hands-on practice on real patients in every class",
+    subtitle: "Taught by experienced sonologists",
+    image: "",
+    sortOrder: 2,
+    active: true,
+  },
+  {
+    titleBn: "ভর্তির আগে ফ্রি ক্লাসের সুযোগ",
+    subtitleBn: "আজই WhatsApp করুন 01778-838644",
+    title: "Attend a free class before you enrol",
+    subtitle: "WhatsApp us today: 01778-838644",
+    image: "",
+    sortOrder: 3,
+    active: true,
+  },
+];

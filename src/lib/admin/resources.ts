@@ -68,8 +68,6 @@ export type ResourceConfig = {
    */
   baseWhere?: Record<string, unknown>;
   columns: ResourceColumn[];
-  /** Renders an extra tool above the list, e.g. the students CSV importer. */
-  listTool?: "student-import";
   /** Renders an extra action in each row, e.g. "clone" on batches. */
   rowTool?: "batch-clone" | "board-results";
   /** Entity key on /admin/import — shows an "Import" button above the list. */
@@ -1269,7 +1267,6 @@ const studentResource: ResourceConfig = {
   description:
     "“যাচাইযোগ্য” চালু করলে শিক্ষার্থীর সনদ পাবলিক /verify পেজে যাচাই করা যাবে।",
   newLabel: "নতুন শিক্ষার্থী",
-  listTool: "student-import",
   columns: [
     { key: "roll", label: "রোল" },
     { key: "name", label: "নাম" },

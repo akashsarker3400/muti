@@ -14,13 +14,15 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Link } from "@/i18n/navigation";
-import { allNav } from "@/lib/nav";
 
 export function MobileNav({
   courseLinks,
+  items,
   applyLabel,
 }: {
   courseLinks: Array<{ href: string; label: string }>;
+  /** Already-translated, in display order (addendum 3, §7). */
+  items: Array<{ href: string; label: string }>;
   applyLabel: string;
 }) {
   const t = useTranslations("nav");
@@ -46,14 +48,14 @@ export function MobileNav({
 
         <nav className="px-3 py-3" aria-label={t("menu")}>
           <ul className="space-y-0.5">
-            {allNav.map((item) => (
+            {items.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className="flex min-h-11 items-center justify-between rounded-lg px-3 text-[0.95rem] font-medium text-[color:var(--foreground)] transition hover:bg-[color:var(--bg-soft)] hover:text-[color:var(--brand)]"
                 >
-                  {t(item.labelKey)}
+                  {item.label}
                   <ChevronRight
                     className="size-4 text-[color:var(--muted-foreground)]"
                     aria-hidden="true"

@@ -307,14 +307,63 @@ export const getPageBySlug = cache(async (slug: string) => {
   }
 });
 
+/**
+ * Hero slides (addendum 3, §6): active, inside their schedule window, at most
+ * five. The list is refreshed every minute so a scheduled banner appears on
+ * time without a redeploy.
+ */
 export const getBanners = cache(async () => {
   try {
+    const now = new Date();
     return await prisma.banner.findMany({
-      where: { active: true },
+      where: {
+        active: true,
+        OR: [{ startAt: null }, { startAt: { lte: now } }],
+        AND: [{ OR: [{ endAt: null }, { endAt: { gte: now } }] }],
+      },
       orderBy: { sortOrder: "asc" },
+      take: 5,
     });
   } catch (error) {
     console.error("getBanners failed", error);
+    return [];
+  }
+});
+
+/* ---- Addendum 3 §4–5 --------------------------------------------------- */
+
+export const getLeadershipMessages = cache(async () => {
+  try {
+    return await prisma.leadershipMessage.findMany({
+      where: { published: true },
+      orderBy: { sortOrder: "asc" },
+    });
+  } catch (error) {
+    console.error("getLeadershipMessages failed", error);
+    return [];
+  }
+});
+
+export const getLeadershipMessage = cache(async (key: string) => {
+  try {
+    return await prisma.leadershipMessage.findFirst({
+      where: { key: key.toLowerCase(), published: true },
+    });
+  } catch (error) {
+    console.error("getLeadershipMessage failed", error);
+    return null;
+  }
+});
+
+export const getAdvisors = cache(async (take?: number) => {
+  try {
+    return await prisma.advisor.findMany({
+      where: { published: true },
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+      take,
+    });
+  } catch (error) {
+    console.error("getAdvisors failed", error);
     return [];
   }
 });

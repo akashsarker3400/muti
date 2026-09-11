@@ -1,8 +1,8 @@
 # MUTI website — notes for agents and developers
 
 Official website plus admin panel for **Mymensingh Ultrasound Training
-Institute (MUTI)**. The specifications are kept in `docs/build-spec.md` and
-`docs/addendum-2.md`; section numbers in code comments refer to them
+Institute (MUTI)**. The specifications are kept in `docs/build-spec.md`,
+`docs/addendum-2.md` and `docs/addendum-3.md`; section numbers in code comments refer to them
 ("section 5.4" is the build spec, "addendum 2, A1" the addendum).
 `HANDOVER.md` records every outstanding TODO and every deliberate deviation.
 
@@ -54,3 +54,12 @@ database access, so nothing can be prerendered at build time.
   `revalidateBatches()` from `src/lib/admin/seats.ts`.
 - `Batch.seatsFilledManual` means the office typed the number themselves;
   automatic seat counting must leave that batch alone.
+- Named permissions live in `src/lib/permissions.ts`; guard a page or action
+  with `requirePermission("…")`. A resource in `src/lib/admin/resources.ts`
+  declares its own `permission` and the generic pages enforce it.
+- Public lookups (`/verify`, `/results`) must go through `checkRateLimit`,
+  `verifyTurnstile` and write a `VerificationLog` row — see
+  `src/app/actions/verify.ts` for the shape.
+- Bulk imports are defined once in `src/lib/admin/import/entities.ts`
+  (columns, templates, header matching) with the database side in
+  `src/app/actions/admin-import.ts`. Add a new importable entity in both.

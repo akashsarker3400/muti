@@ -96,9 +96,7 @@ test.describe("public site", () => {
     await page.goto("/verify");
     await page.getByRole("textbox").fill("MUTI-0000-0000");
     await page.getByRole("button", { name: "যাচাই করুন" }).click();
-    await expect(
-      page.getByText("কোনো রেকর্ড পাওয়া যায়নি, অফিসে যোগাযোগ করুন।"),
-    ).toBeVisible();
+    await expect(page.getByRole("status")).toContainText("কোনো রেকর্ড পাওয়া যায়নি");
   });
 
   test("the admission form rejects an invalid phone number", async ({ page }) => {

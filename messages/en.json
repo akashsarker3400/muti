@@ -17,7 +17,8 @@
     "more": "More",
     "menu": "Menu",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "advisors": "Advisory Board"
   },
   "common": {
     "applyNow": "Apply Now",
@@ -113,7 +114,8 @@
     "classDaysLabel": "Class days",
     "seatsLabel": "Seats",
     "tickerLabel": "Notice",
-    "slide": "Photo {n}"
+    "slide": "Photo {n}",
+    "trustPractical": "Real-patient practical in every class"
   },
   "about": {
     "title": "Built for doctors, run by doctors",
@@ -441,5 +443,20 @@
     "privacy": "Privacy policy",
     "terms": "Terms",
     "developedBy": "Developed by"
+  },
+  "leadership": {
+    "sectionTitle": "Messages from Leadership",
+    "readFull": "Read full message",
+    "pageTitle": "Message from the {role}",
+    "signatureOf": "Signature of {name}",
+    "chairman": "Chairman's Message",
+    "md": "MD's Message"
+  },
+  "advisors": {
+    "title": "Advisory Board",
+    "subtitle": "The people guiding MUTI's academic and professional direction",
+    "homeTitle": "Our Advisory Board",
+    "readBio": "View profile",
+    "empty": "Advisory board details will be added soon."
   }
 }

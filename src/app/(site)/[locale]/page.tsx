@@ -5,7 +5,10 @@ import { ContactStrip } from "@/components/site/contact-strip";
 import { CourseCard } from "@/components/site/course-card";
 import { FacultyCard } from "@/components/site/faculty-card";
 import { GalleryGrid } from "@/components/site/gallery-grid";
+import { AdvisorsStrip } from "@/components/site/advisors-section";
 import { Hero } from "@/components/site/home/hero";
+import { HeroBanner } from "@/components/site/home/hero-banner";
+import { LeadershipCards } from "@/components/site/leadership-cards";
 import { NextBatchCta } from "@/components/site/home/next-batch";
 import { NoticeTicker } from "@/components/site/home/notice-ticker";
 import { PracticalBlock } from "@/components/site/home/practical-block";
@@ -20,7 +23,10 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import {
+  getAdvisors,
+  getBanners,
   getFaculty,
+  getLeadershipMessages,
   getGalleryPreview,
   getNextBatch,
   getNextBatchByCourse,
@@ -49,6 +55,9 @@ export default async function HomePage({
     faculty,
     galleryImages,
     batchByCourse,
+    banners,
+    leadership,
+    advisors,
     home,
     common,
   ] = await Promise.all([
@@ -61,6 +70,9 @@ export default async function HomePage({
     getFaculty(4),
     getGalleryPreview(8),
     getNextBatchByCourse(),
+    getBanners(),
+    getLeadershipMessages(),
+    getAdvisors(4),
     getTranslations("home"),
     getTranslations("common"),
   ]);
@@ -71,7 +83,11 @@ export default async function HomePage({
         <NoticeTicker notices={notices} locale={locale} />
       )}
 
-      <Hero settings={settings} locale={locale} />
+      {banners.length > 0 ? (
+        <HeroBanner banners={banners} settings={settings} locale={locale} />
+      ) : (
+        <Hero settings={settings} locale={locale} />
+      )}
 
       <StatsStrip settings={settings} locale={locale} courseCount={courses.length} />
 
@@ -110,6 +126,14 @@ export default async function HomePage({
       <NextBatchCta batch={nextBatch} locale={locale} />
 
       <PartnersRow partners={partners} soft />
+
+      {settings.homepage.showLeadership && (
+        <LeadershipCards messages={leadership} locale={locale} />
+      )}
+
+      {settings.homepage.showAdvisors && (
+        <AdvisorsStrip advisors={advisors} locale={locale} soft />
+      )}
 
       {notices.length > 0 && (
         <Section>
