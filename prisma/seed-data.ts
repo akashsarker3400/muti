@@ -434,10 +434,20 @@ export const seedCourses: SeedCourse[] = [
   },
 ];
 
+/**
+ * The emblem of the Government of the People's Republic of Bangladesh, which
+ * both bteb.gov.bd and moedu.gov.bd use as their own site logo (they serve the
+ * identical file). Neither body publishes a separate mark. It ships in the
+ * repository rather than the uploads volume so a fresh deployment is not left
+ * with a broken image; staff can replace it from the admin.
+ */
+const BD_GOVT_EMBLEM = "/partners/bangladesh-govt-emblem.png";
+
 export const seedPartners = [
   {
     name: "Bangladesh Technical Education Board (BTEB)",
     type: "AFFILIATION" as const,
+    logo: BD_GOVT_EMBLEM,
     description:
       "Affiliation with the Bangladesh Technical Education Board, Ministry of Education.",
     url: "http://www.bteb.gov.bd",
@@ -446,6 +456,7 @@ export const seedPartners = [
   {
     name: "Ministry of Education, Govt. of the People's Republic of Bangladesh",
     type: "AFFILIATION" as const,
+    logo: BD_GOVT_EMBLEM,
     description: "Government approved institute, code 57125.",
     url: "https://moedu.gov.bd",
     sortOrder: 20,

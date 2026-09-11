@@ -106,12 +106,12 @@ function PartnerGrid({
             <div className="flex min-w-0 items-start gap-3">
               {partner.logo ? (
                 // A real logo sits on a white plate so any background works.
-                <span className="relative grid size-12 shrink-0 place-items-center overflow-hidden rounded-xl border border-[color:var(--border)] bg-white p-1">
+                <span className="relative size-12 shrink-0 overflow-hidden rounded-xl border border-[color:var(--border)] bg-white">
                   <Image
                     src={partner.logo}
                     alt={partner.name}
                     fill
-                    sizes="48px"
+                    sizes="96px"
                     className="object-contain p-1"
                   />
                 </span>
