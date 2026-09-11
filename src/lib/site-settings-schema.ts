@@ -175,8 +175,19 @@ export const siteSettingsSchema = z.object({
     .object({
       published: booleanish,
       heroImage: optionalString,
+      /** Hand-made social card (1200×630); replaces the generated English one. */
+      ogImage: optionalString,
+      /** Addendum 4.1: the institute's commitment statement, verbatim. */
+      commitmentLabelBn: optionalString,
+      commitmentLabelEn: optionalString,
+      taglineBn: optionalString,
+      taglineEn: optionalString,
       introBn: optionalString,
       introEn: optionalString,
+      goalBn: optionalString,
+      goalEn: optionalString,
+      closingBn: optionalString,
+      closingEn: optionalString,
       daysBn: optionalString,
       daysEn: optionalString,
       timeBn: optionalString,
@@ -198,6 +209,7 @@ export const siteSettingsSchema = z.object({
       /** Patients / reports before daily counting started; daily counts add on top. */
       statsBasePatients: z.coerce.number().int().min(0).default(0),
       statsBaseReports: z.coerce.number().int().min(0).default(0),
+      statsBaseConsultations: z.coerce.number().int().min(0).default(0),
       showSupportCta: booleanish,
       supportTextBn: optionalString,
       supportTextEn: optionalString,
@@ -324,10 +336,25 @@ export const defaultSiteSettings: SiteSettings = siteSettingsSchema.parse({
   hero: {},
   health: {
     published: false,
+    // Addendum 4.1 §1: official copy, verbatim. No em dashes anywhere.
+    commitmentLabelBn: "MUTI Ultrasound-এর অঙ্গীকার",
+    commitmentLabelEn: "Our Commitment",
+    taglineBn:
+      "আল্ট্রাসোনোগ্রাম পরীক্ষার অভাবে আর যেন কোনো মা ও শিশুর অকালমৃত্যু না ঘটে।",
+    taglineEn:
+      "No mother or child should die prematurely for want of an ultrasound examination.",
     introBn:
-      "প্রশিক্ষণের পাশাপাশি MUTI প্রতিদিন গরীব ও অসহায় মানুষের জন্য বিনামূল্যে আল্ট্রাসাউন্ড পরীক্ষা, লিখিত রিপোর্ট ও ডাক্তার পরামর্শ দেয়। অভিজ্ঞ সোনোলজিস্টের তত্ত্বাবধানে প্রশিক্ষণরত MBBS ডাক্তাররা পরীক্ষা করেন।",
+      "মাতৃ ও শিশুর সুস্থতা এবং নিরাপদ মাতৃত্ব নিশ্চিত করার লক্ষ্যে MUTI Ultrasound-এর একটি মানবিক উদ্যোগ:",
     introEn:
-      "Alongside its training, MUTI provides free ultrasound examinations, written reports and doctor consultations every day for poor and underprivileged people. Examinations are performed by MBBS doctors in training under the supervision of experienced sonologists.",
+      "A humanitarian initiative by MUTI Ultrasound to ensure the health of mothers and children and safe motherhood:",
+    goalBn:
+      "প্রয়োজনীয় আল্ট্রাসোনোগ্রাম পরীক্ষা ও চিকিৎসকের পরামর্শের মাধ্যমে গর্ভবতী মা ও শিশুর সুস্থতা সম্পর্কে সচেতনতা বৃদ্ধি করাই আমাদের লক্ষ্য।",
+    goalEn:
+      "Our goal is to raise awareness about the health of expectant mothers and their children through necessary ultrasonogram examinations and medical advice.",
+    closingBn:
+      "মানবতার সেবায় MUTI Ultrasound। একটি সুস্থ মা, একটি সুস্থ শিশু, আমাদের অঙ্গীকার।",
+    closingEn:
+      "MUTI Ultrasound, in the service of humanity. A healthy mother, a healthy child, our commitment.",
     // TODO: real schedule from the office (addendum 4, §2.4).
     daysBn: "TODO: শনিবার থেকে বৃহস্পতিবার",
     daysEn: "TODO: Saturday to Thursday",
@@ -338,9 +365,9 @@ export const defaultSiteSettings: SiteSettings = siteSettingsSchema.parse({
     eligibilityEn:
       "<p>Poor and underprivileged patients are welcome.</p><p>Please bring: any previous prescription or reports, and a phone number.</p><p><em>TODO: add any eligibility rule.</em></p>",
     transparencyBn:
-      "<p>এই সেবায় পরীক্ষাগুলো প্রশিক্ষণরত MBBS ডাক্তাররা অভিজ্ঞ সোনোলজিস্টের তত্ত্বাবধানে করেন। প্রদত্ত রিপোর্টটি একটি স্ক্রিনিং রিপোর্ট; চিকিৎসার জন্য বিশেষজ্ঞ ডাক্তারের পরামর্শ নিন।</p>",
+      "<p>এই সেবায় পরীক্ষাগুলো প্রশিক্ষণরত MBBS ডাক্তাররা অভিজ্ঞ সোনোলজিস্টের তত্ত্বাবধানে করেন। প্রদত্ত রিপোর্টটি একটি স্ক্রিনিং রিপোর্ট; চিকিৎসার জন্য বিশেষজ্ঞ ডাক্তারের পরামর্শ নিন।</p><p>জরুরি বা ঝুঁকিপূর্ণ কিছু পাওয়া গেলে দ্রুত নিকটস্থ হাসপাতাল বা বিশেষজ্ঞের কাছে রেফার করা হয়।</p>",
     transparencyEn:
-      "<p>Examinations are performed by MBBS doctors in training under the supervision of experienced sonologists. The report is a screening report; please consult a specialist for treatment.</p>",
+      "<p>Examinations are performed by MBBS doctors in training under the supervision of experienced sonologists. The report is a screening report; please consult a specialist for treatment.</p><p>If anything urgent or high-risk is found, the patient is referred promptly to the nearest hospital or specialist.</p>",
     supportTextBn:
       "দাতা, হাসপাতাল বা সংস্থা হিসেবে এই সেবায় সহযোগিতা করতে বা রোগী রেফার করতে চাইলে আমাদের সাথে যোগাযোগ করুন।",
     supportTextEn:

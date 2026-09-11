@@ -29,6 +29,8 @@ export type DeskRow = {
   complaint: string | null;
   preferredDate: string | null;
   referredBy: string | null;
+  pregnant: string | null;
+  pregnancyMonths: number | null;
   status: Status;
   note: string | null;
   anonymized: boolean;
@@ -62,13 +64,14 @@ export function HealthDesk({
   /** "YYYYMMDD" */
   date: string;
   rows: DeskRow[];
-  count: { patients: number; reports: number };
+  count: { patients: number; reports: number; consultations: number };
   isToday: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [patients, setPatients] = useState(String(count.patients));
   const [reports, setReports] = useState(String(count.reports));
+  const [consultations, setConsultations] = useState(String(count.consultations));
   const [desk, setDesk] = useState({
     name: "",
     phone: "",
@@ -87,7 +90,12 @@ export function HealthDesk({
 
   function saveCount() {
     startTransition(async () => {
-      const result = await saveHealthDailyCount({ date, patients, reports });
+      const result = await saveHealthDailyCount({
+        date,
+        patients,
+        reports,
+        consultations,
+      });
       if (result.ok) toast.success("দিনের হিসাব সংরক্ষিত।");
       else toast.error(result.error ?? "সংরক্ষণ করা যায়নি।");
       router.refresh();
@@ -130,6 +138,16 @@ export function HealthDesk({
                 inputMode="numeric"
                 value={patients}
                 onChange={(e) => setPatients(e.target.value)}
+                className="h-10 w-24 font-latin"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="count-consultations">পরামর্শ</Label>
+              <Input
+                id="count-consultations"
+                inputMode="numeric"
+                value={consultations}
+                onChange={(e) => setConsultations(e.target.value)}
                 className="h-10 w-24 font-latin"
               />
             </div>
@@ -242,6 +260,7 @@ export function HealthDesk({
               <th className="px-3 py-2 text-start font-medium">নাম</th>
               <th className="px-3 py-2 text-start font-medium">মোবাইল</th>
               <th className="px-3 py-2 text-start font-medium">বয়স/লিঙ্গ</th>
+              <th className="px-3 py-2 text-start font-medium">গর্ভবতী</th>
               <th className="px-3 py-2 text-start font-medium">এলাকা</th>
               <th className="px-3 py-2 text-start font-medium">সমস্যা</th>
               <th className="px-3 py-2 text-start font-medium">পছন্দের দিন</th>
@@ -252,7 +271,7 @@ export function HealthDesk({
             {rows.length === 0 && (
               <tr>
                 <td
-                  colSpan={8}
+                  colSpan={9}
                   className="px-3 py-8 text-center text-[color:var(--muted-foreground)]"
                 >
                   এই দিনে কোনো সিরিয়াল নেই।
@@ -281,6 +300,13 @@ export function HealthDesk({
                 </td>
                 <td className="px-3 py-2 font-latin">
                   {[row.age, row.gender?.charAt(0)].filter(Boolean).join(" / ") || "—"}
+                </td>
+                <td className="px-3 py-2">
+                  {row.pregnant === "YES"
+                    ? `হ্যাঁ${row.pregnancyMonths ? ` (${row.pregnancyMonths} মাস)` : ""}`
+                    : row.pregnant === "NO"
+                      ? "না"
+                      : "—"}
                 </td>
                 <td className="px-3 py-2">{row.area ?? "—"}</td>
                 <td

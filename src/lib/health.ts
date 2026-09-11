@@ -26,6 +26,7 @@ export type HealthStats = {
   patientsTotal: number;
   patientsThisMonth: number;
   reportsTotal: number;
+  consultationsTotal: number;
   updatedAt: Date | null;
 };
 
@@ -35,7 +36,9 @@ export async function healthStats(
 ): Promise<HealthStats> {
   const monthPrefix = dhakaDateKey().slice(0, 6);
   const [all, month, latest] = await Promise.all([
-    prisma.healthDailyCount.aggregate({ _sum: { patients: true, reports: true } }),
+    prisma.healthDailyCount.aggregate({
+      _sum: { patients: true, reports: true, consultations: true },
+    }),
     prisma.healthDailyCount.aggregate({
       _sum: { patients: true },
       where: { date: { startsWith: monthPrefix } },
@@ -46,6 +49,7 @@ export async function healthStats(
     patientsTotal: health.statsBasePatients + (all._sum.patients ?? 0),
     patientsThisMonth: month._sum.patients ?? 0,
     reportsTotal: health.statsBaseReports + (all._sum.reports ?? 0),
+    consultationsTotal: health.statsBaseConsultations + (all._sum.consultations ?? 0),
     updatedAt: latest?.updatedAt ?? null,
   };
 }

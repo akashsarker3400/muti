@@ -58,9 +58,11 @@ export async function HealthBand({
               labels={{ open: t("openToday"), closed: t("closedToday") }}
             />
           </p>
-          <h2 className="h2 text-balance">{t("bandTitle")}</h2>
-          <p className="mt-3 max-w-2xl leading-relaxed text-[color:var(--muted-foreground)]">
-            {pick(locale, health.introBn, health.introEn)}
+          <h2 className="h2 text-balance">
+            “{pick(locale, health.taglineBn, health.taglineEn) || t("bandTitle")}”
+          </h2>
+          <p className="mt-3 max-w-2xl leading-relaxed font-semibold text-[color:var(--brand)]">
+            {pick(locale, health.closingBn, health.closingEn)}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button asChild variant="accent" size="cta-lg">

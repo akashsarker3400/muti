@@ -70,8 +70,16 @@ const NEVER_BLANK: Record<keyof SiteSettings, string[]> = {
   // The seeded TODO copy must reach the admin so the office sees what to
   // replace; a blank field would otherwise hide whole sections silently.
   health: [
+    "commitmentLabelBn",
+    "commitmentLabelEn",
+    "taglineBn",
+    "taglineEn",
     "introBn",
     "introEn",
+    "goalBn",
+    "goalEn",
+    "closingBn",
+    "closingEn",
     "daysBn",
     "daysEn",
     "timeBn",

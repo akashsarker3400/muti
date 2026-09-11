@@ -113,7 +113,11 @@ export default async function HealthAdminPage({
       <HealthDesk
         date={date}
         isToday={date === today}
-        count={{ patients: count?.patients ?? 0, reports: count?.reports ?? 0 }}
+        count={{
+          patients: count?.patients ?? 0,
+          reports: count?.reports ?? 0,
+          consultations: count?.consultations ?? 0,
+        }}
         rows={rows.map((row) => ({
           id: row.id,
           serialNo: row.serialNo,
@@ -125,6 +129,8 @@ export default async function HealthAdminPage({
           complaint: row.complaint,
           preferredDate: row.preferredDate?.toISOString().slice(0, 10) ?? null,
           referredBy: row.referredBy,
+          pregnant: row.pregnant,
+          pregnancyMonths: row.pregnancyMonths,
           status: row.status,
           note: row.note,
           anonymized: Boolean(row.anonymizedAt),

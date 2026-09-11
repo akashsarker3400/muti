@@ -25,12 +25,14 @@ type Values = {
   complaint: string;
   preferredDate: string;
   referredBy: string;
+  pregnant: "" | "YES" | "NO" | "NA";
+  pregnancyMonths: string;
   website: string;
 };
 
 /**
  * Patient serial form (addendum 4, §3). Two required fields, everything else
- * optional, big call button first — many patients will phone instead.
+ * optional, big call button first, since many patients will phone instead.
  */
 export function HealthSerialForm({
   locale,
@@ -58,6 +60,7 @@ export function HealthSerialForm({
     register,
     handleSubmit,
     setError,
+    watch,
     formState: { errors },
   } = useForm<Values>({
     defaultValues: {
@@ -69,9 +72,13 @@ export function HealthSerialForm({
       complaint: "",
       preferredDate: "",
       referredBy: "",
+      pregnant: "",
+      pregnancyMonths: "",
       website: "",
     },
   });
+
+  const pregnant = watch("pregnant");
 
   const digits = (value: string | number) =>
     locale === "bn" ? toBanglaDigits(String(value)) : String(value);
@@ -233,6 +240,34 @@ export function HealthSerialForm({
               </select>
             )}
           </Field>
+          <Field label={t("pregnant")} error={errors.pregnant?.message}>
+            {(props) => (
+              <select
+                {...props}
+                {...register("pregnant")}
+                className={`${selectClass} h-12 text-base`}
+              >
+                <option value="">{form("selectPlaceholder")}</option>
+                <option value="YES">{t("pregnantYes")}</option>
+                <option value="NO">{t("pregnantNo")}</option>
+                <option value="NA">{t("pregnantNa")}</option>
+              </select>
+            )}
+          </Field>
+          {pregnant === "YES" && (
+            <Field label={t("pregnancyMonths")} error={errors.pregnancyMonths?.message}>
+              {(props) => (
+                <Input
+                  {...props}
+                  {...register("pregnancyMonths")}
+                  inputMode="numeric"
+                  dir="ltr"
+                  placeholder="1-10"
+                  className="h-12 font-latin text-base"
+                />
+              )}
+            </Field>
+          )}
           <Field label={t("area")} error={errors.area?.message}>
             {(props) => (
               <Input {...props} {...register("area")} className="h-12 text-base" />

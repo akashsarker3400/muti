@@ -115,21 +115,16 @@ export const paymentPolicy: BilingualItem[] = [
  * and which scan types are covered (abdomen, pregnancy, KUB, …).
  */
 export const healthServices: Array<BilingualItem & { icon: string }> = [
+  // Addendum 4.1 §1: the two service pillars, verbatim.
   {
     icon: "ScanLine",
-    bn: "বিনামূল্যে আল্ট্রাসাউন্ড পরীক্ষা",
-    en: "Free ultrasound examination",
+    bn: "বিনা মূল্যে আল্ট্রাসোনোগ্রাম পরীক্ষা",
+    en: "Free ultrasonogram examination",
   },
-  { icon: "FileText", bn: "একই দিনে লিখিত রিপোর্ট", en: "Written report the same day" },
   {
     icon: "Stethoscope",
-    bn: "বিনামূল্যে ডাক্তার পরামর্শ",
+    bn: "বিনা মূল্যে চিকিৎসকের পরামর্শ",
     en: "Free doctor consultation",
-  },
-  {
-    icon: "Hospital",
-    bn: "প্রয়োজনে হাসপাতালে রেফারের পরামর্শ",
-    en: "Referral advice to a hospital when needed",
   },
 ];
 

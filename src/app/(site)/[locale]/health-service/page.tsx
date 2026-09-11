@@ -53,9 +53,16 @@ export async function generateMetadata({
       "free ultrasound mymensingh",
       "বিনামূল্যে আল্ট্রাসাউন্ড ময়মনসিংহ",
       "free doctor consultation mymensingh",
+      "গর্ভবতী মায়ের বিনামূল্যে আল্ট্রাসনোগ্রাম ময়মনসিংহ",
+      "free pregnancy ultrasound mymensingh",
     ],
     alternates: {
       canonical: locale === "bn" ? "/health-service" : "/en/health-service",
+    },
+    openGraph: {
+      title: t("metaTitle"),
+      description: t("metaDescription"),
+      images: [{ url: settings.health.ogImage || "/api/og?health=1" }],
     },
   };
 }
@@ -102,6 +109,11 @@ export default async function HealthServicePage({ params }: { params: Params }) 
   const eligibility = pick(locale, health.eligibilityBn, health.eligibilityEn);
   const transparency = pick(locale, health.transparencyBn, health.transparencyEn);
   const holidayNote = pick(locale, health.holidayNoteBn, health.holidayNoteEn);
+  const commitment = pick(locale, health.commitmentLabelBn, health.commitmentLabelEn);
+  const tagline = pick(locale, health.taglineBn, health.taglineEn);
+  const intro = pick(locale, health.introBn, health.introEn);
+  const goal = pick(locale, health.goalBn, health.goalEn);
+  const closing = pick(locale, health.closingBn, health.closingEn);
 
   const steps = [
     { icon: Phone, text: t("step1") },
@@ -112,11 +124,11 @@ export default async function HealthServicePage({ params }: { params: Params }) 
 
   const statTiles = [
     stats.patientsTotal > 0 && { value: stats.patientsTotal, label: t("statPatients") },
-    stats.patientsThisMonth > 0 && {
-      value: stats.patientsThisMonth,
-      label: t("statThisMonth"),
-    },
     stats.reportsTotal > 0 && { value: stats.reportsTotal, label: t("statReports") },
+    stats.consultationsTotal > 0 && {
+      value: stats.consultationsTotal,
+      label: t("statConsultations"),
+    },
   ].filter(Boolean) as Array<{ value: number; label: string }>;
 
   const openingHours = health.openDays.map((day) => {
@@ -126,7 +138,7 @@ export default async function HealthServicePage({ params }: { params: Params }) 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "MedicalClinic",
-    name: `${settings.general.nameEn} — Free Health Service`,
+    name: `${settings.general.nameEn}: Free Health Service`,
     description: health.introEn || health.introBn,
     url: `${siteUrl}/health-service`,
     telephone: phone,
@@ -137,6 +149,7 @@ export default async function HealthServicePage({ params }: { params: Params }) 
       addressCountry: "BD",
     },
     isAcceptingNewPatients: state !== "closed",
+    medicalSpecialty: "Obstetric",
     priceRange: "Free",
     ...(openingHours.length > 0 ? { openingHoursSpecification: openingHours } : {}),
     parentOrganization: {
@@ -154,12 +167,35 @@ export default async function HealthServicePage({ params }: { params: Params }) 
           <div>
             <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-[color:var(--success)]/40 bg-white px-3 py-1 text-xs font-semibold text-[color:var(--success-ink)]">
               <HandHeart className="size-4" aria-hidden="true" />
-              {t("eyebrow")}
+              {commitment || t("eyebrow")}
             </p>
-            <h1 className="h1 text-balance">{t("title")}</h1>
+            <h1 className="sr-only">{t("title")}</h1>
+            {/* Addendum 4.1: the commitment leads, quoted and large. */}
+            <blockquote
+              className="text-[clamp(1.5rem,3.4vw,2.4rem)] leading-[1.3] font-bold text-balance text-[color:var(--brand)]"
+              data-testid="health-tagline"
+            >
+              “{tagline}”
+            </blockquote>
             <p className="mt-4 max-w-xl text-[1.0625rem] leading-relaxed text-[color:var(--muted-foreground)]">
-              {t("subtitle")}
+              {intro}
             </p>
+            {services.length > 0 && (
+              <ul className="mt-4 flex flex-wrap gap-2">
+                {services.map((item) => {
+                  const Icon = WHY_ICONS[item.icon as WhyIconName] ?? BadgeCheck;
+                  return (
+                    <li
+                      key={item.id}
+                      className="inline-flex items-center gap-2 rounded-lg border border-[color:var(--success)]/30 bg-white px-3 py-2 text-sm font-semibold text-[color:var(--success-ink)]"
+                    >
+                      <Icon className="size-4" aria-hidden="true" />
+                      {item.body}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <Button asChild variant="accent" size="cta-lg">
                 <a href="#serial">{t("getSerial")}</a>
@@ -187,28 +223,36 @@ export default async function HealthServicePage({ params }: { params: Params }) 
         </div>
       </section>
 
-      {/* ---- 2. What we provide -------------------------------------------- */}
-      {services.length > 0 && (
-        <Section>
-          <SectionHeading title={t("provideTitle")} align="center" />
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* ---- 2. Commitment: goal, pillars, closing line (addendum 4.1) ---- */}
+      <Section>
+        <SectionHeading title={commitment || t("provideTitle")} align="center" />
+        <p className="mx-auto max-w-3xl text-center text-[1.0625rem] leading-relaxed text-[color:var(--muted-foreground)]">
+          {goal}
+        </p>
+        {services.length > 0 && (
+          <ul className="mx-auto mt-8 grid max-w-3xl gap-4 sm:grid-cols-2">
             {services.map((item) => {
               const Icon = WHY_ICONS[item.icon as WhyIconName] ?? BadgeCheck;
               return (
                 <li
                   key={item.id}
-                  className="flex h-full flex-col items-center rounded-[14px] border border-[color:var(--border)] bg-white p-5 text-center shadow-[var(--shadow-card)]"
+                  className="flex h-full flex-col items-center rounded-[14px] border border-[color:var(--border)] bg-white p-6 text-center shadow-[var(--shadow-card)]"
                 >
-                  <span className="grid size-12 place-items-center rounded-xl bg-[color:var(--success)]/12 text-[color:var(--success-ink)]">
-                    <Icon className="size-6" aria-hidden="true" />
+                  <span className="grid size-14 place-items-center rounded-2xl bg-[color:var(--success)]/12 text-[color:var(--success-ink)]">
+                    <Icon className="size-7" aria-hidden="true" />
                   </span>
-                  <p className="mt-3 font-medium">{item.body}</p>
+                  <p className="mt-3 text-lg font-semibold">{item.body}</p>
                 </li>
               );
             })}
           </ul>
-        </Section>
-      )}
+        )}
+        {closing && (
+          <p className="mx-auto mt-8 max-w-3xl text-center text-lg font-bold text-[color:var(--brand)]">
+            {closing}
+          </p>
+        )}
+      </Section>
 
       {/* ---- 3 + 4. Who can get it / schedule ------------------------------ */}
       <Section soft>

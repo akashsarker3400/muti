@@ -794,6 +794,9 @@ model HealthAppointment {
   complaint     String?
   preferredDate DateTime?
   referredBy    String?
+  /// Addendum 4.1: YES / NO / NA, and months of pregnancy when YES.
+  pregnant        String?
+  pregnancyMonths Int?
   status        HealthStatus @default(REQUESTED)
   note          String?
   anonymizedAt  DateTime?
@@ -815,9 +818,10 @@ model Counter {
 /// One row per service day: how many patients were seen and reports given.
 /// Feeds the public impact stats on top of the base figures in Site Settings.
 model HealthDailyCount {
-  date     String @id
-  patients Int    @default(0)
-  reports  Int    @default(0)
+  date          String @id
+  patients      Int    @default(0)
+  reports       Int    @default(0)
+  consultations Int    @default(0)
 
   updatedAt DateTime @updatedAt
 }

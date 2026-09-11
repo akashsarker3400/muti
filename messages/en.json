@@ -437,7 +437,8 @@
       "generic": "Could not submit. Please try again or message us on WhatsApp.",
       "nidInvalid": "NID must be 10, 13 or 17 digits",
       "yearInvalid": "Enter a valid year (e.g. 2015)",
-      "dateInvalid": "Enter a valid date"
+      "dateInvalid": "Enter a valid date",
+      "monthsInvalid": "Months of pregnancy must be between 1 and 10"
     }
   },
   "footer": {
@@ -466,11 +467,11 @@
     "empty": "Advisory board details will be added soon."
   },
   "health": {
-    "metaTitle": "Free Ultrasound Examination & Doctor Consultation in Mymensingh | MUTI",
-    "metaDescription": "Free ultrasound examinations, written reports and doctor consultations every day for poor and underprivileged people — Mymensingh Ultrasound Training Institute.",
+    "metaTitle": "Free Pregnancy Ultrasound & Doctor Consultation in Mymensingh | MUTI",
+    "metaDescription": "Free ultrasonogram examinations, written reports and doctor consultations every day for expectant mothers and children. A humanitarian initiative by MUTI Ultrasound, Mymensingh.",
     "eyebrow": "Free Health Service",
     "title": "Free Health Service",
-    "subtitle": "Free ultrasound examination, report and doctor consultation every day for poor and underprivileged people",
+    "subtitle": "Free ultrasonogram examination, report and doctor consultation every day for expectant mothers and children",
     "bandTitle": "Free Ultrasound & Doctor Consultation",
     "heroPlaceholder": "Add a photo of the service under Site Settings → Health service",
     "openToday": "Open today",
@@ -506,10 +507,10 @@
     "serialYourNumber": "Your serial number",
     "serialSuccessBody": "Bring this number to our office on the given day. Bring any previous prescription or reports if you have them.",
     "whatsappPrefill": "I am {name}, I would like a serial for the free ultrasound. Serial no {serialNo}",
-    "captcha": "Verification did not complete — tick the checkbox and try again.",
+    "captcha": "Verification did not complete, tick the checkbox and try again.",
     "impactTitle": "Our service in numbers",
     "updatedOn": "Last updated: {date}",
-    "statPatients": "patients served",
+    "statPatients": "mothers and children served",
     "statThisMonth": "this month",
     "statReports": "reports given",
     "statDaysPerWeek": "days a week",
@@ -519,6 +520,13 @@
     "supportTitle": "Want to support the service?",
     "supportContact": "Contact us",
     "supportWhatsapp": "I would like to support MUTI's free health service.",
-    "footerLine": "Free ultrasound service for poor and underprivileged people, every day"
+    "footerLine": "Free ultrasound service for poor and underprivileged people, every day",
+    "statConsultations": "consultations",
+    "pregnant": "Pregnant?",
+    "pregnantYes": "Yes",
+    "pregnantNo": "No",
+    "pregnantNa": "Not applicable",
+    "pregnancyMonths": "Months of pregnancy",
+    "ogBadge": "FREE"
   }
 }

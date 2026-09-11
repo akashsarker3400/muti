@@ -37,15 +37,22 @@ test.describe("free health service", () => {
       await expect(page.getByRole("heading", { level: 1 })).toContainText(
         "বিনামূল্যে স্বাস্থ্যসেবা",
       );
+      // Addendum 4.1: the commitment leads, the two pillars sit under it.
+      await expect(page.getByTestId("health-tagline")).toContainText(
+        "অকালমৃত্যু না ঘটে",
+      );
       await expect(
-        page.getByText("বিনামূল্যে আল্ট্রাসাউন্ড পরীক্ষা", { exact: true }),
+        page.getByText("বিনা মূল্যে আল্ট্রাসোনোগ্রাম পরীক্ষা", { exact: true }).first(),
       ).toBeVisible();
+      await expect(page.getByText("মানবতার সেবায় MUTI Ultrasound")).toBeVisible();
       // The seeded TODO copy reaches the page rather than leaving sections blank.
       await expect(page.getByTestId("health-schedule")).toContainText("TODO");
 
       // Serial request: two required fields.
       await page.getByRole("textbox", { name: "পূর্ণ নাম" }).fill(name);
       await page.getByRole("textbox", { name: "মোবাইল নম্বর" }).fill("01778838644");
+      await page.getByRole("combobox", { name: "গর্ভবতী?" }).selectOption("YES");
+      await page.getByRole("textbox", { name: "গর্ভকাল (মাস)" }).fill("৭");
       await page
         .getByRole("button", { name: "সিরিয়াল নিন", exact: true })
         .last()
@@ -59,11 +66,13 @@ test.describe("free health service", () => {
       await page.goto("/admin/health");
       const row = page.locator("tr", { hasText: name });
       await expect(row).toBeVisible();
+      await expect(row).toContainText("হ্যাঁ (7 মাস)");
       await row.getByRole("combobox").selectOption("SEEN");
       await expect(row.getByText("দেখা হয়েছে").first()).toBeVisible();
 
       await page.locator("#count-patients").fill("12");
       await page.locator("#count-reports").fill("11");
+      await page.locator("#count-consultations").fill("10");
       await page.getByRole("button", { name: "সংরক্ষণ" }).click();
       await expect(page.getByText("দিনের হিসাব সংরক্ষিত।")).toBeVisible();
 
@@ -79,6 +88,7 @@ test.describe("free health service", () => {
       await page.goto("/admin/health");
       await page.locator("#count-patients").fill("0");
       await page.locator("#count-reports").fill("0");
+      await page.locator("#count-consultations").fill("0");
       await page.getByRole("button", { name: "সংরক্ষণ" }).click();
       await expect(page.getByText("দিনের হিসাব সংরক্ষিত।")).toBeVisible();
     }

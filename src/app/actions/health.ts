@@ -32,6 +32,9 @@ const schema = z.object({
   complaint: z.string().trim().max(200).optional(),
   preferredDate: z.string().trim().max(10).optional(),
   referredBy: z.string().trim().max(120).optional(),
+  /** Addendum 4.1: YES / NO / NA, months only when YES. */
+  pregnant: z.enum(["YES", "NO", "NA", ""]).optional(),
+  pregnancyMonths: z.string().trim().max(2).optional(),
   turnstileToken: z.string().optional(),
   /** Honeypot. */
   website: z.string().max(0).optional().or(z.literal("")),
@@ -79,6 +82,19 @@ export async function requestHealthSerial(raw: unknown): Promise<SerialResult> {
     preferredDate = date;
   }
 
+  const pregnant = data.pregnant || null;
+  let pregnancyMonths: number | null = null;
+  if (pregnant === "YES" && data.pregnancyMonths) {
+    pregnancyMonths = Number(latinDigits(data.pregnancyMonths));
+    if (
+      !Number.isFinite(pregnancyMonths) ||
+      pregnancyMonths < 1 ||
+      pregnancyMonths > 10
+    ) {
+      return { ok: false, errors: { pregnancyMonths: "monthsInvalid" } };
+    }
+  }
+
   const serialDate = dhakaDateKey();
   const serialNo = await nextSerial(serialDate);
 
@@ -94,6 +110,8 @@ export async function requestHealthSerial(raw: unknown): Promise<SerialResult> {
       complaint: data.complaint || null,
       preferredDate,
       referredBy: data.referredBy || null,
+      pregnant,
+      pregnancyMonths,
     },
   });
 
@@ -110,6 +128,7 @@ export async function requestHealthSerial(raw: unknown): Promise<SerialResult> {
         `Complaint: ${data.complaint || "—"}`,
         `Preferred date: ${data.preferredDate || "—"}`,
         `Referred by: ${data.referredBy || "—"}`,
+        `Pregnant: ${pregnant ?? "—"}${pregnancyMonths ? ` (${pregnancyMonths} months)` : ""}`,
         "",
         `${siteUrl}/admin/health`,
       ].join("\n"),

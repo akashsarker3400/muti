@@ -36,6 +36,7 @@ const countSchema = z.object({
   date: z.string().regex(/^\d{8}$/),
   patients: z.coerce.number().int().min(0).max(1000),
   reports: z.coerce.number().int().min(0).max(1000),
+  consultations: z.coerce.number().int().min(0).max(1000),
 });
 
 /** "Patients seen today" quick entry — one row per day, overwritten on re-entry. */
@@ -45,12 +46,12 @@ export async function saveHealthDailyCount(
   const admin = await requirePermission("health.appointments");
   const parsed = countSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, error: "সংখ্যা ০ থেকে ১০০০ এর মধ্যে দিন।" };
-  const { date, patients, reports } = parsed.data;
+  const { date, patients, reports, consultations } = parsed.data;
   try {
     await prisma.healthDailyCount.upsert({
       where: { date },
-      create: { date, patients, reports },
-      update: { patients, reports },
+      create: { date, patients, reports, consultations },
+      update: { patients, reports, consultations },
     });
     await logActivity(admin.id, "count", "healthDailyCount", date);
     revalidatePath("/admin/health");
