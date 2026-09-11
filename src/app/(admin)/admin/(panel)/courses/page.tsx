@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Course" };
+export const metadata = { title: "Courses" };
 
 export default async function AdminCoursesPage() {
   const courses = await prisma.course.findMany({
@@ -28,7 +28,7 @@ export default async function AdminCoursesPage() {
   return (
     <>
       <AdminPageHeader
-        title="Course"
+        title="Courses"
         description="Drag rows to reorder; the website shows the same order."
         action={<NewButton href="/admin/courses/new" label="New course" />}
       />

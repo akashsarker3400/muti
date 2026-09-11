@@ -456,3 +456,25 @@ html[lang="bn"] .nav-text {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Course book cover (addendum 5, A3): soft shadow and a 3D tilt on hover. */
+.book-cover-scene {
+  perspective: 1200px;
+}
+.book-cover {
+  transform: rotateY(-12deg) rotateX(2deg);
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease;
+  border-radius: 8px;
+  box-shadow:
+    -18px 22px 40px rgba(18, 32, 79, 0.28),
+    0 2px 6px rgba(18, 32, 79, 0.15);
+}
+.book-cover-scene:hover .book-cover {
+  transform: rotateY(-4deg) rotateX(0deg) translateY(-4px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .book-cover {
+    transition: none;
+  }
+}

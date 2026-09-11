@@ -19,6 +19,7 @@ export function UploadField({
   onChange,
   accept = "image/*",
   kind = "image",
+  maxMb,
 }: {
   /** Ties the field's <label> to the path input below. */
   id?: string;
@@ -26,20 +27,30 @@ export function UploadField({
   onChange: (url: string) => void;
   accept?: string;
   kind?: "image" | "file";
+  /** Tighter size cap than the API default (10 MB), e.g. 5 for promo posters. */
+  maxMb?: number;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
 
   async function upload(file: File) {
+    if (maxMb && file.size > maxMb * 1024 * 1024) {
+      toast.error(`The file is larger than ${maxMb} MB.`);
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
     setBusy(true);
     try {
       const body = new FormData();
       body.append("file", file);
 
-      const response = await fetch("/api/admin/upload", {
-        method: "POST",
-        body,
-      });
+      const response = await fetch(
+        maxMb ? `/api/admin/upload?max=${maxMb}` : "/api/admin/upload",
+        {
+          method: "POST",
+          body,
+        },
+      );
       const data = (await response.json()) as { url?: string; error?: string };
 
       if (!response.ok || !data.url) {

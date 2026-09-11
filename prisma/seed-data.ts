@@ -236,7 +236,7 @@ export const seedCourses: SeedCourse[] = [
     overviewBn:
       "<p>MBBS বা সমমান যোগ্যতাসম্পন্ন ডাক্তারদের জন্য তিন মাসের সার্টিফিকেট কোর্স। বেসিক ফিজিক্স থেকে শুরু করে লিভার, গলব্লাডার, কিডনি, ইউটেরাস, ওভারি এবং প্রেগন্যান্সি আল্ট্রাসাউন্ড পর্যন্ত সব মৌলিক বিষয় পড়ানো হয়। প্রতিটি লেকচারের পরেই রিয়েল পেশেন্টে প্র্যাকটিক্যাল ক্লাস থাকে, যাতে কোর্স শেষে নিজে স্ক্যান ও রিপোর্ট করতে পারেন।</p>",
     overviewEn:
-      "<p>A three-month certificate course for doctors holding MBBS or an equivalent qualification. It covers the essentials — from basic physics through liver, gall bladder, kidney, uterus, ovary and pregnancy ultrasound. Every lecture is followed by a practical class on real patients so that you can scan and report independently by the end of the course.</p>",
+      "<p>A three-month certificate course for doctors holding MBBS or an equivalent qualification. It covers the essentials, from basic physics through liver, gall bladder, kidney, uterus, ovary and pregnancy ultrasound. Every lecture is followed by a practical class on real patients so that you can scan and report independently by the end of the course.</p>",
     sortOrder: 10,
     featured: true,
     routines: cmuRegularRoutine,
@@ -528,7 +528,7 @@ export const seedFaqs = [
     answerBn:
       "<p>হ্যাঁ, প্রতিটি ক্লাসে রিয়েল পেশেন্টের মাধ্যমে হাতে-কলমে প্র্যাকটিক্যাল প্র্যাকটিস করানো হয়।</p>",
     answerEn:
-      "<p>Yes — every single class includes hands-on practical scanning on real patients.</p>",
+      "<p>Yes. Every single class includes hands-on practical scanning on real patients.</p>",
     sortOrder: 60,
   },
 ];
@@ -564,7 +564,7 @@ export const seedPages = [
     titleBn: "আমাদের গল্প",
     titleEn: "Our story",
     bodyBn:
-      "<p>২০০৯ সালে যাত্রা শুরু করে ময়মনসিংহ আল্ট্রাসাউন্ড ট্রেনিং ইনস্টিটিউট (MUTI) বৃহত্তর ময়মনসিংহে প্রথম আল্ট্রাসাউন্ড প্রশিক্ষণ প্রতিষ্ঠান হিসেবে প্রতিষ্ঠিত হয়। প্রতিষ্ঠানটি সরকার অনুমোদিত, প্রতিষ্ঠান কোড ৫৭১২৫।</p><p>আমাদের লক্ষ্য একটাই — এই অঞ্চলের প্রত্যেক MBBS ডাক্তার যেন নিজে আত্মবিশ্বাসের সাথে আল্ট্রাসাউন্ড স্ক্যান ও রিপোর্ট করতে পারেন। সেজন্য আমরা তত্ত্বের পাশাপাশি প্রতিটি ক্লাসে রিয়েল পেশেন্টে হাতে-কলমে প্র্যাকটিক্যালকে সবচেয়ে বেশি গুরুত্ব দিই।</p><p>অভিজ্ঞ সোনোলজিস্ট ও আল্ট্রাসনোগ্রাম বিশেষজ্ঞদের তত্ত্বাবধানে, আধুনিক আল্ট্রাসাউন্ড মেশিন ব্যবহার করে ছোট ব্যাচে ব্যক্তিগত মেন্টরশিপসহ প্রশিক্ষণ দেওয়া হয়। কোর্স শেষ হওয়ার পরেও শিক্ষার্থীরা আজীবন প্র্যাকটিক্যাল ও ওয়ার্কশপে যোগ দিতে পারেন।</p>",
+      "<p>২০০৯ সালে যাত্রা শুরু করে ময়মনসিংহ আল্ট্রাসাউন্ড ট্রেনিং ইনস্টিটিউট (MUTI) বৃহত্তর ময়মনসিংহে প্রথম আল্ট্রাসাউন্ড প্রশিক্ষণ প্রতিষ্ঠান হিসেবে প্রতিষ্ঠিত হয়। প্রতিষ্ঠানটি সরকার অনুমোদিত, প্রতিষ্ঠান কোড ৫৭১২৫।</p><p>আমাদের লক্ষ্য একটাই: এই অঞ্চলের প্রত্যেক MBBS ডাক্তার যেন নিজে আত্মবিশ্বাসের সাথে আল্ট্রাসাউন্ড স্ক্যান ও রিপোর্ট করতে পারেন। সেজন্য আমরা তত্ত্বের পাশাপাশি প্রতিটি ক্লাসে রিয়েল পেশেন্টে হাতে-কলমে প্র্যাকটিক্যালকে সবচেয়ে বেশি গুরুত্ব দিই।</p><p>অভিজ্ঞ সোনোলজিস্ট ও আল্ট্রাসনোগ্রাম বিশেষজ্ঞদের তত্ত্বাবধানে, আধুনিক আল্ট্রাসাউন্ড মেশিন ব্যবহার করে ছোট ব্যাচে ব্যক্তিগত মেন্টরশিপসহ প্রশিক্ষণ দেওয়া হয়। কোর্স শেষ হওয়ার পরেও শিক্ষার্থীরা আজীবন প্র্যাকটিক্যাল ও ওয়ার্কশপে যোগ দিতে পারেন।</p>",
     bodyEn:
       "<p>Mymensingh Ultrasound Training Institute (MUTI) opened in 2009 as the first ultrasound training institute in greater Mymensingh. It is a government approved institute, code 57125.</p><p>Our aim is a simple one: that every MBBS doctor in this region should be able to scan and report independently and with confidence. That is why, alongside the theory, we put the greatest weight on hands-on practice with real patients in every class.</p><p>Training is led by experienced sonologists and ultrasonogram specialists using modern ultrasound equipment, in small batches with personal mentorship. Students keep lifetime access to practical sessions and workshops after their course ends.</p>",
   },
@@ -575,7 +575,7 @@ export const seedPages = [
     bodyBn:
       "<p>এই ওয়েবসাইটে আপনি যে তথ্য দেন (নাম, মোবাইল নম্বর, ইমেইল, শিক্ষাগত যোগ্যতা ও মেসেজ) তা শুধুমাত্র আপনার ভর্তি বা অনুসন্ধানের বিষয়ে আপনার সাথে যোগাযোগ করার জন্য ব্যবহার করা হয়।</p><h2>আমরা কী সংগ্রহ করি</h2><p>ভর্তি আবেদন, ফ্রি ক্লাস বুকিং ও যোগাযোগ ফরমে দেওয়া তথ্য আমাদের নিজস্ব সার্ভারে সংরক্ষিত থাকে।</p><h2>আমরা কী করি না</h2><p>আপনার তথ্য কোনো তৃতীয় পক্ষের কাছে বিক্রি বা হস্তান্তর করা হয় না।</p><h2>ওয়েবসাইট পরিসংখ্যান ও কুকি</h2><p>ভিজিটর পরিসংখ্যান বুঝতে আমরা Google Analytics ও Meta Pixel ব্যবহার করতে পারি।</p><p>আপনি কোন বিজ্ঞাপন বা লিংক থেকে এসেছেন তা বোঝার জন্য আমরা আপনার ব্রাউজারে একটি ছোট কুকি রাখি (৩০ দিন)। এতে শুধু ক্যাম্পেইনের নাম থাকে, আপনার ব্যক্তিগত কোনো তথ্য থাকে না। এটি শুধু আমাদের নিজস্ব ওয়েবসাইটের কুকি।</p><h2>বিনামূল্যে স্বাস্থ্যসেবার সিরিয়াল</h2><p>স্বাস্থ্যসেবার সিরিয়াল ফরমে দেওয়া নাম, মোবাইল নম্বর, বয়স, এলাকা ও সমস্যার সংক্ষিপ্ত বিবরণ শুধু সিরিয়াল দেওয়া ও আপনার সাথে যোগাযোগের জন্য ব্যবহার হয়। এগুলো স্বাস্থ্য সংক্রান্ত তথ্য: কোনো রোগীর নাম কখনো ওয়েবসাইটে প্রকাশ করা হয় না, লিখিত সম্মতি ছাড়া রোগীর ছবি ব্যবহার করা হয় না, এবং ৯০ দিন পর রেকর্ড থেকে নাম ও নম্বর স্বয়ংক্রিয়ভাবে মুছে ফেলা হয়।</p><h2>যোগাযোগ</h2><p>আপনার তথ্য মুছে ফেলার অনুরোধ জানাতে অফিসের ইমেইল বা ফোনে যোগাযোগ করুন।</p>",
     bodyEn:
-      "<p>The information you provide on this website (name, mobile number, email, qualification and message) is used only to contact you about your admission or enquiry.</p><h2>What we collect</h2><p>Details submitted through the admission application, free class booking and contact forms are stored on our own server.</p><h2>What we do not do</h2><p>We do not sell or pass your information on to any third party.</p><h2>Website statistics and cookies</h2><p>We may use Google Analytics and the Meta Pixel to understand visitor statistics.</p><p>To understand which advert or link brought you here, we store a small first-party cookie in your browser for 30 days. It holds campaign labels only — no personal information — and is never shared with anyone else.</p><h2>Free health service serials</h2><p>The name, mobile number, age, area and one-line complaint given on the health service serial form are used only to issue the serial and contact you. This is health data: no patient name is ever published on the website, no patient photo is used without written consent, and the name and number are automatically removed from the record after 90 days.</p><h2>Contact</h2><p>To request deletion of your information, contact the office by email or phone.</p>",
+      "<p>The information you provide on this website (name, mobile number, email, qualification and message) is used only to contact you about your admission or enquiry.</p><h2>What we collect</h2><p>Details submitted through the admission application, free class booking and contact forms are stored on our own server.</p><h2>What we do not do</h2><p>We do not sell or pass your information on to any third party.</p><h2>Website statistics and cookies</h2><p>We may use Google Analytics and the Meta Pixel to understand visitor statistics.</p><p>To understand which advert or link brought you here, we store a small first-party cookie in your browser for 30 days. It holds campaign labels only, no personal information, and is never shared with anyone else.</p><h2>Free health service serials</h2><p>The name, mobile number, age, area and one-line complaint given on the health service serial form are used only to issue the serial and contact you. This is health data: no patient name is ever published on the website, no patient photo is used without written consent, and the name and number are automatically removed from the record after 90 days.</p><h2>Contact</h2><p>To request deletion of your information, contact the office by email or phone.</p>",
   },
   {
     slug: "terms",
@@ -608,7 +608,7 @@ export const seedPosts = [
     titleBn: "CMU ও DMU কোর্সের পার্থক্য",
     titleEn: "The difference between the CMU and DMU courses",
     excerpt:
-      "সময়কাল, সিলেবাস, প্র্যাকটিক্যাল ক্লাসের সংখ্যা ও সার্টিফিকেট — কোনটি আপনার জন্য উপযুক্ত।",
+      "সময়কাল, সিলেবাস, প্র্যাকটিক্যাল ক্লাসের সংখ্যা ও সার্টিফিকেট: কোনটি আপনার জন্য উপযুক্ত।",
     bodyBn:
       "<p>এই লেখাটি খসড়া অবস্থায় আছে। প্রকাশ করার আগে অ্যাডমিন প্যানেল থেকে সম্পূর্ণ লেখাটি যোগ করুন।</p>",
     bodyEn:

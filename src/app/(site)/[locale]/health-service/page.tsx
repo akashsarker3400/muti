@@ -29,7 +29,8 @@ import { formatDate, pick, toBanglaDigits } from "@/lib/format";
 import { healthStats, openToday, WEEKDAY_LABELS, type Weekday } from "@/lib/health";
 import { displayPhone } from "@/lib/phone";
 import { prisma } from "@/lib/prisma";
-import { getPartners } from "@/lib/queries";
+import { getPartners, getVideos } from "@/lib/queries";
+import { VideoGrid } from "@/components/site/video-grid";
 import { getSiteSettings } from "@/lib/site-settings";
 import { waLink } from "@/lib/whatsapp";
 import { pageAlternates } from "@/i18n/routing";
@@ -89,14 +90,17 @@ export default async function HealthServicePage({ params }: { params: Params }) 
   const health = settings.health;
   if (!health.published) notFound();
 
-  const [t, common, services, stats, images, supporters] = await Promise.all([
-    getTranslations("health"),
-    getTranslations("common"),
-    getContent("HEALTH_SERVICE", locale),
-    healthStats(health),
-    getHealthAlbumImages(),
-    getPartners(["COMMUNITY"]),
-  ]);
+  const [t, common, services, stats, images, supporters, videos, videoT] =
+    await Promise.all([
+      getTranslations("health"),
+      getTranslations("common"),
+      getContent("HEALTH_SERVICE", locale),
+      healthStats(health),
+      getHealthAlbumImages(),
+      getPartners(["COMMUNITY"]),
+      getVideos("HEALTH"),
+      getTranslations("video"),
+    ]);
 
   const digits = (value: number | string) =>
     locale === "bn" ? toBanglaDigits(String(value)) : String(value);
@@ -413,6 +417,14 @@ export default async function HealthServicePage({ params }: { params: Params }) 
             <h2 className="mb-2 text-base font-semibold">{t("transparencyTitle")}</h2>
             <RichText html={transparency} />
           </div>
+        </Section>
+      )}
+
+      {/* ---- 8b. Videos (homepage additions, 2) ------------------------------ */}
+      {videos.length > 0 && (
+        <Section soft>
+          <SectionHeading title={videoT("sectionTitle")} />
+          <VideoGrid videos={videos} settings={settings} locale={locale} columns={2} />
         </Section>
       )}
 

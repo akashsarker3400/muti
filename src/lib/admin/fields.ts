@@ -34,6 +34,8 @@ export type FieldDef = {
   lang?: "bn" | "en";
   /** Latin-only input (codes, URLs, numbers) gets LTR direction and Inter. */
   latin?: boolean;
+  /** Upload size cap in MB for image/file fields (default 10). */
+  maxMb?: number;
 };
 
 export type FormSection = {

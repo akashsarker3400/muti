@@ -510,7 +510,7 @@ export function AdmissionForm({
                     inputMode="numeric"
                     dir="ltr"
                     placeholder={t("passingYear")}
-                    aria-label={`${t(`examOptions.${exam}`)} — ${t("passingYear")}`}
+                    aria-label={`${t(`examOptions.${exam}`)}: ${t("passingYear")}`}
                     aria-invalid={rowErrors?.year ? true : undefined}
                     className="h-10 font-latin"
                   />
@@ -518,13 +518,13 @@ export function AdmissionForm({
                     {...register(`education.${index}.gpa` as const)}
                     dir="ltr"
                     placeholder={t("gpa")}
-                    aria-label={`${t(`examOptions.${exam}`)} — ${t("gpa")}`}
+                    aria-label={`${t(`examOptions.${exam}`)}: ${t("gpa")}`}
                     className="h-10 font-latin"
                   />
                   <Input
                     {...register(`education.${index}.board` as const)}
                     placeholder={t("board")}
-                    aria-label={`${t(`examOptions.${exam}`)} — ${t("board")}`}
+                    aria-label={`${t(`examOptions.${exam}`)}: ${t("board")}`}
                     className="h-10"
                   />
                   {rowErrors?.year && (

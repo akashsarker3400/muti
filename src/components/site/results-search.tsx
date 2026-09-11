@@ -260,7 +260,7 @@ function ResultCard({
                   </span>
                 )}
                 {subjectCodes[subject.code] && (
-                  <span className="sr-only">— {subjectCodes[subject.code]}</span>
+                  <span className="sr-only">: {subjectCodes[subject.code]}</span>
                 )}
               </li>
             ))}

@@ -17,7 +17,11 @@ import {
   visibleNav,
   type NavItem,
 } from "@/lib/nav";
-import { getLeadershipMessages, type PublicCourse } from "@/lib/queries";
+import {
+  getFeaturedCourseBook,
+  getLeadershipMessages,
+  type PublicCourse,
+} from "@/lib/queries";
 import type { SiteSettings } from "@/lib/site-settings";
 import { waLink } from "@/lib/whatsapp";
 
@@ -55,6 +59,10 @@ export async function SiteHeader({
     href: `/courses/${course.slug}`,
     label: pick(locale, course.nameBn, course.nameEn),
   }));
+  // The course book joins the Courses menu once it is published (addendum 5).
+  const book = await getFeaturedCourseBook();
+  if (book)
+    courseLinks.push({ href: `/course-book/${book.slug}`, label: nav("courseBook") });
 
   // Published leadership pages join the About dropdown (addendum 3, §7).
   const leadership: NavItem[] = (await getLeadershipMessages()).map((message) => ({
@@ -106,6 +114,31 @@ export async function SiteHeader({
                             className="nav-text menu-item flex items-center px-3 text-[color:var(--foreground)] transition"
                           >
                             {text(entry)}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </li>
+              ) : item.href === "/courses" && courseLinks.length > 0 ? (
+                <li key={item.href} className="group relative">
+                  <Link
+                    href="/courses"
+                    className="nav-text flex items-center gap-1 rounded-md px-1.5 whitespace-nowrap text-[color:var(--foreground)] transition group-focus-within:bg-[color:var(--bg-soft)] group-hover:bg-[color:var(--bg-soft)] group-hover:text-[color:var(--brand)] xl:px-2"
+                    aria-haspopup="true"
+                  >
+                    {nav("courses")}
+                    <ChevronDown className="size-3.5" aria-hidden="true" />
+                  </Link>
+                  <div className="invisible absolute start-0 top-full w-72 pt-2 opacity-0 transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+                    <ul className="rounded-xl border border-[color:var(--border)] bg-white p-1.5 shadow-[var(--shadow-card-hover)]">
+                      {courseLinks.map((entry) => (
+                        <li key={entry.href}>
+                          <Link
+                            href={entry.href}
+                            className="nav-text menu-item flex items-center px-3 text-[color:var(--foreground)] transition"
+                          >
+                            {entry.label}
                           </Link>
                         </li>
                       ))}

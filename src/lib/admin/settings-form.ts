@@ -285,6 +285,12 @@ export const settingsFormSections: FormSection[] = [
         type: "checkbox",
       },
       {
+        name: "homepage.showBook",
+        label: "Show the course book strip",
+        type: "checkbox",
+        hint: "Appears under “Why choose MUTI” once the book is published from the Course Book menu.",
+      },
+      {
         name: "homepage.showNoticeTicker",
         label: "Show the notice ticker",
         type: "checkbox",

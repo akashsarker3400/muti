@@ -25,7 +25,7 @@ export async function generateMetadata({
   const role = pick(locale, message.roleTitleBn, message.roleTitleEn);
   const name = pick(locale, message.personNameBn, message.personName);
   return {
-    title: `${role} — ${name}`,
+    title: `${role}: ${name}`,
     description: pick(locale, message.excerptBn, message.excerptEn) || undefined,
     alternates: pageAlternates(locale, `/messages/${message.key}`),
   };

@@ -10,7 +10,8 @@ import { Section, SectionHeading } from "@/components/site/section";
 import type { Locale } from "@/i18n/routing";
 import { pick } from "@/lib/format";
 import { getContent } from "@/lib/content-items";
-import { getPageBySlug, getPartners } from "@/lib/queries";
+import { getPageBySlug, getPartners, getVideos } from "@/lib/queries";
+import { VideoGrid } from "@/components/site/video-grid";
 import { isEmptyRichText } from "@/lib/sanitize";
 import { getSiteSettings } from "@/lib/site-settings";
 import { pageAlternates } from "@/i18n/routing";
@@ -36,12 +37,14 @@ export default async function AboutPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [settings, story, partners, pillars, t] = await Promise.all([
+  const [settings, story, partners, pillars, t, videos, videoT] = await Promise.all([
     getSiteSettings(),
     getPageBySlug("about-story"),
     getPartners(),
     getContent("VALUE", locale),
     getTranslations("about"),
+    getVideos("ABOUT"),
+    getTranslations("video"),
   ]);
 
   // The three cards keep a fixed icon order; the words come from the admin.
@@ -62,6 +65,13 @@ export default async function AboutPage({
             <SectionHeading title={t("storyTitle")} />
             <RichText html={storyHtml} />
           </div>
+        </Section>
+      )}
+
+      {videos.length > 0 && (
+        <Section soft>
+          <SectionHeading title={videoT("sectionTitle")} />
+          <VideoGrid videos={videos} settings={settings} locale={locale} columns={2} />
         </Section>
       )}
 

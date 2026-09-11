@@ -6,6 +6,7 @@ import { CourseCard } from "@/components/site/course-card";
 import { FacultyCard } from "@/components/site/faculty-card";
 import { GalleryGrid } from "@/components/site/gallery-grid";
 import { AdvisorsStrip } from "@/components/site/advisors-section";
+import { BookStrip } from "@/components/site/home/book-strip";
 import { Hero } from "@/components/site/home/hero";
 import { HeroBanner } from "@/components/site/home/hero-banner";
 import { HealthBand } from "@/components/site/health/health-band";
@@ -13,7 +14,9 @@ import { LeadershipCards } from "@/components/site/leadership-cards";
 import { NextBatchCta } from "@/components/site/home/next-batch";
 import { NoticeTicker } from "@/components/site/home/notice-ticker";
 import { PracticalBlock } from "@/components/site/home/practical-block";
+import { PromoSlot } from "@/components/site/home/promo-slot";
 import { StatsStrip } from "@/components/site/home/stats-strip";
+import { VideoSection } from "@/components/site/home/video-section";
 import { WhyChoose } from "@/components/site/home/why-choose";
 import { OrganizationJsonLd } from "@/components/site/json-ld";
 import { NoticeList } from "@/components/site/notice-list";
@@ -27,6 +30,9 @@ import {
   getAdvisors,
   getBanners,
   getFaculty,
+  getFeaturedCourseBook,
+  getHomeVideo,
+  getPromos,
   getLeadershipMessages,
   getGalleryPreview,
   getNextBatch,
@@ -59,8 +65,13 @@ export default async function HomePage({
     banners,
     leadership,
     advisors,
+    promoA,
+    promoB,
+    homeVideo,
+    book,
     home,
     common,
+    promo,
   ] = await Promise.all([
     getSiteSettings(),
     getPublishedCourses(),
@@ -74,9 +85,15 @@ export default async function HomePage({
     getBanners(),
     getLeadershipMessages(),
     getAdvisors(4),
+    getPromos("PROMO_A"),
+    getPromos("PROMO_B"),
+    getHomeVideo(),
+    getFeaturedCourseBook(),
     getTranslations("home"),
     getTranslations("common"),
+    getTranslations("promo"),
   ]);
+  const promoLabels = { offer: promo("offer"), slide: promo("slide") };
 
   return (
     <>
@@ -91,6 +108,14 @@ export default async function HomePage({
       )}
 
       <StatsStrip settings={settings} locale={locale} courseCount={courses.length} />
+
+      {promoA.length > 0 && (
+        <section className="pt-6 sm:pt-8">
+          <div className="container-content">
+            <PromoSlot slot="PROMO_A" promos={promoA} labels={promoLabels} />
+          </div>
+        </section>
+      )}
 
       {courses.length > 0 && (
         <Section>
@@ -122,6 +147,10 @@ export default async function HomePage({
 
       <WhyChoose locale={locale} limit={8} />
 
+      <VideoSection video={homeVideo} settings={settings} locale={locale} />
+
+      {settings.homepage.showBook && <BookStrip book={book} />}
+
       <HealthBand settings={settings} locale={locale} />
 
       <PracticalBlock settings={settings} locale={locale} />
@@ -138,20 +167,43 @@ export default async function HomePage({
         <AdvisorsStrip advisors={advisors} locale={locale} soft />
       )}
 
-      {notices.length > 0 && (
+      {(notices.length > 0 || promoB.length > 0) && (
         <Section>
-          <SectionHeading
-            title={home("noticesTitle")}
-            action={
-              <Button asChild variant="brandOutline" size="cta">
-                <Link href="/notices">
-                  {common("viewAll")}
-                  <ArrowRight className="size-4 rtl:rotate-180" aria-hidden="true" />
-                </Link>
-              </Button>
+          <div
+            className={
+              promoB.length > 0
+                ? "grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-10"
+                : undefined
             }
-          />
-          <NoticeList notices={notices.slice(0, 5)} locale={locale} />
+          >
+            {notices.length > 0 && (
+              <div className="min-w-0">
+                <SectionHeading
+                  title={home("noticesTitle")}
+                  action={
+                    <Button asChild variant="brandOutline" size="cta">
+                      <Link href="/notices">
+                        {common("viewAll")}
+                        <ArrowRight
+                          className="size-4 rtl:rotate-180"
+                          aria-hidden="true"
+                        />
+                      </Link>
+                    </Button>
+                  }
+                />
+                <NoticeList notices={notices.slice(0, 5)} locale={locale} />
+              </div>
+            )}
+            {promoB.length > 0 && (
+              <PromoSlot
+                slot="PROMO_B"
+                promos={promoB}
+                labels={promoLabels}
+                className="mx-auto w-full max-w-[420px] lg:mx-0 lg:max-w-none lg:self-start"
+              />
+            )}
+          </div>
         </Section>
       )}
 

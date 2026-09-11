@@ -61,6 +61,8 @@ RUN npm init -y > /dev/null \
 
 # --- runtime ---------------------------------------------------------------
 FROM base AS runner
+# ffmpeg makes the poster frame for uploaded videos (homepage additions, 2b).
+RUN apk add --no-cache ffmpeg
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000

@@ -135,8 +135,8 @@ export const certificatesOffered: BilingualItem[] = [
     en: "Certificate in Medical Ultrasound (CMU)",
   },
   {
-    bn: "Certificate in Medical Ultrasound — BTEB অনুমোদিত",
-    en: "Certificate in Medical Ultrasound — BTEB approved",
+    bn: "Certificate in Medical Ultrasound (BTEB অনুমোদিত)",
+    en: "Certificate in Medical Ultrasound (BTEB approved)",
   },
   {
     bn: "Diploma in Medical Ultrasound (DMU)",

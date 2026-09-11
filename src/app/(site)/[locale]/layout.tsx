@@ -12,10 +12,11 @@ import { BrandTheme } from "@/components/site/brand-theme";
 import { LeadTracker } from "@/components/site/lead-tracker";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
+import { PromoPopup } from "@/components/site/home/promo-popup";
 import { WhatsAppFloat } from "@/components/site/whatsapp-float";
 import { routing } from "@/i18n/routing";
 import { fontVariables } from "@/lib/fonts";
-import { getPublishedCourses } from "@/lib/queries";
+import { getPopupPromo, getPublishedCourses } from "@/lib/queries";
 import { siteUrl } from "@/lib/env";
 import { faviconUrl, getSiteSettings } from "@/lib/site-settings";
 import { pick } from "@/lib/format";
@@ -101,11 +102,13 @@ export default async function SiteLayout({
   }
   setRequestLocale(locale);
 
-  const [settings, courses, t, courseT] = await Promise.all([
+  const [settings, courses, t, courseT, popup, promo] = await Promise.all([
     getSiteSettings(),
     getPublishedCourses(),
     getTranslations("common"),
     getTranslations("course"),
+    getPopupPromo(),
+    getTranslations("promo"),
   ]);
 
   return (
@@ -127,6 +130,12 @@ export default async function SiteLayout({
           </main>
 
           <SiteFooter settings={settings} locale={locale} courses={courses} />
+          {popup && (
+            <PromoPopup
+              promo={popup}
+              labels={{ close: promo("close"), offer: promo("offer") }}
+            />
+          )}
           <WhatsAppFloat
             phone={settings.contact.whatsapp}
             defaultMessage={pick(

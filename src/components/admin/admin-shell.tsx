@@ -34,7 +34,10 @@ import {
   X,
   Upload,
   HeartPulse,
+  BookMarked,
+  Film,
   Languages,
+  Megaphone,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -65,6 +68,7 @@ const NAV: NavGroup[] = [
       { href: "/admin/courses", label: "Courses", icon: BookOpen },
       { href: "/admin/batches", label: "Batches", icon: CalendarRange },
       { href: "/admin/students", label: "Students", icon: GraduationCap },
+      { href: "/admin/course-book", label: "Course book", icon: BookMarked },
       { href: "/admin/certificates", label: "Certificates", icon: Award },
       { href: "/admin/board-exams", label: "Board results", icon: Trophy },
       { href: "/admin/results", label: "Results (notices)", icon: Trophy },
@@ -92,6 +96,8 @@ const NAV: NavGroup[] = [
     title: "Content",
     items: [
       { href: "/admin/banners", label: "Hero banners", icon: Images },
+      { href: "/admin/promos", label: "Promos", icon: Megaphone },
+      { href: "/admin/videos", label: "Videos", icon: Film },
       { href: "/admin/notices", label: "Notices", icon: Newspaper },
       {
         href: "/admin/leadership",

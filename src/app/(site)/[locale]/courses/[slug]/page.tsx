@@ -12,6 +12,7 @@ import { WhatsAppIcon } from "@/components/site/icons";
 import { CourseJsonLd } from "@/components/site/json-ld";
 import { SeatCounter } from "@/components/site/seat-counter";
 import { RichText } from "@/components/site/rich-text";
+import { CourseBookSection } from "@/components/site/course-book-section";
 import { RoutineTable } from "@/components/site/routine-table";
 import { Section } from "@/components/site/section";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ import {
   getGlobalFaqs,
   getNextBatchByCourse,
   getPublishedCourses,
+  getCourseBookForCourse,
 } from "@/lib/queries";
 import { isEmptyRichText } from "@/lib/sanitize";
 import { getSiteSettings } from "@/lib/site-settings";
@@ -46,13 +48,13 @@ export async function generateMetadata({
   const path = `/courses/${slug}`;
 
   return {
-    title: course.metaTitle || `${name} — ${fullName}`,
+    title: course.metaTitle || `${name}: ${fullName}`,
     description:
       course.metaDescription ||
       `${fullName} at MUTI, Mymensingh. Government approved institute, code 57125.`,
     alternates: pageAlternates(locale, path),
     openGraph: {
-      title: `${name} — ${fullName}`,
+      title: `${name}: ${fullName}`,
       description: course.metaDescription ?? undefined,
       images: [{ url: `/api/og?course=${encodeURIComponent(slug)}` }],
     },
@@ -91,6 +93,7 @@ export default async function CourseDetailPage({
     getTranslations("levels"),
     getTranslations("seats"),
   ]);
+  const book = await getCourseBookForCourse(course.id);
 
   // Live seat counter for this course's next batch (addendum 2, A1).
   const nextBatch = batchByCourse.get(course.id);
@@ -256,6 +259,9 @@ export default async function CourseDetailPage({
                 <RoutineTable routines={course.routines} />
               </div>
             )}
+
+            {/* 5b. Course book (addendum 5, A3) */}
+            <CourseBookSection book={book} courseCode={course.code} locale={locale} />
 
             {/* 6. Eligibility and required documents */}
             {!isEmptyRichText(eligibility) && (

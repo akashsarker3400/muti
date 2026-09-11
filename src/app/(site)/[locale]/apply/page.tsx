@@ -53,7 +53,7 @@ export default async function ApplyPage({
               courses={courses.map((course) => ({
                 id: course.id,
                 slug: course.slug,
-                label: `${pick(locale, course.nameBn, course.nameEn)} — ${pick(locale, course.fullNameBn, course.fullNameEn)}`,
+                label: `${pick(locale, course.nameBn, course.nameEn)}: ${pick(locale, course.fullNameBn, course.fullNameEn)}`,
               }))}
               batches={batches.map((batch) => ({
                 id: batch.id,

@@ -27,8 +27,10 @@ export type ResourceColumn = {
   key: string;
   label: string;
   type?: "text" | "date" | "bool" | "image" | "badge" | "number";
-  /** For `type: "badge"`, maps a value to its Bangla label. */
+  /** For `type: "badge"`, maps a value to its label. */
   labels?: Record<string, string>;
+  /** Badge colour; defaults to the brand navy. */
+  tone?: "brand" | "warning" | "success" | "danger" | "neutral";
   /** Dotted path into an included relation, e.g. "course.nameEn". */
   path?: string;
   hideOnMobile?: boolean;
@@ -57,7 +59,8 @@ export type ResourceConfig = {
     | "certificate"
     | "boardExam"
     | "leadershipMessage"
-    | "advisor";
+    | "advisor"
+    | "promo";
   title: string;
   singular: string;
   description?: string;
@@ -76,6 +79,8 @@ export type ResourceConfig = {
   exportCsv?: boolean;
   /** Extra read-only panel under the edit form. */
   detailPanel?: "student-certificates";
+  /** Live preview rendered inside the form from the current values. */
+  preview?: "promo";
   /** Named permission (addendum 3, §8) needed to open the list or save. */
   permission?: Permission;
   searchFields: string[];
@@ -896,6 +901,14 @@ const postResource: ResourceConfig = {
   columns: [
     { key: "cover", label: "", type: "image" },
     { key: "titleEn", label: "Title" },
+    {
+      key: "needsReview",
+      label: "Review",
+      type: "badge",
+      labels: { true: "Needs faculty review" },
+      tone: "warning",
+      hideOnMobile: true,
+    },
     { key: "publishedAt", label: "Published on", type: "date", hideOnMobile: true },
   ],
   searchFields: ["titleBn", "titleEn", "slug"],
@@ -911,6 +924,7 @@ const postResource: ResourceConfig = {
     tags: z.union([z.array(z.string()), z.string()]).optional(),
     published: z.boolean().default(false),
     publishedAt: optionalText,
+    needsReview: z.boolean().default(false),
   }),
   sections: () => [
     {
@@ -951,6 +965,12 @@ const postResource: ResourceConfig = {
         },
         { name: "tags", label: "Tags", type: "tags" },
         { name: "publishedAt", label: "Publish date", type: "date" },
+        {
+          name: "needsReview",
+          label: "Needs faculty review",
+          type: "checkbox",
+          hint: "Drafts written from the course book keep this ticked until a doctor has checked the medical content. Untick after review, then publish.",
+        },
         publishedField,
       ],
     },
@@ -966,6 +986,7 @@ const postResource: ResourceConfig = {
     tags: Array.isArray(row.tags) ? (row.tags as string[]) : [],
     published: Boolean(row.published),
     publishedAt: fromDate(row.publishedAt),
+    needsReview: Boolean(row.needsReview),
   }),
   toData: (values) => {
     const published = Boolean(values.published);
@@ -987,6 +1008,7 @@ const postResource: ResourceConfig = {
       published,
       // Publishing without a date stamps "now"; a draft keeps no date.
       publishedAt: explicitDate ?? (published ? new Date() : null),
+      needsReview: Boolean(values.needsReview),
     };
   },
 };
@@ -2303,6 +2325,163 @@ const healthServiceResource = contentResource({
   withIcon: true,
 });
 
+/* -------------------------------------------------------------------------- */
+/* Homepage promos (homepage additions, 1)                                    */
+/* -------------------------------------------------------------------------- */
+
+const promoResource: ResourceConfig = {
+  key: "promos",
+  model: "promo",
+  title: "Promos",
+  singular: "Promo",
+  description:
+    "Posters, leaflets and offer ads on the homepage. Slot A is full width under the stats strip (1600×600 works best); slot B sits beside the notices (800×800). Image only: design the poster with any text you need, then upload it (max 5 MB, converted to webp).",
+  newLabel: "New promo",
+  permission: "promos.manage",
+  preview: "promo",
+  columns: [
+    { key: "image", label: "", type: "image" },
+    { key: "title", label: "Title" },
+    {
+      key: "slot",
+      label: "Slot",
+      type: "badge",
+      labels: { PROMO_A: "A · full width", PROMO_B: "B · beside notices" },
+    },
+    { key: "clicks", label: "Clicks", type: "number", hideOnMobile: true },
+    { key: "startAt", label: "Start", type: "date", hideOnMobile: true },
+    { key: "endAt", label: "End", type: "date", hideOnMobile: true },
+    { key: "active", label: "Active", type: "bool" },
+  ],
+  searchFields: ["title", "link"],
+  orderBy: [{ slot: "asc" }, { sortOrder: "asc" }],
+  schema: z.object({
+    slot: z.enum(["PROMO_A", "PROMO_B"]).default("PROMO_A"),
+    title: requiredText,
+    image: text.min(1, "Upload the poster image"),
+    mobileImage: optionalText,
+    link: optionalText,
+    openInNewTab: z.boolean().default(false),
+    isOffer: z.boolean().default(false),
+    showAsPopup: z.boolean().default(false),
+    startAt: optionalText,
+    endAt: optionalText,
+    sortOrder: z.coerce.number().int().default(0),
+    active: z.boolean().default(true),
+  }),
+  sections: () => [
+    {
+      id: "main",
+      label: "Promo",
+      fields: [
+        {
+          name: "title",
+          label: "Title",
+          type: "text",
+          required: true,
+          hint: "Internal name and the image's alt text, e.g. “Eid offer 2026”.",
+        },
+        {
+          name: "slot",
+          label: "Slot",
+          type: "select",
+          required: true,
+          options: [
+            {
+              value: "PROMO_A",
+              label: "A: full width under the stats strip (1600×600)",
+            },
+            { value: "PROMO_B", label: "B: beside the notices (800×800)" },
+          ],
+        },
+        {
+          name: "image",
+          label: "Poster image",
+          type: "image",
+          required: true,
+          maxMb: 5,
+          hint: "Slot A: 1600×600 (8:3). Slot B: 800×800 (square). On phones slot A is capped at 320px tall.",
+        },
+        {
+          name: "mobileImage",
+          label: "Phone poster (optional)",
+          type: "image",
+          maxMb: 5,
+          hint: "A taller version for phones, e.g. 1080×720 for slot A. Leave empty to reuse the poster.",
+        },
+        {
+          name: "link",
+          label: "Link (optional)",
+          type: "text",
+          latin: true,
+          full: true,
+          placeholder: "/courses/dmu, /notices/…, or https://wa.me/8801778838644",
+          hint: "Where a click goes: a course page, a notice, a WhatsApp link or any external address. Leave empty for a plain poster.",
+        },
+        { name: "openInNewTab", label: "Open the link in a new tab", type: "checkbox" },
+        {
+          name: "isOffer",
+          label: "Show a small “Offer” tag in the corner",
+          type: "checkbox",
+        },
+        {
+          name: "showAsPopup",
+          label: "Also show as a one-time popup on the visitor's first visit",
+          type: "checkbox",
+          hint: "Shown once per visitor, then hidden for 7 days. Never on admin pages. Off by default.",
+        },
+        {
+          name: "startAt",
+          label: "Start date",
+          type: "date",
+          hint: "Leave empty to show immediately.",
+        },
+        {
+          name: "endAt",
+          label: "End date",
+          type: "date",
+          hint: "The promo hides itself after this day, e.g. the end of an Eid offer.",
+        },
+        { name: "sortOrder", label: "Order (lowest first)", type: "number" },
+        { name: "active", label: "Active", type: "checkbox" },
+      ],
+    },
+  ],
+  toForm: (row) => ({
+    slot: str(row.slot) || "PROMO_A",
+    title: str(row.title),
+    image: str(row.image),
+    mobileImage: str(row.mobileImage),
+    link: str(row.link),
+    openInNewTab: Boolean(row.openInNewTab),
+    isOffer: Boolean(row.isOffer),
+    showAsPopup: Boolean(row.showAsPopup),
+    startAt: fromDate(row.startAt),
+    endAt: fromDate(row.endAt),
+    sortOrder: toInt(row.sortOrder),
+    active: row.active === undefined ? true : Boolean(row.active),
+  }),
+  toData: (values) => ({
+    slot: str(values.slot) || "PROMO_A",
+    title: str(values.title),
+    image: str(values.image),
+    mobileImage: nullable(values.mobileImage),
+    link: nullable(values.link),
+    openInNewTab: Boolean(values.openInNewTab),
+    isOffer: Boolean(values.isOffer),
+    showAsPopup: Boolean(values.showAsPopup),
+    startAt: toDate(values.startAt),
+    // An end date covers the whole day.
+    endAt: (() => {
+      const end = toDate(values.endAt);
+      if (end) end.setUTCHours(23, 59, 59, 999);
+      return end;
+    })(),
+    sortOrder: toInt(values.sortOrder),
+    active: Boolean(values.active),
+  }),
+};
+
 export const RESOURCES: Record<string, ResourceConfig> = {
   notices: noticeResource,
   faculty: facultyResource,
@@ -2327,6 +2506,7 @@ export const RESOURCES: Record<string, ResourceConfig> = {
   leadership: leadershipResource,
   advisors: advisorResource,
   "health-services": healthServiceResource,
+  promos: promoResource,
 };
 
 export function getResource(key: string): ResourceConfig | null {

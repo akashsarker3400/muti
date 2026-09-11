@@ -8,7 +8,7 @@ import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { pick, toBanglaDigits } from "@/lib/format";
 import { allNav, visibleNav } from "@/lib/nav";
-import { getLeadershipMessages } from "@/lib/queries";
+import { getFeaturedCourseBook, getLeadershipMessages } from "@/lib/queries";
 import { displayPhone, telHref } from "@/lib/phone";
 import type { PublicCourse } from "@/lib/queries";
 import type { SiteSettings } from "@/lib/site-settings";
@@ -23,13 +23,14 @@ export async function SiteFooter({
   locale: Locale;
   courses: PublicCourse[];
 }) {
-  const [nav, footer, contact, common, leadership, health] = await Promise.all([
+  const [nav, footer, contact, common, leadership, health, book] = await Promise.all([
     getTranslations("nav"),
     getTranslations("footer"),
     getTranslations("contact"),
     getTranslations("common"),
     getLeadershipMessages(),
     getTranslations("health"),
+    getFeaturedCourseBook(),
   ]);
   const leadershipLinks = leadership.map((message) => ({
     href: `/messages/${message.key}`,
@@ -126,6 +127,16 @@ export async function SiteFooter({
                   </Link>
                 </li>
               ))}
+              {book && (
+                <li>
+                  <Link
+                    href={`/course-book/${book.slug}`}
+                    className="nav-text inline-block text-[color:#b9c2dd] transition hover:text-white"
+                  >
+                    {nav("courseBook")}
+                  </Link>
+                </li>
+              )}
             </ul>
           )}
         </nav>

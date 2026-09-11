@@ -171,3 +171,34 @@ function describePrismaError(error: unknown): string {
       return "Could not save. Please try again.";
   }
 }
+
+/**
+ * Drag-to-reorder for lists with a `sortOrder` column (promos, chapters …).
+ * Stores 10, 20, 30 … so the office can still slot a row in between by hand.
+ */
+export async function reorderResource(
+  resourceKey: string,
+  ids: string[],
+): Promise<SaveResult> {
+  const resource = getResource(resourceKey);
+  if (!resource) return { ok: false, error: "Unknown resource." };
+  const admin = resource.permission
+    ? await requirePermission(resource.permission)
+    : await requireAdmin();
+  const clean = ids.filter((id) => /^[a-z0-9-]{10,40}$/i.test(id));
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      const model = (tx as unknown as Record<string, Delegate>)[resource.model];
+      for (const [index, id] of clean.entries()) {
+        await model.update({ where: { id }, data: { sortOrder: (index + 1) * 10 } });
+      }
+    });
+    await logActivity(admin.id, "reorder", resource.model, null);
+    revalidatePath("/admin/" + resource.key);
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: describePrismaError(error) };
+  }
+}

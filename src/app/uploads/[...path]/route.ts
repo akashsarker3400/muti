@@ -1,7 +1,8 @@
 import path from "node:path";
 import { NextResponse } from "next/server";
 
-import { isSafeKey, storage } from "@/lib/storage";
+import { isPublicKey } from "@/lib/storage-key";
+import { storage } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,7 @@ const CONTENT_TYPES: Record<string, string> = {
   ".gif": "image/gif",
   ".svg": "image/svg+xml",
   ".pdf": "application/pdf",
+  ".mp4": "video/mp4",
 };
 
 export async function GET(
@@ -33,9 +35,10 @@ export async function GET(
   const forceDownload = new URL(request.url).searchParams.get("download") === "1";
 
   // Only the shape the uploader produces is ever looked up (section 11):
-  // one month folder, one random file name, a known extension.
+  // one month folder, one random file name, a known extension. Protected
+  // files (the sample chapter PDF) fail this check on purpose.
   const key = segments.join("/");
-  if (!isSafeKey(key)) return new NextResponse("Not found", { status: 404 });
+  if (!isPublicKey(key)) return new NextResponse("Not found", { status: 404 });
 
   const extension = path.extname(key).toLowerCase();
   const contentType = CONTENT_TYPES[extension];

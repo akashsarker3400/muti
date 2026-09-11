@@ -19,7 +19,8 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "advisors": "Advisory Board",
-    "healthService": "Health Service"
+    "healthService": "Health Service",
+    "courseBook": "Course book"
   },
   "common": {
     "applyNow": "Apply Now",
@@ -72,7 +73,7 @@
   "seats": {
     "full": "Seats full",
     "hurry": "Enrol now",
-    "fullNotice": "Seats are full — contact us about the next batch",
+    "fullNotice": "Seats are full. Contact us about the next batch",
     "joinWaitlist": "Join waitlist",
     "waitlistNote": "This batch is full. Join the waitlist and we will contact you as soon as a seat opens up in the next batch."
   },
@@ -266,7 +267,7 @@
     "noticesTitle": "Other results and notices",
     "notFound": "No result found for this number. If you believe this is an error, please contact the office.",
     "invalid": "Enter at least 4 digits.",
-    "captcha": "Verification did not complete — tick the checkbox below and try again.",
+    "captcha": "Verification did not complete. Tick the checkbox below and try again.",
     "rateLimited": "Too many attempts. Please try again in a minute.",
     "empty": "No results have been published yet.",
     "examDate": "Exam date",
@@ -293,11 +294,11 @@
       "bmdc": "Dashes and spaces are fine; every certificate held by that doctor is listed."
     },
     "verifyButton": "Verify",
-    "valid": "Verified — valid certificate",
+    "valid": "Verified: valid certificate",
     "revoked": "This certificate has been revoked",
     "notFound": "No record found. If you cannot find your certificate, please contact our office.",
     "invalid": "Enter at least 3 characters.",
-    "captcha": "Verification did not complete — tick the checkbox below and try again.",
+    "captcha": "Verification did not complete. Tick the checkbox below and try again.",
     "studentName": "Student name",
     "courseName": "Course",
     "session": "Session / batch",
@@ -320,7 +321,10 @@
     "title": "Gallery",
     "subtitle": "Photos from classes, practical sessions and events",
     "empty": "No photos have been added yet.",
-    "allAlbums": "All albums"
+    "allAlbums": "All albums",
+    "photosTab": "Photos",
+    "videosTab": "Videos",
+    "noVideos": "No videos have been added yet."
   },
   "blog": {
     "title": "Blog",
@@ -407,7 +411,7 @@
     "employmentOther": "Other",
     "nationalId": "National ID number",
     "nationalIdPlaceholder": "10, 13 or 17 digit NID",
-    "nationalIdHint": "Optional — you can also provide it at the office.",
+    "nationalIdHint": "Optional. You can also provide it at the office.",
     "presentAddress": "Present address",
     "permanentAddress": "Permanent address",
     "addressSame": "Permanent address is the same as present address",
@@ -423,7 +427,7 @@
     "passingYear": "Passing year",
     "gpa": "GPA / result",
     "board": "Board / university",
-    "selectPlaceholder": "— select —",
+    "selectPlaceholder": "Select",
     "errors": {
       "nameRequired": "Please enter your name",
       "nameTooShort": "Name must be at least 3 characters",
@@ -530,5 +534,62 @@
     "pregnantNa": "Not applicable",
     "pregnancyMonths": "Months of pregnancy",
     "ogBadge": "FREE"
+  },
+  "promo": {
+    "offer": "Offer",
+    "slide": "Promo",
+    "close": "Close"
+  },
+  "video": {
+    "eyebrow": "Watch",
+    "title": "MUTI in 1 minute",
+    "body": "Classrooms, the scanning lab and real-patient practicals: see how a course at MUTI runs before you apply.",
+    "play": "Play video",
+    "unsupported": "Your browser cannot play this video. Please try another browser or contact us on WhatsApp.",
+    "whatsappPrefill": "I watched the MUTI video and would like to know about admission.",
+    "sectionTitle": "Videos"
+  },
+  "book": {
+    "eyebrow": "Course book",
+    "levelLine": "CMU and DMU 1st Semester course book",
+    "chaptersBadge": "{count} chapters",
+    "pagesBadge": "{count} pages",
+    "includedBadge": "Included with the course",
+    "intro": "Written by MUTI faculty in simple question and answer style, this is the book every CMU and DMU student learns from. Abdomen and pregnancy scanning, normal measurements, pathology and report writing.",
+    "downloadSample": "Download free sample chapter",
+    "viewCourses": "View courses",
+    "chaptersTitle": "What is inside",
+    "chaptersSubtitle": "{count} chapters, from physics to late pregnancy",
+    "freeSample": "Free sample",
+    "whatYouGetTitle": "What you get",
+    "get1": "Normal measurements for every organ",
+    "get2": "Sonographic findings of common pathology",
+    "get3": "Ready-to-use report formats",
+    "get4": "Exam-oriented questions and answers",
+    "whoTitle": "Who it is for",
+    "whoBody": "MBBS doctors and interns in the CMU and DMU courses. It is also a useful revision for any doctor starting ultrasound.",
+    "sampleTitle": "Get the free sample chapter",
+    "sampleSubtitle": "{chapter} as a PDF. Fill in your details and the download button appears right away.",
+    "sampleChapterDefault": "Chapter 01: USG Physics",
+    "consent": "Contact me about admission",
+    "interestedCourse": "Interested course",
+    "submitSample": "Get the sample chapter",
+    "successTitle": "Your sample chapter is ready",
+    "successBody": "The download link works for 24 hours. We have also emailed it to you if you gave an address.",
+    "downloadPdf": "Download PDF",
+    "whatsappAfterSample": "I downloaded the Easy Ultrasound sample chapter, I want to know about admission",
+    "ctaTitle": "Get the full book with your admission",
+    "ctaSubtitle": "The complete book comes with these courses.",
+    "whatsappCta": "I want to know about the Easy Ultrasound course book and CMU/DMU admission",
+    "courseSectionTitle": "Course book",
+    "courseSectionLine": "{count} chapters, included in the book fee",
+    "usedFirstSemester": "Used in 1st semester",
+    "andMore": "and {count} more",
+    "viewBook": "See the book",
+    "homeStripTitle": "Our own course book: {title}",
+    "homeStripBody": "Download a free sample chapter.",
+    "metaTitle": "Easy Ultrasound course book by MUTI | Abdomen and Pregnancy",
+    "metaDescription": "MUTI's own course book for CMU and DMU students: 13 chapters on abdomen and pregnancy ultrasound with normal measurements, pathology and report formats. Download a free sample chapter.",
+    "unavailable": "The sample chapter is not available right now. Please contact the office."
   }
 }

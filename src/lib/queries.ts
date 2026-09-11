@@ -375,3 +375,126 @@ export const getAdvisors = cache(async (take?: number) => {
     return [];
   }
 });
+
+/* ---- Homepage additions: promos and videos ------------------------------ */
+
+/** Active promos in one slot, inside their schedule window, in admin order. */
+export const getPromos = cache(async (slot: "PROMO_A" | "PROMO_B") => {
+  try {
+    const now = new Date();
+    return await prisma.promo.findMany({
+      where: {
+        slot,
+        active: true,
+        OR: [{ startAt: null }, { startAt: { lte: now } }],
+        AND: [{ OR: [{ endAt: null }, { endAt: { gte: now } }] }],
+      },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      take: 5,
+    });
+  } catch (error) {
+    console.error("getPromos failed", error);
+    return [];
+  }
+});
+
+export type PublicPromo = Awaited<ReturnType<typeof getPromos>>[number];
+
+/** The promo (if any) that pops up once per visitor; the first one wins. */
+export const getPopupPromo = cache(async () => {
+  try {
+    const now = new Date();
+    return await prisma.promo.findFirst({
+      where: {
+        active: true,
+        showAsPopup: true,
+        OR: [{ startAt: null }, { startAt: { lte: now } }],
+        AND: [{ OR: [{ endAt: null }, { endAt: { gte: now } }] }],
+      },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+    });
+  } catch (error) {
+    console.error("getPopupPromo failed", error);
+    return null;
+  }
+});
+
+const videoInclude = { file: true, poster: true } as const;
+
+/** Published videos for one placement (homepage takes the first showOnHome). */
+export const getVideos = cache(async (placement?: "HOME" | "ABOUT" | "HEALTH") => {
+  try {
+    return await prisma.siteVideo.findMany({
+      where: { published: true, ...(placement ? { placement } : {}) },
+      include: videoInclude,
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+    });
+  } catch (error) {
+    console.error("getVideos failed", error);
+    return [];
+  }
+});
+
+export type PublicVideo = Awaited<ReturnType<typeof getVideos>>[number];
+
+export const getHomeVideo = cache(async () => {
+  try {
+    return await prisma.siteVideo.findFirst({
+      where: { published: true, showOnHome: true },
+      include: videoInclude,
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+    });
+  } catch (error) {
+    console.error("getHomeVideo failed", error);
+    return null;
+  }
+});
+
+/* ---- Addendum 5: course book --------------------------------------------- */
+
+const bookInclude = {
+  chapters: { orderBy: [{ sortOrder: "asc" as const }, { number: "asc" as const }] },
+  courses: { include: { course: { select: { id: true, slug: true, code: true } } } },
+};
+
+/** The published course book by slug, with chapters and linked courses. */
+export const getCourseBook = cache(async (slug: string) => {
+  try {
+    return await prisma.courseBook.findFirst({
+      where: { slug, published: true },
+      include: bookInclude,
+    });
+  } catch (error) {
+    console.error("getCourseBook failed", error);
+    return null;
+  }
+});
+
+export type PublicCourseBook = NonNullable<Awaited<ReturnType<typeof getCourseBook>>>;
+
+/** The published book a course uses, for the course page section. */
+export const getCourseBookForCourse = cache(async (courseId: string) => {
+  try {
+    return await prisma.courseBook.findFirst({
+      where: { published: true, courses: { some: { courseId } } },
+      include: bookInclude,
+    });
+  } catch (error) {
+    console.error("getCourseBookForCourse failed", error);
+    return null;
+  }
+});
+
+/** The first published book, for the homepage strip and the nav. */
+export const getFeaturedCourseBook = cache(async () => {
+  try {
+    return await prisma.courseBook.findFirst({
+      where: { published: true },
+      include: bookInclude,
+      orderBy: { createdAt: "asc" },
+    });
+  } catch (error) {
+    console.error("getFeaturedCourseBook failed", error);
+    return null;
+  }
+});

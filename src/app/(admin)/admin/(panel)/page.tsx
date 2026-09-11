@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  BookMarked,
   CalendarRange,
   GraduationCap,
   Inbox,
@@ -29,6 +30,7 @@ const APPLICATION_TYPE_LABELS: Record<string, string> = {
   ADMISSION: "Admission application",
   FREE_CLASS: "Free class",
   CONTACT: "Contact",
+  BOOK_SAMPLE: "Book sample",
 };
 
 export default async function AdminDashboard() {
@@ -45,6 +47,7 @@ export default async function AdminDashboard() {
     publishedNotices,
     recentApplications,
     chartRows,
+    sampleDownloads,
   ] = await Promise.all([
     prisma.application.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
     prisma.student.count(),
@@ -58,6 +61,16 @@ export default async function AdminDashboard() {
     prisma.application.findMany({
       where: { createdAt: { gte: thirtyDaysAgo } },
       select: { createdAt: true },
+    }),
+    // Course book sample downloads this calendar month (addendum 5, A4).
+    prisma.bookSampleDownload.count({
+      where: {
+        createdAt: {
+          gte: new Date(
+            Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1),
+          ),
+        },
+      },
     }),
   ]);
 
@@ -121,7 +134,7 @@ export default async function AdminDashboard() {
         </div>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard
           label="New applications (7 days)"
           value={String(newApplications)}
@@ -145,6 +158,12 @@ export default async function AdminDashboard() {
           value={String(publishedNotices)}
           icon={Newspaper}
           href="/admin/notices"
+        />
+        <StatCard
+          label="Sample downloads this month"
+          value={String(sampleDownloads)}
+          icon={BookMarked}
+          href="/admin/applications?type=BOOK_SAMPLE"
         />
       </div>
 

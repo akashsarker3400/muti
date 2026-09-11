@@ -1,7 +1,9 @@
 import type { Locale } from "@/i18n/routing";
 import { siteUrl } from "@/lib/env";
 import { pick } from "@/lib/format";
+import type { PublicVideo } from "@/lib/queries";
 import type { SiteSettings } from "@/lib/site-settings";
+import { isoDuration, parseEmbedUrl } from "@/lib/video";
 
 /**
  * Structured data per section 10. Rendered as a plain script tag so it is in
@@ -186,4 +188,84 @@ function stripHtml(html: string): string {
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 500);
+}
+
+/** VideoObject for the institute videos (homepage additions, 2). */
+export function VideoJsonLd({
+  video,
+  settings,
+  locale,
+}: {
+  video: PublicVideo;
+  settings: SiteSettings;
+  locale: Locale;
+}) {
+  const embed =
+    video.source === "EMBED" && video.embedUrl ? parseEmbedUrl(video.embedUrl) : null;
+  const thumbnail = video.posterImage || video.poster?.url || embed?.thumbnail || null;
+  const absolute = (path: string) =>
+    path.startsWith("http") ? path : `${siteUrl}${path}`;
+  const duration = isoDuration(video.file?.duration);
+  const data: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    name: video.title,
+    description: video.description || video.title,
+    uploadDate: video.createdAt.toISOString(),
+    inLanguage: locale,
+    publisher: {
+      "@type": "EducationalOrganization",
+      name: pick(locale, settings.general.nameBn, settings.general.nameEn),
+      url: siteUrl,
+    },
+  };
+  if (thumbnail) data.thumbnailUrl = [absolute(thumbnail)];
+  if (duration) data.duration = duration;
+  if (video.source === "UPLOAD" && video.file)
+    data.contentUrl = absolute(video.file.url);
+  if (embed)
+    data.embedUrl =
+      embed.provider === "youtube"
+        ? `https://www.youtube.com/embed/${embed.id}`
+        : embed.src;
+  return <JsonLd data={data} />;
+}
+
+/** Book schema for the course book page (addendum 5, A3.7). */
+export function BookJsonLd({
+  book,
+  settings,
+  path,
+}: {
+  book: {
+    title: string;
+    subtitle: string | null;
+    coverImage: string | null;
+    pages: number | null;
+    edition: string | null;
+  };
+  settings: SiteSettings;
+  path: string;
+}) {
+  return (
+    <JsonLd
+      data={{
+        "@context": "https://schema.org",
+        "@type": "Book",
+        name: book.subtitle ? `${book.title}: ${book.subtitle}` : book.title,
+        author: { "@type": "Organization", name: "MUTI faculty" },
+        publisher: {
+          "@type": "EducationalOrganization",
+          name: settings.general.nameEn,
+          url: siteUrl,
+        },
+        inLanguage: "en",
+        url: `${siteUrl}${path}`,
+        ...(book.coverImage ? { image: `${siteUrl}${book.coverImage}` } : {}),
+        ...(book.pages ? { numberOfPages: book.pages } : {}),
+        ...(book.edition ? { bookEdition: book.edition } : {}),
+        bookFormat: "https://schema.org/Paperback",
+      }}
+    />
+  );
 }

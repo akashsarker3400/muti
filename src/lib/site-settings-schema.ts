@@ -101,6 +101,8 @@ export const siteSettingsSchema = z.object({
       showAdvisors: booleanish.prefault(true),
       /** Homepage "Messages from leadership" cards (addendum 3, §4). */
       showLeadership: booleanish.prefault(true),
+      /** Course book strip under "Why choose MUTI" (addendum 5, A3). */
+      showBook: booleanish.prefault(true),
       announcementTextBn: optionalString,
       announcementTextEn: optionalString,
       announcementLink: optionalString,
@@ -298,8 +300,9 @@ export const defaultSiteSettings: SiteSettings = siteSettingsSchema.parse({
     showNoticeTicker: true,
     showAdvisors: true,
     showLeadership: true,
-    announcementTextBn: "ভর্তি চলছে — CMU, DMU ও ADMU কোর্স, সেশন ২০২৬",
-    announcementTextEn: "Admission open — CMU, DMU and ADMU courses, Session 2026",
+    showBook: true,
+    announcementTextBn: "ভর্তি চলছে: CMU, DMU ও ADMU কোর্স, সেশন ২০২৬",
+    announcementTextEn: "Admission open: CMU, DMU and ADMU courses, Session 2026",
     announcementLink: "/admission",
     announcementActive: true,
     announcementColor: "accent",

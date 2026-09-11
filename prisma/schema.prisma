@@ -26,6 +26,30 @@ enum ApplicationType {
   ADMISSION
   FREE_CLASS
   CONTACT
+  /// Free sample chapter of the course book (addendum 5, A4).
+  BOOK_SAMPLE
+}
+
+enum PromoSlot {
+  PROMO_A
+  PROMO_B
+}
+
+enum VideoSource {
+  EMBED
+  UPLOAD
+}
+
+enum VideoPlacement {
+  HOME
+  ABOUT
+  HEALTH
+}
+
+enum MediaKind {
+  IMAGE
+  PDF
+  VIDEO
 }
 
 enum ApplicationStatus {
@@ -160,12 +184,12 @@ model SiteSetting {
 }
 
 model Course {
-  id   String @id @default(cuid())
-  slug String @unique
+  id           String        @id @default(cuid())
+  slug         String        @unique
   certificates Certificate[]
   boardExams   BoardExam[]
   /// CMU, CMU-BTEB, DMU, ADMU, TVS, DOPPLER, ANOMALY
-  code String @unique
+  code         String        @unique
 
   nameEn     String
   nameBn     String?
@@ -216,6 +240,7 @@ model Course {
   students     Student[]
   faqs         Faq[]
   results      Result[]
+  books        CourseBookOnCourse[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -288,12 +313,12 @@ model Application {
   batchId  String?
   batch    Batch?  @relation(fields: [batchId], references: [id], onDelete: SetNull)
 
-  qualification String?
+  qualification  String?
   /// Which medical college the applicant graduated from.
   medicalCollege String?
-  bmdc          String?
-  location      String?
-  preferredDate DateTime?
+  bmdc           String?
+  location       String?
+  preferredDate  DateTime?
 
   /// The remaining fields of the paper admission form. All optional online:
   /// the office completes anything missing at admission time.
@@ -304,19 +329,22 @@ model Application {
   nationalId       String?
   bloodGroup       String?
   employment       Employment?
-  presentAddress   String? @db.Text
-  permanentAddress String? @db.Text
+  presentAddress   String?     @db.Text
+  permanentAddress String?     @db.Text
   /// [{ exam: "SSC" | "HSC" | "MBBS" | "OTHER", year, gpa, board }]
   education        Json?
-  message       String?   @db.Text
+  message          String?     @db.Text
 
   adminNote String? @db.Text
 
+  /// Sample-chapter downloads made with this submission's token (addendum 5).
+  sampleDownloads BookSampleDownload[]
+
   /// Lead attribution (addendum 2, A3).
-  source        LeadSource?
+  source       LeadSource?
   /// Raw campaign data: { utm_source, utm_campaign, fbclid, gclid, referrer, landing }
-  utm           Json?
-  referralCode  String?
+  utm          Json?
+  referralCode String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -489,8 +517,8 @@ model LeadershipMessage {
   degrees         String?
   designationLine String?
   photo           String?
-  messageBn       String?  @db.Text
-  messageEn       String @db.Text
+  messageBn       String? @db.Text
+  messageEn       String  @db.Text
   excerptBn       String?
   excerptEn       String?
   signatureImage  String?
@@ -549,8 +577,8 @@ model Notice {
   slug    String  @unique
   titleBn String?
   titleEn String
-  bodyBn  String?  @db.Text
-  bodyEn  String @db.Text
+  bodyBn  String? @db.Text
+  bodyEn  String  @db.Text
 
   category    NoticeCategory @default(GENERAL)
   pinned      Boolean        @default(false)
@@ -598,12 +626,12 @@ model Testimonial {
 }
 
 model GalleryAlbum {
-  id        String  @id @default(cuid())
-  slug      String  @unique
-  title     String
-  titleBn   String?
-  cover     String?
-  sortOrder Int     @default(0)
+  id              String  @id @default(cuid())
+  slug            String  @unique
+  title           String
+  titleBn         String?
+  cover           String?
+  sortOrder       Int     @default(0)
   /// Shown on /health-service (addendum 4, §2.9). Consented photos only.
   isHealthService Boolean @default(false)
 
@@ -628,8 +656,8 @@ model Faq {
   id         String  @id @default(cuid())
   questionBn String?
   questionEn String
-  answerBn   String?  @db.Text
-  answerEn   String @db.Text
+  answerBn   String? @db.Text
+  answerEn   String  @db.Text
   courseId   String?
   course     Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
   sortOrder  Int     @default(0)
@@ -647,12 +675,15 @@ model Post {
   titleBn     String?
   titleEn     String
   excerpt     String?
-  bodyBn      String?    @db.Text
-  bodyEn      String   @db.Text
+  bodyBn      String?   @db.Text
+  bodyEn      String    @db.Text
   cover       String?
   tags        String[]
   published   Boolean   @default(false)
   publishedAt DateTime?
+  /// Draft written from the course book; a doctor must approve it before it
+  /// is published (addendum 5, A5).
+  needsReview Boolean   @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -666,8 +697,8 @@ model Page {
   slug      String  @unique
   titleBn   String?
   titleEn   String
-  bodyBn    String?  @db.Text
-  bodyEn    String @db.Text
+  bodyBn    String? @db.Text
+  bodyEn    String  @db.Text
   published Boolean @default(true)
 
   createdAt DateTime @default(now())
@@ -741,8 +772,8 @@ model ContentItem {
   icon    String?
   titleBn String?
   titleEn String?
-  bodyBn  String?  @db.Text
-  bodyEn  String @db.Text
+  bodyBn  String? @db.Text
+  bodyEn  String  @db.Text
 
   sortOrder Int     @default(0)
   published Boolean @default(true)
@@ -776,30 +807,32 @@ model RateLimit {
   @@index([scope, key, createdAt])
 }
 
-/* ---- Addendum 4: free health service ------------------------------------ */
+/**
+ * ---- Addendum 4: free health service ------------------------------------
+ */
 
 /// Patient serial for the free ultrasound service. Health data: the form
 /// collects the minimum, nothing here is ever public, and name/phone are
 /// replaced by a hash 90 days after the visit (`anonymizedAt`).
 model HealthAppointment {
-  id            String       @id @default(cuid())
+  id              String       @id @default(cuid())
   /// Calendar day the serial belongs to, "YYYYMMDD"; numbers restart daily.
-  serialDate    String
-  serialNo      Int
-  name          String
-  phone         String
-  age           Int?
-  gender        String?
-  area          String?
-  complaint     String?
-  preferredDate DateTime?
-  referredBy    String?
+  serialDate      String
+  serialNo        Int
+  name            String
+  phone           String
+  age             Int?
+  gender          String?
+  area            String?
+  complaint       String?
+  preferredDate   DateTime?
+  referredBy      String?
   /// Addendum 4.1: YES / NO / NA, and months of pregnancy when YES.
   pregnant        String?
   pregnancyMonths Int?
-  status        HealthStatus @default(REQUESTED)
-  note          String?
-  anonymizedAt  DateTime?
+  status          HealthStatus @default(REQUESTED)
+  note            String?
+  anonymizedAt    DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -824,4 +857,139 @@ model HealthDailyCount {
   consultations Int    @default(0)
 
   updatedAt DateTime @updatedAt
+}
+
+/// Uploaded files that carry metadata the admin needs (videos, posters, the
+/// protected sample PDF). Ordinary images and PDFs are listed straight from
+/// storage, so this table only holds what the media grid cannot infer.
+model Media {
+  id        String    @id @default(cuid())
+  /// Storage key, e.g. "2026-09/abc.mp4" or "protected/2026-09/abc.pdf".
+  key       String    @unique
+  url       String
+  kind      MediaKind
+  /// "video", "poster", "protected", "promo" …
+  tag       String?
+  mimeType  String
+  size      Int
+  width     Int?
+  height    Int?
+  /// Seconds, for videos.
+  duration  Int?
+  /// Never served by the public /uploads route; only by a signed route.
+  protected Boolean   @default(false)
+
+  videos  SiteVideo[]  @relation("VideoFile")
+  posters SiteVideo[]  @relation("VideoPoster")
+  books   CourseBook[]
+
+  createdAt DateTime @default(now())
+}
+
+/// Homepage promo slots: posters the office designs and uploads.
+model Promo {
+  id           String    @id @default(cuid())
+  slot         PromoSlot
+  title        String
+  image        String
+  mobileImage  String?
+  link         String?
+  openInNewTab Boolean   @default(false)
+  isOffer      Boolean   @default(false)
+  showAsPopup  Boolean   @default(false)
+  startAt      DateTime?
+  endAt        DateTime?
+  active       Boolean   @default(true)
+  sortOrder    Int       @default(0)
+  clicks       Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slot, active, sortOrder])
+}
+
+/// Institute videos: a YouTube/Facebook embed or a self-hosted MP4.
+model SiteVideo {
+  id            String         @id @default(cuid())
+  title         String
+  description   String?        @db.Text
+  source        VideoSource    @default(EMBED)
+  embedUrl      String?
+  fileId        String?
+  file          Media?         @relation("VideoFile", fields: [fileId], references: [id], onDelete: SetNull)
+  posterId      String?
+  poster        Media?         @relation("VideoPoster", fields: [posterId], references: [id], onDelete: SetNull)
+  /// Poster override by path, for embeds and hand-made thumbnails.
+  posterImage   String?
+  autoplayMuted Boolean        @default(false)
+  showOnHome    Boolean        @default(false)
+  placement     VideoPlacement @default(HOME)
+  sortOrder     Int            @default(0)
+  published     Boolean        @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([placement, published, sortOrder])
+}
+
+/// MUTI's own course book (addendum 5, part A).
+model CourseBook {
+  id                 String  @id @default(cuid())
+  slug               String  @unique
+  title              String
+  subtitle           String?
+  edition            String?
+  coverImage         String?
+  description        String? @db.Text
+  descriptionBn      String? @db.Text
+  pages              Int?
+  priceNote          String?
+  samplePdfFileId    String?
+  samplePdf          Media?  @relation(fields: [samplePdfFileId], references: [id], onDelete: SetNull)
+  sampleChapterTitle String?
+  published          Boolean @default(false)
+
+  chapters CourseBookChapter[]
+  courses  CourseBookOnCourse[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CourseBookChapter {
+  id        String     @id @default(cuid())
+  bookId    String
+  book      CourseBook @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  number    Int
+  title     String
+  titleBn   String?
+  summary   String?
+  topics    String[]
+  isSample  Boolean    @default(false)
+  sortOrder Int        @default(0)
+
+  @@unique([bookId, number])
+}
+
+model CourseBookOnCourse {
+  bookId   String
+  book     CourseBook @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  courseId String
+  course   Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, courseId])
+}
+
+/// One row per download of the sample chapter through a signed token.
+model BookSampleDownload {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  ip            String?
+  createdAt     DateTime    @default(now())
+
+  @@index([applicationId])
+  @@index([createdAt])
 }

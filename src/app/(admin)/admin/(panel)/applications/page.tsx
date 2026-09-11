@@ -26,6 +26,7 @@ const TYPES: Array<{ value: string; label: string }> = [
   { value: "ADMISSION", label: "Admission application" },
   { value: "FREE_CLASS", label: "Free class" },
   { value: "CONTACT", label: "Contact" },
+  { value: "BOOK_SAMPLE", label: "Book sample" },
 ];
 
 const SOURCES: Array<{ value: string; label: string }> = [
@@ -67,7 +68,11 @@ export default async function ApplicationsPage({
     prisma.application.findMany({
       where,
       orderBy: { createdAt: "desc" },
-      include: { course: true, batch: true },
+      include: {
+        course: true,
+        batch: true,
+        _count: { select: { sampleDownloads: true } },
+      },
       take: PAGE_SIZE,
       skip: (page - 1) * PAGE_SIZE,
     }),
@@ -123,6 +128,7 @@ export default async function ApplicationsPage({
       row.utm && typeof row.utm === "object" && "utm_campaign" in row.utm
         ? String((row.utm as Record<string, unknown>).utm_campaign ?? "")
         : null,
+    downloads: row._count.sampleDownloads,
     createdAt: row.createdAt.toISOString(),
   }));
 

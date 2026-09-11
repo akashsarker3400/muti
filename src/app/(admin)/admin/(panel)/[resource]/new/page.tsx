@@ -32,6 +32,7 @@ export default async function NewResourcePage({
         sections={sections}
         defaultValues={defaultValues}
         cancelHref={`/admin/${resource.key}`}
+        preview={resource.preview}
         onSave={async (values) => {
           "use server";
           return saveResource(key, null, values);

@@ -7,7 +7,9 @@ import { Section } from "@/components/site/section";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { pick } from "@/lib/format";
-import { getGalleryAlbums } from "@/lib/queries";
+import { getGalleryAlbums, getVideos } from "@/lib/queries";
+import { getSiteSettings } from "@/lib/site-settings";
+import { VideoGrid } from "@/components/site/video-grid";
 import { cn } from "cn";
 import { pageAlternates } from "@/i18n/routing";
 
@@ -30,26 +32,47 @@ export default async function GalleryPage({
   searchParams,
 }: {
   params: Promise<{ locale: Locale }>;
-  searchParams: Promise<{ album?: string }>;
+  searchParams: Promise<{ album?: string; tab?: string }>;
 }) {
-  const [{ locale }, { album }] = await Promise.all([params, searchParams]);
+  const [{ locale }, { album, tab }] = await Promise.all([params, searchParams]);
   setRequestLocale(locale);
 
-  const [albums, t] = await Promise.all([
+  const [albums, videos, settings, t] = await Promise.all([
     getGalleryAlbums(),
+    getVideos(),
+    getSiteSettings(),
     getTranslations("gallery"),
   ]);
 
   const withImages = albums.filter((entry) => entry.images.length > 0);
   const selected = withImages.find((entry) => entry.slug === album);
   const visible = selected ? [selected] : withImages;
+  // The Videos tab only exists once the office has added a video.
+  const showVideos = tab === "videos" && videos.length > 0;
 
   return (
     <>
       <PageHero title={t("title")} subtitle={t("subtitle")} />
 
       <Section>
-        {withImages.length === 0 ? (
+        {videos.length > 0 && (
+          <div
+            className="mb-8 flex gap-2 border-b border-[color:var(--border)] pb-3"
+            role="tablist"
+            aria-label={t("title")}
+          >
+            <FilterChip href="/gallery" active={!showVideos}>
+              {t("photosTab")}
+            </FilterChip>
+            <FilterChip href="/gallery?tab=videos" active={showVideos}>
+              {t("videosTab")}
+            </FilterChip>
+          </div>
+        )}
+
+        {showVideos ? (
+          <VideoGrid videos={videos} settings={settings} locale={locale} columns={2} />
+        ) : withImages.length === 0 ? (
           <p className="rounded-xl border border-dashed border-[color:var(--border)] bg-white p-8 text-center text-[color:var(--muted-foreground)]">
             {t("empty")}
           </p>

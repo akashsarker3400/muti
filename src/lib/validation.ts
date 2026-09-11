@@ -122,6 +122,20 @@ export const contactSchema = z.object({
   website: honeypot,
 });
 
+/** Free sample chapter of the course book (addendum 5, A4). */
+export const bookSampleSchema = z.object({
+  name,
+  phone,
+  email,
+  qualification: z.enum(["MBBS", "INTERN", "OTHER"], {
+    message: "qualificationRequired",
+  }),
+  courseId: z.string().trim().optional(),
+  consent: z.boolean().optional(),
+  turnstileToken: z.string().optional(),
+  website: honeypot,
+});
+
 export const verifySchema = z.object({
   query: z.string().trim().min(3, "queryRequired").max(60),
 });

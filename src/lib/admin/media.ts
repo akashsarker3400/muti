@@ -17,29 +17,45 @@ export type MediaFile = {
   size: number;
   modified: string;
   isImage: boolean;
+  isVideo: boolean;
   used: boolean;
+  /** "video", "poster", "protected" … from the Media table, when recorded. */
+  tag: string | null;
+  /** Never served publicly (the course book sample); deleted from its own page. */
+  protected: boolean;
 };
 
 export async function listMedia(): Promise<MediaFile[]> {
   const files = (await storage().list()).map((file) => ({
+    key: file.key,
     url: `/uploads/${file.key}`,
     name: file.key.split("/").pop() ?? file.key,
     size: file.size,
     modified: file.modified,
   }));
 
-  const referenced = await referencedUrls();
+  const [referenced, rows] = await Promise.all([
+    referencedUrls(),
+    prisma.media.findMany({ select: { key: true, tag: true, protected: true } }),
+  ]);
+  const meta = new Map(rows.map((row) => [row.key, row]));
 
   return files
     .sort((a, b) => b.modified.getTime() - a.modified.getTime())
-    .map((file) => ({
-      url: file.url,
-      name: file.name,
-      size: file.size,
-      modified: file.modified.toISOString(),
-      isImage: /\.(webp|jpe?g|png|gif|svg)$/i.test(file.name),
-      used: referenced.has(file.url),
-    }));
+    .map((file) => {
+      const row = meta.get(file.key);
+      return {
+        url: file.url,
+        name: file.name,
+        size: file.size,
+        modified: file.modified.toISOString(),
+        isImage: /\.(webp|jpe?g|png|gif|svg)$/i.test(file.name),
+        isVideo: /\.mp4$/i.test(file.name),
+        used: referenced.has(file.url) || Boolean(row),
+        tag: row?.tag ?? null,
+        protected: row?.protected ?? file.key.startsWith("protected/"),
+      };
+    });
 }
 
 /** Every upload path currently referenced by a database row. */
@@ -64,6 +80,9 @@ async function referencedUrls(): Promise<Set<string>> {
     results,
     notices,
     settings,
+    promos,
+    videos,
+    books,
   ] = await Promise.all([
     prisma.course.findMany({ select: { image: true } }),
     prisma.faculty.findMany({ select: { photo: true } }),
@@ -79,8 +98,17 @@ async function referencedUrls(): Promise<Set<string>> {
       select: { attachments: true, bodyBn: true, bodyEn: true },
     }),
     prisma.siteSetting.findUnique({ where: { id: 1 } }),
+    prisma.promo.findMany({ select: { image: true, mobileImage: true } }),
+    prisma.siteVideo.findMany({ select: { posterImage: true } }),
+    prisma.courseBook.findMany({ select: { coverImage: true } }),
   ]);
 
+  promos.forEach((row) => {
+    add(row.image);
+    add(row.mobileImage);
+  });
+  videos.forEach((row) => add(row.posterImage));
+  books.forEach((row) => add(row.coverImage));
   courses.forEach((row) => add(row.image));
   faculty.forEach((row) => add(row.photo));
   testimonials.forEach((row) => add(row.photo));

@@ -52,6 +52,7 @@ export default async function EditResourcePage({
         sections={resource.sections(options)}
         defaultValues={resource.toForm(row)}
         cancelHref={`/admin/${resource.key}`}
+        preview={resource.preview}
         onSave={async (values) => {
           "use server";
           return saveResource(key, id, values);

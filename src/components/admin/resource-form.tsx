@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { Panel } from "@/components/admin/ui";
 import { MultiUploadField } from "@/components/admin/multi-upload-field";
+import { PromoPreview } from "@/components/admin/promo-preview";
 import { UploadField } from "@/components/admin/upload-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +53,8 @@ export function ResourceForm({
   submitLabel = "Save",
   cancelHref,
   extra,
+  preview,
+  stayAfterSave = false,
 }: {
   sections: FormSection[];
   defaultValues: FormValues;
@@ -60,6 +63,10 @@ export function ResourceForm({
   cancelHref: string;
   /** Rendered below the sections, e.g. the course routine editor. */
   extra?: React.ReactNode;
+  /** Live preview built from the current values. */
+  preview?: "promo";
+  /** Stay on the page after saving instead of going to `cancelHref`. */
+  stayAfterSave?: boolean;
 }) {
   const router = useRouter();
   const [values, setValues] = useState<FormValues>(defaultValues);
@@ -89,7 +96,7 @@ export function ResourceForm({
 
       if (result.ok) {
         toast.success("Saved.");
-        router.push(cancelHref);
+        if (!stayAfterSave) router.push(cancelHref);
         router.refresh();
         return;
       }
@@ -188,6 +195,12 @@ export function ResourceForm({
   return (
     <form onSubmit={submit} className="space-y-5">
       <Panel>{body}</Panel>
+
+      {preview === "promo" && (
+        <Panel>
+          <PromoPreview values={values} />
+        </Panel>
+      )}
 
       {extra}
 
@@ -467,6 +480,7 @@ function FieldControl({
           onChange={(url) => setValue(field.name, url)}
           kind={field.type === "image" ? "image" : "file"}
           accept={field.type === "image" ? "image/*" : "application/pdf,image/*"}
+          maxMb={field.maxMb}
         />
       )}
 

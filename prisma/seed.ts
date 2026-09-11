@@ -24,6 +24,7 @@ import {
   seedBanners,
   seedPosts,
 } from "./seed-data";
+import { seedBookPosts, seedChapters, seedCourseBook } from "./seed-book";
 
 /**
  * Idempotent seed (section 8). Safe to re-run: it upserts by natural key, so a
@@ -374,6 +375,66 @@ async function seedContentItems() {
   console.log(`+ ${rows.length} content items`);
 }
 
+/**
+ * Course book (addendum 5, A2) and the eight blog drafts written from it
+ * (A5). Runs on every deploy, not only on a fresh install, because the live
+ * site already existed when the addendum arrived. Upserts never touch what
+ * the office has edited: existing rows are left as they are.
+ */
+async function seedCourseBookRows() {
+  const courses = await prisma.course.findMany({
+    where: { code: { in: seedCourseBook.courseCodes } },
+    select: { id: true },
+  });
+  const { courseCodes, ...bookData } = seedCourseBook;
+  void courseCodes;
+
+  const book = await prisma.courseBook.upsert({
+    where: { slug: seedCourseBook.slug },
+    update: {},
+    // Unpublished until the owner uploads the cover and the sample PDF.
+    create: { ...bookData, published: false },
+  });
+
+  for (const chapter of seedChapters) {
+    await prisma.courseBookChapter.upsert({
+      where: { bookId_number: { bookId: book.id, number: chapter.number } },
+      update: {},
+      create: {
+        bookId: book.id,
+        number: chapter.number,
+        title: chapter.title,
+        titleBn: chapter.titleBn,
+        summary: chapter.summary,
+        topics: chapter.topics,
+        isSample: chapter.isSample ?? false,
+        sortOrder: chapter.number * 10,
+      },
+    });
+  }
+
+  const linked = await prisma.courseBookOnCourse.count({ where: { bookId: book.id } });
+  if (linked === 0 && courses.length > 0) {
+    await prisma.courseBookOnCourse.createMany({
+      data: courses.map((course) => ({ bookId: book.id, courseId: course.id })),
+      skipDuplicates: true,
+    });
+  }
+  console.log(
+    `+ course book "${book.title}" with ${seedChapters.length} chapters ensured`,
+  );
+
+  for (const post of seedBookPosts) {
+    await prisma.post.upsert({
+      where: { slug: post.slug },
+      update: {},
+      // Drafts for faculty review: never published by the seed (A5).
+      create: { ...post, published: false, publishedAt: null, needsReview: true },
+    });
+  }
+  console.log(`+ ${seedBookPosts.length} course-book blog drafts ensured`);
+}
+
 async function main() {
   console.log("Seeding MUTI database…");
 
@@ -387,6 +448,7 @@ async function main() {
 
   await seedAdminUser();
   await seedSettings();
+  await seedCourseBookRows();
 
   if (!freshInstall) {
     console.log("· existing installation — skipping content seed");

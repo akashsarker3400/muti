@@ -273,7 +273,7 @@ function Cell({
 
     case "badge":
       return value ? (
-        <AdminBadge tone="brand">
+        <AdminBadge tone={column.tone ?? "brand"}>
           {column.labels?.[String(value)] ?? String(value)}
         </AdminBadge>
       ) : null;

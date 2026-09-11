@@ -42,8 +42,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No file provided" }, { status: 400 });
   }
 
-  if (file.size > MAX_BYTES) {
-    return NextResponse.json({ error: "File is larger than 10 MB" }, { status: 413 });
+  // Callers may ask for a tighter cap (promo posters: 5 MB).
+  const url = new URL(request.url);
+  const requestedMax = Number(url.searchParams.get("max"));
+  const maxBytes =
+    Number.isFinite(requestedMax) && requestedMax > 0
+      ? Math.min(MAX_BYTES, requestedMax * 1024 * 1024)
+      : MAX_BYTES;
+  if (file.size > maxBytes) {
+    return NextResponse.json(
+      { error: `File is larger than ${Math.round(maxBytes / 1024 / 1024)} MB` },
+      { status: 413 },
+    );
   }
 
   const isImage = ALLOWED_IMAGE_TYPES.has(file.type);

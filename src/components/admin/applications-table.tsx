@@ -61,6 +61,8 @@ export type AdminApplication = {
   source: string | null;
   referralCode: string | null;
   campaign: string | null;
+  /** Sample chapter downloads (BOOK_SAMPLE rows only). */
+  downloads: number;
   createdAt: string;
 };
 
@@ -74,6 +76,7 @@ const TYPE_LABELS: Record<string, string> = {
   ADMISSION: "Admission application",
   FREE_CLASS: "Free class",
   CONTACT: "Contact",
+  BOOK_SAMPLE: "Book sample",
 };
 
 /** Applications inbox with selection, bulk status change and a detail view. */
@@ -215,6 +218,11 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                 </td>
                 <td className="px-4 py-2.5 whitespace-nowrap">
                   {TYPE_LABELS[row.type] ?? row.type}
+                  {row.type === "BOOK_SAMPLE" && (
+                    <span className="ms-2 font-latin text-xs text-[color:var(--muted-foreground)]">
+                      {row.downloads} {row.downloads === 1 ? "download" : "downloads"}
+                    </span>
+                  )}
                 </td>
                 <td className="hidden px-4 py-2.5 lg:table-cell">
                   {row.courseName ?? "—"}
@@ -284,6 +292,9 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
 
               <dl className="space-y-2.5 text-sm">
                 <Row label="Type" value={TYPE_LABELS[detail.type] ?? detail.type} />
+                {detail.type === "BOOK_SAMPLE" && (
+                  <Row label="Downloads" value={String(detail.downloads)} latin />
+                )}
                 <Row label="Phone" value={displayPhone(detail.phone)} latin />
                 {detail.whatsapp && (
                   <Row label="WhatsApp" value={displayPhone(detail.whatsapp)} latin />

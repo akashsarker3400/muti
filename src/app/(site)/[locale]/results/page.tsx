@@ -80,7 +80,7 @@ export default async function ResultsPage({
           locale={locale}
           exams={exams.map((exam) => ({
             id: exam.id,
-            label: `${exam.title} — ${exam.session}`,
+            label: `${exam.title} (${exam.session})`,
           }))}
           subjectCodes={parseSubjectCodes(settings.results.subjectCodes)}
           turnstileSiteKey={settings.security.turnstileSiteKey}

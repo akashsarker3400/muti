@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Copy, FileText, Trash2 } from "lucide-react";
+import { Copy, FileText, Film, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { deleteMediaFile } from "@/app/actions/admin-media";
@@ -48,12 +48,20 @@ export function MediaGrid({ files }: { files: MediaFile[] }) {
               className="overflow-hidden rounded-[14px] border border-[color:var(--border)] bg-white shadow-[var(--shadow-card)]"
             >
               <a
-                href={file.url}
+                href={file.protected ? "/api/v1/book/sample?preview=1" : file.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="relative block aspect-[4/3] bg-[color:var(--bg-soft)]"
               >
-                {file.isImage ? (
+                {file.protected ? (
+                  <span className="grid size-full place-items-center text-[color:var(--brand)]">
+                    <ShieldCheck className="size-10" aria-hidden="true" />
+                  </span>
+                ) : file.isVideo ? (
+                  <span className="grid size-full place-items-center text-[color:var(--brand)]">
+                    <Film className="size-10" aria-hidden="true" />
+                  </span>
+                ) : file.isImage ? (
                   <Image
                     src={file.url}
                     alt={file.name}
@@ -75,6 +83,7 @@ export function MediaGrid({ files }: { files: MediaFile[] }) {
                   ) : (
                     <AdminBadge tone="warning">Unused</AdminBadge>
                   )}
+                  {file.tag && <AdminBadge tone="brand">{file.tag}</AdminBadge>}
                   <span className="nums font-latin text-xs text-[color:var(--muted-foreground)]">
                     {formatSize(file.size)}
                   </span>
