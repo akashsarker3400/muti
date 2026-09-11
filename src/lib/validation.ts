@@ -45,6 +45,7 @@ export const admissionApplicationSchema = z.object({
   qualification: z.enum(["MBBS", "INTERN", "OTHER"], {
     message: "qualificationRequired",
   }),
+  medicalCollege: z.string().trim().max(160).optional(),
   bmdc: z.string().trim().max(60).optional(),
   location: z.string().trim().max(160).optional(),
   batchId: z.string().trim().optional(),

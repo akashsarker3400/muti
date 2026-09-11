@@ -41,6 +41,7 @@ export type AdminApplication = {
   courseName: string | null;
   batchName: string | null;
   qualification: string | null;
+  medicalCollege: string | null;
   bmdc: string | null;
   location: string | null;
   preferredDate: string | null;
@@ -275,6 +276,9 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                 {detail.batchName && <Row label="ব্যাচ" value={detail.batchName} />}
                 {detail.qualification && (
                   <Row label="যোগ্যতা" value={detail.qualification} />
+                )}
+                {detail.medicalCollege && (
+                  <Row label="মেডিকেল কলেজ" value={detail.medicalCollege} />
                 )}
                 {detail.bmdc && <Row label="BMDC" value={detail.bmdc} latin />}
                 {detail.location && <Row label="এলাকা" value={detail.location} />}

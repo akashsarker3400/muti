@@ -241,6 +241,8 @@ model Application {
   batch    Batch?  @relation(fields: [batchId], references: [id], onDelete: SetNull)
 
   qualification String?
+  /// Which medical college the applicant graduated from (paper form: Board/University).
+  medicalCollege String?
   bmdc          String?
   location      String?
   preferredDate DateTime?

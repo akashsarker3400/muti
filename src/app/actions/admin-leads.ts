@@ -47,6 +47,7 @@ const officeApplicationSchema = z.object({
   courseId: z.string().trim().default(""),
   batchId: z.string().trim().default(""),
   qualification: z.string().trim().default(""),
+  medicalCollege: z.string().trim().max(160).default(""),
   message: z.string().trim().default(""),
   source: z.string().trim().default("WALK_IN"),
 });
@@ -96,6 +97,7 @@ export async function createOfficeApplication(
         courseId: parsed.data.courseId || null,
         batchId: parsed.data.batchId || null,
         qualification: parsed.data.qualification || null,
+        medicalCollege: parsed.data.medicalCollege || null,
         message: parsed.data.message || null,
         source,
       },

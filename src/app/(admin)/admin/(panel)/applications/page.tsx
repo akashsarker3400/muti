@@ -94,6 +94,7 @@ export default async function ApplicationsPage({
     courseName: row.course ? `${row.course.nameEn} (${row.course.code})` : null,
     batchName: row.batch?.name ?? null,
     qualification: row.qualification,
+    medicalCollege: row.medicalCollege,
     bmdc: row.bmdc,
     location: row.location,
     preferredDate: row.preferredDate?.toISOString() ?? null,

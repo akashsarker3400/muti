@@ -291,6 +291,8 @@
     "qualificationMbbs": "MBBS",
     "qualificationIntern": "ইন্টার্ন ডাক্তার",
     "qualificationOther": "অন্যান্য",
+    "medicalCollege": "যে মেডিকেল কলেজ থেকে পাশ করেছেন",
+    "medicalCollegePlaceholder": "যেমন: ময়মনসিংহ মেডিকেল কলেজ",
     "bmdc": "BMDC রেজিস্ট্রেশন নম্বর",
     "bmdcPlaceholder": "ঐচ্ছিক",
     "location": "বর্তমান কর্মস্থল / এলাকা",

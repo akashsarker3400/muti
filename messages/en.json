@@ -291,6 +291,8 @@
     "qualificationMbbs": "MBBS",
     "qualificationIntern": "Intern doctor",
     "qualificationOther": "Other",
+    "medicalCollege": "Medical college graduated from",
+    "medicalCollegePlaceholder": "e.g. Mymensingh Medical College",
     "bmdc": "BMDC registration number",
     "bmdcPlaceholder": "Optional",
     "location": "Current workplace / location",

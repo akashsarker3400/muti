@@ -123,6 +123,9 @@ test.describe("public site", () => {
     await page.getByRole("textbox", { name: "মোবাইল নম্বর" }).fill("01778838644");
     await page.getByRole("combobox", { name: /^কোর্স/ }).selectOption({ index: 1 });
     await page.getByRole("combobox", { name: /শিক্ষাগত যোগ্যতা/ }).selectOption("MBBS");
+    await page
+      .getByRole("textbox", { name: /মেডিকেল কলেজ থেকে পাশ/ })
+      .fill("ময়মনসিংহ মেডিকেল কলেজ");
     await page.getByRole("checkbox", { name: /আমি সম্মত/ }).check();
     await page.getByRole("button", { name: /আবেদন জমা দিন/ }).click();
 
@@ -130,6 +133,16 @@ test.describe("public site", () => {
     await expect(
       page.getByRole("link", { name: /WhatsApp-এ মেসেজ করুন/ }),
     ).toBeVisible();
+
+    // The office sees the college in the application detail.
+    await page.goto("/admin/applications");
+    await page
+      .getByRole("row", { name: new RegExp(name) })
+      .getByRole("button")
+      .first()
+      .click();
+    await expect(page.getByRole("dialog")).toContainText("মেডিকেল কলেজ");
+    await expect(page.getByRole("dialog")).toContainText("ময়মনসিংহ মেডিকেল কলেজ");
   });
 
   test("sitemap and robots are served", async ({ request }) => {

@@ -26,6 +26,7 @@ type FormValues = {
   email: string;
   courseId: string;
   qualification: "" | "MBBS" | "INTERN" | "OTHER";
+  medicalCollege: string;
   bmdc: string;
   location: string;
   batchId: string;
@@ -81,6 +82,7 @@ export function AdmissionForm({
       email: "",
       courseId: preselected?.id ?? "",
       qualification: "",
+      medicalCollege: "",
       bmdc: "",
       location: "",
       batchId: "",
@@ -101,6 +103,7 @@ export function AdmissionForm({
         email: values.email || undefined,
         courseId: values.courseId,
         qualification: values.qualification || undefined,
+        medicalCollege: values.medicalCollege || undefined,
         bmdc: values.bmdc || undefined,
         location: values.location || undefined,
         batchId: values.batchId || undefined,
@@ -293,6 +296,21 @@ export function AdmissionForm({
               <option value="INTERN">{t("qualificationIntern")}</option>
               <option value="OTHER">{t("qualificationOther")}</option>
             </select>
+          )}
+        </Field>
+
+        <Field
+          label={t("medicalCollege")}
+          error={errors.medicalCollege?.message}
+          hint={t("optional")}
+        >
+          {(props) => (
+            <Input
+              {...props}
+              {...register("medicalCollege")}
+              placeholder={t("medicalCollegePlaceholder")}
+              className="h-11"
+            />
           )}
         </Field>
 

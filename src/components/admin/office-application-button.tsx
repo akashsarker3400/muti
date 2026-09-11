@@ -146,14 +146,26 @@ export function OfficeApplicationButton({
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="office-qualification">শিক্ষাগত যোগ্যতা</Label>
-              <Input
-                id="office-qualification"
-                name="qualification"
-                placeholder="MBBS"
-                className="h-11"
-              />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="office-qualification">শিক্ষাগত যোগ্যতা</Label>
+                <Input
+                  id="office-qualification"
+                  name="qualification"
+                  placeholder="MBBS"
+                  className="h-11"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="office-medical-college">মেডিকেল কলেজ</Label>
+                <Input
+                  id="office-medical-college"
+                  name="medicalCollege"
+                  placeholder="যেমন: ময়মনসিংহ মেডিকেল কলেজ"
+                  className="h-11"
+                />
+              </div>
             </div>
 
             <div className="space-y-1.5">
