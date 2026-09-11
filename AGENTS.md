@@ -1,8 +1,9 @@
 # MUTI website — notes for agents and developers
 
 Official website plus admin panel for **Mymensingh Ultrasound Training
-Institute (MUTI)**. The full specification lives in
-`../muti-website-build-spec.md`; section numbers in code comments refer to it.
+Institute (MUTI)**. The full specification is kept in `docs/build-spec.md`;
+the section numbers in code comments refer to it. `HANDOVER.md` records every
+outstanding TODO and every deliberate deviation from that spec.
 
 ## Stack
 
