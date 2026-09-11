@@ -1,6 +1,35 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("public site", () => {
+  test("the notice ticker scrolls published notices under the header", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const ticker = page.getByTestId("notice-ticker");
+    await expect(ticker).toBeVisible();
+
+    // Each visible entry links to its notice; the seamless-loop clone is
+    // hidden from assistive tech and from the tab order.
+    const links = ticker.locator("li:not([aria-hidden]) a[href^='/notices/']");
+    expect(await links.count()).toBeGreaterThan(0);
+    await expect(ticker.locator("li[aria-hidden='true'] a").first()).toHaveAttribute(
+      "tabindex",
+      "-1",
+    );
+
+    // It is a marquee, not a static row: the track carries the animation and
+    // pauses when the reader hovers so a notice can actually be clicked.
+    const track = ticker.locator(".notice-ticker-track");
+    await expect(track).toHaveCSS("animation-name", "notice-ticker");
+    await ticker.hover();
+    await expect(track).toHaveCSS("animation-play-state", "paused");
+
+    const href = await links.first().getAttribute("href");
+    await links.first().click();
+    await expect(page).toHaveURL(new RegExp(`${href}$`));
+  });
+
   test("home page loads with the hero, courses and contact details", async ({
     page,
   }) => {

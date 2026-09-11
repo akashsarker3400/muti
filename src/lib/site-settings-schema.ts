@@ -91,6 +91,8 @@ export const siteSettingsSchema = z.object({
       showDoctorsTrained: booleanish,
       practicalsPerBatch: z.coerce.number().int().min(0).default(0),
       showPracticalsPerBatch: booleanish.prefault(true),
+      /** Scrolling notice ticker between the header and the hero. */
+      showNoticeTicker: booleanish.prefault(true),
       announcementTextBn: optionalString,
       announcementTextEn: optionalString,
       announcementLink: optionalString,
@@ -204,6 +206,7 @@ export const defaultSiteSettings: SiteSettings = siteSettingsSchema.parse({
     showDoctorsTrained: false,
     practicalsPerBatch: 30,
     showPracticalsPerBatch: true,
+    showNoticeTicker: true,
     announcementTextBn: "ভর্তি চলছে — CMU, DMU ও ADMU কোর্স, সেশন ২০২৬",
     announcementTextEn: "Admission open — CMU, DMU and ADMU courses, Session 2026",
     announcementLink: "/admission",

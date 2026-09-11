@@ -7,6 +7,7 @@ import { FacultyCard } from "@/components/site/faculty-card";
 import { GalleryGrid } from "@/components/site/gallery-grid";
 import { Hero } from "@/components/site/home/hero";
 import { NextBatchCta } from "@/components/site/home/next-batch";
+import { NoticeTicker } from "@/components/site/home/notice-ticker";
 import { PracticalBlock } from "@/components/site/home/practical-block";
 import { StatsStrip } from "@/components/site/home/stats-strip";
 import { WhyChoose } from "@/components/site/home/why-choose";
@@ -54,7 +55,7 @@ export default async function HomePage({
     getSiteSettings(),
     getPublishedCourses(),
     getNextBatch(),
-    getNotices({ take: 5 }),
+    getNotices({ take: 8 }),
     getPartners(),
     getTestimonials(8),
     getFaculty(4),
@@ -66,6 +67,10 @@ export default async function HomePage({
 
   return (
     <>
+      {settings.homepage.showNoticeTicker && (
+        <NoticeTicker notices={notices} locale={locale} />
+      )}
+
       <Hero settings={settings} locale={locale} />
 
       <StatsStrip settings={settings} locale={locale} courseCount={courses.length} />
@@ -119,7 +124,7 @@ export default async function HomePage({
               </Button>
             }
           />
-          <NoticeList notices={notices} locale={locale} />
+          <NoticeList notices={notices.slice(0, 5)} locale={locale} />
         </Section>
       )}
 

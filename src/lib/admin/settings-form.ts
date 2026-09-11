@@ -262,6 +262,12 @@ export const settingsFormSections: FormSection[] = [
         label: "“প্র্যাকটিক্যাল ক্লাস” টাইল দেখান",
         type: "checkbox",
       },
+      {
+        name: "homepage.showNoticeTicker",
+        label: "নোটিশ টিকার দেখান",
+        type: "checkbox",
+        hint: "হেডারের নিচে প্রকাশিত নোটিশগুলো খবরের মতো স্ক্রল করে। নোটিশ মেনু থেকেই নিয়ন্ত্রিত হয়।",
+      },
     ],
   },
   {

@@ -111,7 +111,8 @@
     "contactTitle": "Get in touch",
     "contactSubtitle": "Message us on WhatsApp or visit the office for anything you need.",
     "classDaysLabel": "Class days",
-    "seatsLabel": "Seats"
+    "seatsLabel": "Seats",
+    "tickerLabel": "Notice"
   },
   "about": {
     "title": "Built for doctors, run by doctors",
