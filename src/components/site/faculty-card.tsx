@@ -20,19 +20,21 @@ export function FacultyCard({
 
   return (
     <article className="flex h-full flex-col rounded-[14px] border border-[color:var(--border)] bg-white p-5 text-center shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]">
-      <div className="mx-auto">
+      {/* Soft portrait box rather than a circle: faces are not cropped by
+          the round mask and the card reads calmer. */}
+      <div className="mx-auto w-[128px] overflow-hidden rounded-[14px] border border-[color:var(--border)] bg-[color:var(--bg-soft)] shadow-sm">
         {member.photo ? (
           <Image
             src={member.photo}
             alt={name}
-            width={96}
-            height={96}
-            className="size-24 rounded-full object-cover"
+            width={128}
+            height={160}
+            className="aspect-[4/5] w-full object-cover object-top"
           />
         ) : (
           <span
             aria-hidden="true"
-            className="grid size-24 place-items-center rounded-full bg-[color:var(--brand-soft)] text-2xl font-bold text-[color:var(--brand)]"
+            className="grid aspect-[4/5] w-full place-items-center bg-[color:var(--brand-soft)] text-3xl font-bold text-[color:var(--brand)]"
           >
             {name.trim().charAt(0)}
           </span>
