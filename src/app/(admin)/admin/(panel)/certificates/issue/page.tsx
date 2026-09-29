@@ -28,7 +28,9 @@ export default async function IssueCertificatesPage({
   const { batch: batchId } = await searchParams;
 
   const batches = await prisma.batch.findMany({
-    where: { students: { some: {} } },
+    // `deletedAt` is spelt out because a relation filter is not covered by the
+    // client's soft-delete extension (ERP addendum, 2.4).
+    where: { deletedAt: null, students: { some: { deletedAt: null } } },
     select: {
       id: true,
       name: true,
@@ -52,6 +54,7 @@ export default async function IssueCertificatesPage({
           endDate: true,
           course: { select: { code: true, fullNameEn: true } },
           students: {
+            where: { deletedAt: null },
             orderBy: { roll: "asc" },
             select: {
               id: true,

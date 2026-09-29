@@ -173,7 +173,9 @@ export async function deleteCourse(id: string): Promise<SaveResult> {
   const admin = await requireAdmin();
 
   try {
-    await prisma.course.delete({ where: { id } });
+    // Soft delete (ERP addendum, 2.4): students and certificates point at a
+    // course for years, so the row leaves the lists and stays in the database.
+    await prisma.course.update({ where: { id }, data: { deletedAt: new Date() } });
     await logActivity(admin.id, "delete", "course", id);
     revalidatePath("/admin/courses");
     revalidatePath("/", "layout");

@@ -133,7 +133,12 @@ export async function deleteApplication(
   const admin = await requireAdmin();
 
   try {
-    await prisma.application.delete({ where: { id } });
+    // Soft delete (ERP addendum, 2.4): a lead the office deletes by accident
+    // is a lost admission, so the row is hidden rather than removed.
+    await prisma.application.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
     await logActivity(admin.id, "delete", "application", id);
     revalidatePath("/admin/applications");
     revalidatePath("/admin");

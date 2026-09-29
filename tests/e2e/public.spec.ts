@@ -4,6 +4,10 @@ import { expect, test } from "@playwright/test";
  * The Bangla site lives under /bn since the locale change; the English root
  * is covered by locale.spec.ts. These tests keep exercising the Bangla pages.
  */
+// See the note in erp-foundations.spec.ts: one rate-limit bucket per spec file
+// keeps the admission-form tests from spending each other's five an hour.
+test.use({ extraHTTPHeaders: { "x-forwarded-for": "203.0.113.11" } });
+
 test.describe("public site (Bangla)", () => {
   test("the notice ticker scrolls published notices under the header", async ({
     page,

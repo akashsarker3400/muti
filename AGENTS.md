@@ -7,9 +7,10 @@ Institute (MUTI)**. The specifications are kept in `docs/build-spec.md`,
 ("section 5.4" is the build spec, "addendum 2, A1" the addendum).
 `HANDOVER.md` records every outstanding TODO and every deliberate deviation.
 
-Addendum 2 section B (Phase 2: attendance, fees, exams, certificates, portal…)
-is **not** built and must not be started until the owner says "start Phase 2".
-It also depends on `muti-erp-addendum.md`, which has not been supplied yet.
+Addendum 2 section B (Phase 2: attendance, fees, exams, portal…) is **not**
+built and must not be started until the owner says "start Phase 2".
+`docs/erp-addendum.md` is the future-proofing brief: its section 4 is Phase 1
+and is built (see below); everything else in it is Phase 2 and must not be.
 
 ## Stack
 
@@ -67,6 +68,24 @@ database access, so nothing can be prerendered at build time.
   `revalidateBatches()` from `src/lib/admin/seats.ts`.
 - `Batch.seatsFilledManual` means the office typed the number themselves;
   automatic seat counting must leave that batch alone.
+- Soft delete (ERP addendum, 2.4) covers Course, Batch, Student and
+  Application. The filter lives in the Prisma client extension in
+  `src/lib/prisma.ts`, not at the call sites, so it cannot be forgotten;
+  `findUnique` becomes `findFirst` there. Spread `includingDeleted` into a
+  `where` to look past it on purpose — needed whenever uniqueness is checked,
+  because a deleted student still owns their roll. A nested relation read is
+  **not** covered: filter those by hand.
+- Roll numbers come from `src/lib/roll-number.ts` (`MUTI-2026-CMU-001`) through
+  the same atomic `Counter` the certificate series uses. The "Admit" button on
+  an application (`admitApplication`) copies the applicant into a Student,
+  takes the next roll, and links the two by `Student.applicationId`; pressing
+  it twice opens the existing record instead of making a second one.
+- `Branch` exists with one row and a nullable `branchId` on Batch and Student
+  (ERP addendum, 2.16). Nothing filters on it yet; a second campus later is a
+  filter rather than a migration.
+- Scheduled work has one entry point, `/api/cron/run`, which runs every job and
+  catches each separately. The single-purpose cron routes still exist for
+  anyone who wants a different schedule for one of them.
 - Named permissions live in `src/lib/permissions.ts`; guard a page or action
   with `requirePermission("…")`. A resource in `src/lib/admin/resources.ts`
   declares its own `permission` and the generic pages enforce it.

@@ -157,10 +157,12 @@ test.describe("admin: English required, Bangla optional", () => {
     await page.locator("#field-nameEn").fill(`Locale ${id}`);
     await page.locator("#field-fullNameEn").fill(`Locale Course ${id}`);
     // Retried: on a cold dev server the click can land before the form is
-    // interactive, and then the save never happens at all.
+    // interactive, and then the save never happens at all. The wait is
+    // `toHaveURL`, which polls the address, rather than `waitForURL`, which
+    // waits for a load event that a client-side navigation never fires.
     await expect(async () => {
       await page.getByRole("button", { name: "Save" }).click();
-      await page.waitForURL(/\/admin\/courses$/, { timeout: 5000 });
+      await expect(page).toHaveURL(/\/admin\/courses$/, { timeout: 5000 });
     }).toPass({ timeout: 40_000 });
     await expect(page.getByText(`Locale ${id}`)).toBeVisible();
 

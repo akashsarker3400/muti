@@ -357,12 +357,17 @@ Meta-র Cloud API যুক্ত করতে চাইলে `WHATSAPP_TOKEN`
 দুটি রিমাইন্ডার নিজে থেকে যায়: ক্লাস শুরুর **৩ দিন আগে** ব্যাচের শিক্ষার্থীদের,
 আর **আগামীকালের** নিশ্চিত হেলথ সিরিয়ালের রোগীদের।
 
-Coolify → আপনার অ্যাপ → **Scheduled tasks** → নতুন টাস্ক:
+Coolify → আপনার অ্যাপ → **Scheduled tasks** → **একটি** টাস্ক দিলেই সব চলবে
+(রিমাইন্ডার, পুরনো তথ্য মোছা, আর ডাটাবেস ব্যাকআপ):
 
 ```
-schedule: 0 9 * * *
-command: curl -fsS -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/messages
+schedule: 0 2 * * *
+command: curl -fsS -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/run
 ```
+
+একটার জন্য আলাদা সময় দরকার হলে আলাদা ঠিকানাও আছে:
+`/api/cron/messages`, `/api/cron/anonymize`, `/api/cron/backup`।
+একটা কাজ আটকে গেলেও বাকিগুলো চলে।
 
 `CRON_SECRET` না থাকলে environment variables-এ একটা লম্বা এলোমেলো লেখা বসান
 (হেলথ ডেটা মুছে ফেলার কাজটিও এই একই কি ব্যবহার করে)।

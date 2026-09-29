@@ -94,9 +94,11 @@ export async function deleteResource(
     : await requireAdmin();
 
   try {
-    // Certificates are soft-deleted: a number once issued must stay unique.
-    if (resource.model === "certificate") {
-      await prisma.certificate.update({
+    // Record-keeping tables are soft-deleted (ERP addendum, 2.4): the row
+    // leaves every list but stays in the database, so a certificate number
+    // remains unique and a mistake on Thursday is recoverable on Friday.
+    if (resource.softDelete) {
+      await delegate(resource).update({
         where: { id },
         data: { deletedAt: new Date() },
       });

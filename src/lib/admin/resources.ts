@@ -78,6 +78,13 @@ export type ResourceConfig = {
   importEntity?: string;
   /** Offers a CSV download of the whole table from the list header. */
   exportCsv?: boolean;
+  /**
+   * Delete sets `deletedAt` instead of removing the row (ERP addendum, 2.4).
+   * For anything the institute is a record keeper of: a certificate number
+   * must stay unique for ever, and a student the office deletes by accident
+   * on a Thursday afternoon should be recoverable on the Friday.
+   */
+  softDelete?: boolean;
   /** Extra read-only panel under the edit form. */
   detailPanel?: "student-certificates";
   /** Live preview rendered inside the form from the current values. */
@@ -1127,6 +1134,8 @@ const pageResource: ResourceConfig = {
 const batchResource: ResourceConfig = {
   key: "batches",
   model: "batch",
+  softDelete: true,
+  baseWhere: { deletedAt: null },
   title: "Batch",
   singular: "Batch",
   description: "The homepage shows the nearest published “UPCOMING” batch.",
@@ -1352,6 +1361,8 @@ const resultResource: ResourceConfig = {
 const studentResource: ResourceConfig = {
   key: "students",
   model: "student",
+  softDelete: true,
+  baseWhere: { deletedAt: null },
   title: "Student",
   singular: "Student",
   description:
@@ -1424,7 +1435,16 @@ const studentResource: ResourceConfig = {
         },
         { name: "name", label: "Name (English)", type: "text", required: true },
         { name: "nameBn", label: "Name (Bangla)", type: "text" },
-        { name: "roll", label: "Roll", type: "text", required: true, latin: true },
+        {
+          name: "roll",
+          label: "Roll",
+          type: "text",
+          required: true,
+          latin: true,
+          generator: "roll-no",
+          placeholder: "MUTI-2026-CMU-001",
+          hint: "Pick the course first, then press Generate to take the next roll in that course's series for this year. Type it by hand for an older student; a hand-typed roll is never handed out again.",
+        },
         {
           name: "certificateNo",
           label: "Certificate number (legacy field)",
@@ -1840,6 +1860,7 @@ const issuedCertificateResource: ResourceConfig = {
     "Every issued certificate. /verify answers from these by certificate number or the student’s BMDC. Issue a whole batch at once from “Issue certificates”; approval, prints and handovers live on the register. To revoke one, set the status to “Revoked” and give a reason.",
   newLabel: "New certificate",
   permission: "certificates.manage",
+  softDelete: true,
   rowTool: "certificate-print",
   importEntity: "certificates",
   exportCsv: true,

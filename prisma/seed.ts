@@ -527,6 +527,33 @@ async function seedMessageTemplates() {
   console.log(`+ ${DEFAULT_TEMPLATES.length} message templates ensured`);
 }
 
+/**
+ * One campus (ERP addendum, 2.16). Existing rows are pointed at it so a second
+ * branch later is a filter rather than a data cleanup.
+ */
+async function seedBranch() {
+  const branch = await prisma.branch.upsert({
+    where: { name: "Mymensingh" },
+    update: {},
+    create: { name: "Mymensingh" },
+  });
+
+  const [students, batches] = await Promise.all([
+    prisma.student.updateMany({
+      where: { branchId: null },
+      data: { branchId: branch.id },
+    }),
+    prisma.batch.updateMany({
+      where: { branchId: null },
+      data: { branchId: branch.id },
+    }),
+  ]);
+
+  console.log(
+    `+ branch "${branch.name}" ensured (${students.count} students, ${batches.count} batches attached)`,
+  );
+}
+
 async function main() {
   console.log("Seeding MUTI database…");
 
@@ -542,6 +569,7 @@ async function main() {
   await seedSettings();
   await seedCourseBookRows();
   await seedMessageTemplates();
+  await seedBranch();
 
   if (!freshInstall) {
     console.log("· existing installation — skipping content seed");

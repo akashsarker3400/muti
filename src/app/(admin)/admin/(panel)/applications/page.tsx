@@ -71,6 +71,7 @@ export default async function ApplicationsPage({
       include: {
         course: true,
         batch: true,
+        student: { select: { id: true } },
         _count: { select: { sampleDownloads: true } },
       },
       take: PAGE_SIZE,
@@ -92,6 +93,7 @@ export default async function ApplicationsPage({
     id: row.id,
     type: row.type,
     status: row.status,
+    admitted: row.student !== null,
     name: row.name,
     phone: row.phone,
     whatsapp: row.whatsapp,

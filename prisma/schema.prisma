@@ -262,6 +262,10 @@ model Course {
   results      Result[]
   books        CourseBookOnCourse[]
 
+  /// Soft delete (ERP addendum, 2.4): a course a student holds a certificate
+  /// for must never vanish from the record.
+  deletedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -313,6 +317,12 @@ model Batch {
   results      Result[]
   applications Application[]
 
+  /// Soft delete (ERP addendum, 2.4).
+  deletedAt DateTime?
+  /// Campus (ERP addendum, 2.16).
+  branchId  String?
+  branch    Branch?   @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -359,6 +369,9 @@ model Application {
 
   adminNote String? @db.Text
 
+  /// Set when this application was admitted and became a student record.
+  student Student?
+
   /// Sample-chapter downloads made with this submission's token (addendum 5).
   sampleDownloads BookSampleDownload[]
 
@@ -367,6 +380,10 @@ model Application {
   /// Raw campaign data: { utm_source, utm_campaign, fbclid, gclid, referrer, landing }
   utm          Json?
   referralCode String?
+
+  /// Soft delete (ERP addendum, 2.4): an enquiry is a lead record, and the
+  /// office should not be able to lose one by pressing the wrong button.
+  deletedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -418,6 +435,15 @@ model Student {
 
   certificates Certificate[]
   boardResults BoardResult[]
+
+  /// Soft delete (ERP addendum, 2.4).
+  deletedAt     DateTime?
+  /// Campus (ERP addendum, 2.16).
+  branchId      String?
+  branch        Branch?      @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  /// The web application this student was admitted from (ERP addendum, 2.8).
+  applicationId String?      @unique
+  application   Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1138,4 +1164,19 @@ model PageView {
   @@index([day])
   @@index([day, path])
   @@index([day, visitor])
+}
+
+/// A campus (ERP addendum, 2.16). One row today, "Mymensingh". Carrying the
+/// column now means a second campus is a filter later rather than a migration
+/// across every table that matters.
+model Branch {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  address   String?
+  phone     String?
+  active    Boolean   @default(true)
+  students  Student[]
+  batches   Batch[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }

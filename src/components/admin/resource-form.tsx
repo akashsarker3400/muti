@@ -6,6 +6,7 @@ import { Loader2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { nextCertificateNumber } from "@/app/actions/admin-certificates";
+import { nextRollNumber } from "@/app/actions/admin-students";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { Panel } from "@/components/admin/ui";
 import { MultiUploadField } from "@/components/admin/multi-upload-field";
@@ -574,10 +575,9 @@ function FieldControl({
 }
 
 /**
- * Fills a field from the server: the certificate number generator takes the
- * next number in its series (Site Settings -> Certificates & cards). The
- * button is disabled once the field has a value, so an issued number is never
- * silently replaced.
+ * Fills a field from the server: a certificate number or a student roll, each
+ * taking the next value in its own series. The button is disabled once the
+ * field has a value, so a number already issued is never silently replaced.
  */
 function GenerateButton({
   disabled,
@@ -586,7 +586,7 @@ function GenerateButton({
 }: {
   disabled: boolean;
   onGenerate: () => Promise<
-    { ok: true; certificateNo: string } | { ok: false; error: string }
+    { ok: true; value: string } | { ok: false; error: string }
   >;
   onResult: (value: string) => void;
 }) {
@@ -603,7 +603,7 @@ function GenerateButton({
       onClick={() =>
         startTransition(async () => {
           const result = await onGenerate();
-          if (result.ok) onResult(result.certificateNo);
+          if (result.ok) onResult(result.value);
           else toast.error(result.error);
         })
       }
@@ -625,7 +625,18 @@ function generate(field: FieldDef, values: FormValues) {
         courseId: String(values.courseId ?? ""),
         type: String(values.type ?? ""),
         issuedAt: String(values.issuedAt ?? ""),
-      });
+      }).then((result) =>
+        result.ok
+          ? ({ ok: true as const, value: result.certificateNo })
+          : ({ ok: false as const, error: result.error }),
+      );
+    case "roll-no":
+      return nextRollNumber({ courseId: String(values.courseId ?? "") }).then(
+        (result) =>
+          result.ok
+            ? ({ ok: true as const, value: result.roll })
+            : ({ ok: false as const, error: result.error }),
+      );
     default:
       return Promise.resolve({ ok: false as const, error: "Nothing to generate." });
   }

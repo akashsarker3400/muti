@@ -49,7 +49,8 @@ async function remindClassStarting(institute: string): Promise<{
       startDate: true,
       course: { select: { nameEn: true, fullNameEn: true } },
       students: {
-        where: { status: "ACTIVE" },
+        // Spelt out: a nested read is not covered by the soft-delete extension.
+        where: { status: "ACTIVE", deletedAt: null },
         select: { id: true, name: true, phone: true },
       },
     },

@@ -1,5 +1,6 @@
 "use client";
 
+import { AdmitButton } from "@/components/admin/admit-button";
 import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -37,6 +38,8 @@ export type AdminApplication = {
   id: string;
   type: string;
   status: string;
+  /** Already turned into a student record (ERP addendum, 2.9). */
+  admitted: boolean;
   name: string;
   phone: string;
   whatsapp: string | null;
@@ -258,6 +261,13 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                     >
                       <Eye className="size-4" aria-hidden="true" />
                     </Button>
+                    {row.type === "ADMISSION" && (
+                      <AdmitButton
+                        id={row.id}
+                        name={row.name}
+                        admitted={row.admitted}
+                      />
+                    )}
                     <Button asChild variant="ghost" size="icon-sm" aria-label="Call">
                       <a href={telHref(row.phone)}>
                         <Phone className="size-4" aria-hidden="true" />
