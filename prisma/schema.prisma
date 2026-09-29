@@ -314,6 +314,7 @@ model Batch {
   showSeatCounter   Boolean @default(true)
 
   students     Student[]
+  boardExams   BoardExam[]
   results      Result[]
   applications Application[]
 
@@ -534,9 +535,22 @@ model BoardExam {
   courseId    String?
   course      Course?   @relation(fields: [courseId], references: [id], onDelete: SetNull)
   boardName   String    @default("Bangladesh Technical Education Board")
+
+  /// The examination itself, for the admit card. A board exam record starts
+  /// life before the exam (date, centre, who is sitting it) and gains its
+  /// results afterwards, so both live on the same row.
+  examDate     DateTime?
+  /// Free text, e.g. "10:00 am to 1:00 pm", because a board sets it per paper.
+  examTime     String?
+  centre       String?
+  /// The batch sitting this examination; the admit cards are printed for it.
+  batchId      String?
+  batch        Batch?    @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  /// Printed under the instructions, one per line.
+  instructions String?   @db.Text
   /// The board's notice PDF on the uploads volume; downloadable publicly.
-  noticeFile  String?
-  published   Boolean   @default(false)
+  noticeFile   String?
+  published    Boolean   @default(false)
 
   results BoardResult[]
 

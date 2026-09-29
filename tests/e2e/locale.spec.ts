@@ -184,7 +184,7 @@ test.describe("admin: English required, Bangla optional", () => {
     await page.locator(".ProseMirror").first().click();
     await page.keyboard.type("Body in English.");
     await page.getByRole("button", { name: "Save" }).click();
-    await page.waitForURL(/\/admin\/notices$/);
+    await expect(page).toHaveURL(/\/admin\/notices$/);
 
     await page.goto("/admin/needs-english");
     const row = page.locator("tr", { hasText: title });

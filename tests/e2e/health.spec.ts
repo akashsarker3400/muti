@@ -13,7 +13,7 @@ async function healthTab(page: Page) {
 
 async function saveSettings(page: Page) {
   await page.getByRole("button", { name: "Save settings" }).click();
-  await page.waitForURL(/\/admin$/);
+  await expect(page).toHaveURL(/\/admin$/);
 }
 
 test.describe("free health service", () => {

@@ -22,4 +22,60 @@ setup("authenticate as admin", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Welcome");
 
   await page.context().storageState({ path: ADMIN_STATE });
+
+  await warmRoutes(page);
 });
+
+/**
+ * Visits each route once so the dev server compiles it before any test needs
+ * it.
+ *
+ * Next aborts the navigation that arrives while it is still building a route
+ * ("net::ERR_ABORTED"), which shows up as a different test failing on each
+ * run and looks like a fault in whatever was unlucky. Paying the compile cost
+ * once here, in setup, is cheaper than retry loops in twenty specs.
+ */
+async function warmRoutes(page: import("@playwright/test").Page) {
+  const routes = [
+    "/admin",
+    "/admin/applications",
+    "/admin/students",
+    "/admin/students/new",
+    "/admin/courses",
+    "/admin/courses/new",
+    "/admin/board-exams",
+    "/admin/board-exams/new",
+    "/admin/certificates",
+    "/admin/certificates/issue",
+    "/admin/certificates/register",
+    "/admin/messages",
+    "/admin/import",
+    "/admin/settings",
+    "/admin/media",
+    "/admin/analytics",
+    "/admin/gallery",
+    "/admin/videos",
+    "/admin/promos",
+    "/",
+    "/courses",
+    "/apply",
+    "/blog",
+    "/verify",
+    "/results",
+    "/bn",
+    "/bn/courses",
+  ];
+
+  for (const route of routes) {
+    // An abort here is exactly what this loop exists to absorb, so a failed
+    // warm-up is retried once and then left to the test that needs it.
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      try {
+        await page.goto(route, { waitUntil: "domcontentloaded", timeout: 60_000 });
+        break;
+      } catch {
+        /* try once more, then move on */
+      }
+    }
+  }
+}

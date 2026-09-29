@@ -119,6 +119,9 @@ database access, so nothing can be prerendered at build time.
 - Printed documents build their QR from `siteUrl`, never the request host, and
   the certificate QR uses `/verify?t=<verifyToken>` (the only parameter that
   page reads).
+- The admit card lives at `/admin/board-exams/<id>/admit-cards`, one A4 page
+  per candidate of `BoardExam.batch`. It is a printed document, not the Phase 2
+  exam module: nothing here does marks, grades or attendance.
 - The certificate, the registration card and the admit card are **English
   only**; a student's own name is the one exception. The ornamental frame is a
   positioned `<span>` with an SVG at `size-full` inside it — set the insets on

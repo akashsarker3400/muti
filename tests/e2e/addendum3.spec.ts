@@ -36,7 +36,7 @@ test.describe("addendum 3", () => {
     await page.locator("#field-bmdc").fill(`A-${id.slice(-5)}`);
     await page.locator("#field-courseId").selectOption({ index: 1 });
     await save(page);
-    await page.waitForURL(/\/admin\/students$/);
+    await expect(page).toHaveURL(/\/admin\/students$/);
 
     // Certificate for that student.
     await page.goto("/admin/certificates/new");
@@ -47,7 +47,7 @@ test.describe("addendum 3", () => {
     await page.locator("#field-courseId").selectOption({ index: 1 });
     await page.locator("#field-grade").fill("4.00");
     await save(page);
-    await page.waitForURL(/\/admin\/certificates$/);
+    await expect(page).toHaveURL(/\/admin\/certificates$/);
 
     // Public: by certificate number, case-insensitively.
     await page.goto("/bn/verify");
@@ -78,7 +78,7 @@ test.describe("addendum 3", () => {
     await page.locator("#field-status").selectOption("REVOKED");
     await page.locator("#field-revokedReason").fill("Exam result corrected");
     await save(page);
-    await page.waitForURL(/\/admin\/certificates$/);
+    await expect(page).toHaveURL(/\/admin\/certificates$/);
 
     await page.goto("/bn/verify");
     await page.getByRole("textbox").fill(certNo);
@@ -110,7 +110,7 @@ test.describe("addendum 3", () => {
     await page.locator("#field-session").fill("Jan-June 2025");
     await page.locator("#field-published").check();
     await save(page);
-    await page.waitForURL(/\/admin\/board-exams$/);
+    await expect(page).toHaveURL(/\/admin\/board-exams$/);
 
     await page
       .locator("tr", { hasText: title })
@@ -152,7 +152,7 @@ test.describe("addendum 3", () => {
     await page.locator("#field-boardRoll").fill(passRoll);
     await page.locator("#field-courseId").selectOption({ index: 1 });
     await save(page);
-    await page.waitForURL(/\/admin\/students$/);
+    await expect(page).toHaveURL(/\/admin\/students$/);
 
     await page.goto("/bn/results");
     await page.getByRole("radio", { name: "BMDC নম্বর" }).check();
@@ -220,7 +220,7 @@ test.describe("addendum 3", () => {
     await page.locator("#field-personName").fill("Dr. Smoke Chairman");
     await page.locator("#field-published").check();
     await save(page);
-    await page.waitForURL(/\/admin\/leadership$/);
+    await expect(page).toHaveURL(/\/admin\/leadership$/);
 
     await page.goto("/bn");
     await expect(
@@ -246,7 +246,7 @@ test.describe("addendum 3", () => {
     await page.locator("#field-personName").fill("TODO: Chairman's name");
     await page.locator("#field-published").uncheck();
     await save(page);
-    await page.waitForURL(/\/admin\/leadership$/);
+    await expect(page).toHaveURL(/\/admin\/leadership$/);
 
     await page.goto("/bn/messages/chairman");
     await expect(page.getByRole("heading", { level: 1 })).not.toContainText(

@@ -45,7 +45,7 @@ test.describe("blog review gate", () => {
       .fill("Dr. Ashraful Islam, MBBS, DMU (test)");
     await page.locator("#field-needsReview").uncheck();
     await save(page);
-    await page.waitForURL(/\/admin\/blog$/);
+    await expect(page).toHaveURL(/\/admin\/blog$/);
 
     try {
       // The public article carries the byline and the structured data.

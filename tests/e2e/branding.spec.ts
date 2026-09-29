@@ -39,7 +39,7 @@ async function setBannersActive(page: Page, active: boolean) {
 
 async function saveSettings(page: Page) {
   await page.getByRole("button", { name: "Save settings" }).click();
-  await page.waitForURL(/\/admin$/);
+  await expect(page).toHaveURL(/\/admin$/);
 }
 
 test.describe("branding", () => {
@@ -172,12 +172,12 @@ test.describe("editable content lists", () => {
 
     await page.goto("/admin/payment-policy");
     await page.getByRole("link", { name: "Edit" }).first().click();
-    await page.waitForURL(/\/admin\/payment-policy\/[^/]+$/);
+    await expect(page).toHaveURL(/\/admin\/payment-policy\/[^/]+$/);
 
     const original = await page.locator("#field-bodyEn").inputValue();
     await page.locator("#field-bodyEn").fill(text);
     await page.getByRole("button", { name: "Save" }).click();
-    await page.waitForURL(/\/admin\/payment-policy$/);
+    await expect(page).toHaveURL(/\/admin\/payment-policy$/);
 
     // The same list feeds the course fee card and the admission page, and the
     // Bangla page shows the English line when no Bangla was typed.
@@ -189,10 +189,10 @@ test.describe("editable content lists", () => {
     // Put the seeded wording back.
     await page.goto("/admin/payment-policy");
     await page.getByRole("link", { name: "Edit" }).first().click();
-    await page.waitForURL(/\/admin\/payment-policy\/[^/]+$/);
+    await expect(page).toHaveURL(/\/admin\/payment-policy\/[^/]+$/);
     await page.locator("#field-bodyEn").fill(original);
     await page.getByRole("button", { name: "Save" }).click();
-    await page.waitForURL(/\/admin\/payment-policy$/);
+    await expect(page).toHaveURL(/\/admin\/payment-policy$/);
   });
 
   test("unpublishing a document hides it from course pages", async ({ page }) => {

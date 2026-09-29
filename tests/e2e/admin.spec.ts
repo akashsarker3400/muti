@@ -46,7 +46,7 @@ test.describe("admin panel", () => {
     await page.locator("#field-category").selectOption("ADMISSION");
     await page.getByRole("button", { name: "Save" }).click();
 
-    await page.waitForURL(/\/admin\/notices$/);
+    await expect(page).toHaveURL(/\/admin\/notices$/);
     await expect(page.getByRole("cell", { name: title })).toBeVisible();
 
     await page.goto("/notices");
@@ -71,7 +71,7 @@ test.describe("admin panel", () => {
     await page.getByRole("tab", { name: "Contact" }).click();
     await page.locator("#field-contact\\.officeHoursEn").fill(`Office hours ${stamp}`);
     await page.getByRole("button", { name: "Save settings" }).click();
-    await page.waitForURL(/\/admin$/);
+    await expect(page).toHaveURL(/\/admin$/);
 
     await page.goto("/contact");
     await expect(page.getByText(`Office hours ${stamp}`)).toBeVisible();

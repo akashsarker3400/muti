@@ -195,17 +195,34 @@ export default async function ResourceListPage({
                       <td className="px-4 py-2.5">
                         <div className="flex items-center justify-end">
                           {resource.rowTool === "board-results" && (
-                            <Button
-                              asChild
-                              variant="outline"
-                              size="sm"
-                              className="me-2"
-                            >
-                              <Link href={`/admin/board-exams/${id}/results`}>
-                                <ListChecks className="size-4" aria-hidden="true" />
-                                Results
-                              </Link>
-                            </Button>
+                            <>
+                              <Button
+                                asChild
+                                variant="outline"
+                                size="sm"
+                                className="me-2"
+                              >
+                                <a
+                                  href={`/admin/board-exams/${id}/admit-cards`}
+                                  target="_blank"
+                                  rel="noopener"
+                                >
+                                  <IdCard className="size-4" aria-hidden="true" />
+                                  Admit cards
+                                </a>
+                              </Button>
+                              <Button
+                                asChild
+                                variant="outline"
+                                size="sm"
+                                className="me-2"
+                              >
+                                <Link href={`/admin/board-exams/${id}/results`}>
+                                  <ListChecks className="size-4" aria-hidden="true" />
+                                  Results
+                                </Link>
+                              </Button>
+                            </>
                           )}
                           {resource.rowTool === "student-card" && (
                             <Button

@@ -142,7 +142,7 @@ test.describe("ERP foundations", () => {
     }).toPass({ timeout: 30_000 });
     const roll = await page.locator("#field-roll").inputValue();
     await save(page);
-    await page.waitForURL(/\/admin\/students$/);
+    await expect(page).toHaveURL(/\/admin\/students$/);
 
     const row = page.locator("tr", { hasText: name });
     await row.getByRole("button", { name: "Delete" }).click();

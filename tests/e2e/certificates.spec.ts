@@ -42,7 +42,7 @@ test.describe("certificate workflow", () => {
     await page.locator("#field-name").fill(batchName);
     await page.locator("#field-courseId").selectOption({ index: 1 });
     await save(page);
-    await page.waitForURL(/\/admin\/batches$/);
+    await expect(page).toHaveURL(/\/admin\/batches$/);
 
     for (const [index, name] of students.entries()) {
       await page.goto("/admin/students/new");
@@ -53,7 +53,7 @@ test.describe("certificate workflow", () => {
       await page.locator("#field-status").selectOption("COMPLETED");
       await page.locator("#field-resultGrade").fill("4.00");
       await save(page);
-      await page.waitForURL(/\/admin\/students$/);
+      await expect(page).toHaveURL(/\/admin\/students$/);
     }
 
     // --- bulk issue ----------------------------------------------------------
@@ -168,5 +168,66 @@ test.describe("certificate workflow", () => {
       await deleteRow(page, "/admin/students", name);
     }
     await deleteRow(page, "/admin/batches", batchName);
+  });
+});
+
+test.describe("admit cards", () => {
+  test("one card per candidate of the batch sitting the examination", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const id = Date.now().toString(36);
+    const batchName = `Admit Batch ${id}`;
+    const studentName = `Dr. Candidate ${id}`;
+    const examTitle = `Final Examination ${id}`;
+
+    await page.goto("/admin/batches/new");
+    await page.locator("#field-name").fill(batchName);
+    await page.locator("#field-courseId").selectOption({ index: 1 });
+    await save(page);
+    await expect(page).toHaveURL(/\/admin\/batches$/);
+
+    await page.goto("/admin/students/new");
+    await page.locator("#field-name").fill(studentName);
+    await page.locator("#field-roll").fill(`AC-${id}`);
+    await page.locator("#field-courseId").selectOption({ index: 1 });
+    await page.locator("#field-batchId").selectOption({ label: batchName });
+    await page.locator("#field-boardRoll").fill(`38${String(Date.now()).slice(-8)}`);
+    await save(page);
+    await expect(page).toHaveURL(/\/admin\/students$/);
+
+    await page.goto("/admin/board-exams/new");
+    await page.locator("#field-title").fill(examTitle);
+    await page.locator("#field-session").fill("Jan-June 2026");
+    await page.locator("#field-batchId").selectOption({ label: batchName });
+    await page.locator("#field-examTime").fill("10:00 am to 1:00 pm");
+    await page.locator("#field-centre").fill("Mymensingh Polytechnic Institute");
+    await save(page);
+    await expect(page).toHaveURL(/\/admin\/board-exams$/);
+
+    try {
+      const row = page.locator("tr", { hasText: examTitle });
+      const href = await row
+        .getByRole("link", { name: "Admit cards" })
+        .getAttribute("href");
+      await page.goto(href!);
+
+      // One A4 sheet for the one candidate, carrying what the hall needs.
+      await expect(page.locator(".sheet")).toHaveCount(1);
+      const card = page.locator(".sheet").first();
+      await expect(card).toContainText("Admit Card");
+      await expect(card).toContainText(studentName);
+      await expect(card).toContainText("Mymensingh Polytechnic Institute");
+      await expect(card).toContainText("10:00 am to 1:00 pm");
+      // No date was set, so that line prints a rule to fill in by hand rather
+      // than a gap the candidate cannot read.
+      await expect(card).toContainText("Date of Examination");
+      // English only, like the certificate and the registration card.
+      await expect(card.locator('[lang="bn"]')).toHaveCount(0);
+    } finally {
+      await deleteRow(page, "/admin/board-exams", examTitle);
+      await deleteRow(page, "/admin/students", studentName);
+      await deleteRow(page, "/admin/batches", batchName);
+    }
   });
 });

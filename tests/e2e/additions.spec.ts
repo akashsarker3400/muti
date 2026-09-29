@@ -60,7 +60,7 @@ test.describe("homepage promos", () => {
       // Live preview renders from the current values before saving.
       await expect(page.getByText("Preview", { exact: true })).toBeVisible();
       await page.getByRole("button", { name: "Save" }).click();
-      await page.waitForURL(/\/admin\/promos$/);
+      await expect(page).toHaveURL(/\/admin\/promos$/);
       await expect(page.getByText(title)).toBeVisible();
     }
 
@@ -92,7 +92,7 @@ test.describe("homepage promos", () => {
       await page.locator("#field-slot").selectOption("PROMO_A");
       await page.locator("#field-image").fill(image);
       await page.getByRole("button", { name: "Save" }).click();
-      await page.waitForURL(/\/admin\/promos$/);
+      await expect(page).toHaveURL(/\/admin\/promos$/);
       await page.goto("/");
       await expect(page.getByTestId("promo-PROMO_A").getByRole("tab")).toHaveCount(2);
     } finally {
@@ -110,7 +110,7 @@ test.describe("homepage promos", () => {
     await page.locator("#field-image").fill(image);
     await page.locator("#field-startAt").fill("2999-01-01");
     await page.getByRole("button", { name: "Save" }).click();
-    await page.waitForURL(/\/admin\/promos$/);
+    await expect(page).toHaveURL(/\/admin\/promos$/);
     try {
       await expect(page.locator("li", { hasText: `Future promo ${id}` })).toContainText(
         "Scheduled / expired",
@@ -136,7 +136,7 @@ test.describe("institute video", () => {
       .locator("#video-embed")
       .fill("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
     await page.getByRole("button", { name: "Save" }).click();
-    await page.waitForURL(/\/admin\/videos$/);
+    await expect(page).toHaveURL(/\/admin\/videos$/);
 
     try {
       await page.goto("/");
@@ -340,7 +340,7 @@ test.describe("printed documents", () => {
     await page.locator("#field-photo").fill(image);
     await page.locator("#field-courseId").selectOption({ index: 1 });
     await page.getByRole("button", { name: "Save" }).click();
-    await page.waitForURL(/\/admin\/students$/);
+    await expect(page).toHaveURL(/\/admin\/students$/);
 
     // The number generator takes the next one in the series, then the office
     // can still overwrite it for an older certificate.
@@ -357,7 +357,7 @@ test.describe("printed documents", () => {
       .locator("#field-studentId")
       .selectOption({ label: `${roll} — Dr. Document ${id}` });
     await page.getByRole("button", { name: "Save" }).click();
-    await page.waitForURL(/\/admin\/certificates$/);
+    await expect(page).toHaveURL(/\/admin\/certificates$/);
 
     try {
       // A new certificate is a draft, and a draft is not printable, so approve

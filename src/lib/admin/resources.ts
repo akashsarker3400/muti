@@ -73,7 +73,11 @@ export type ResourceConfig = {
   baseWhere?: Record<string, unknown>;
   columns: ResourceColumn[];
   /** Renders an extra action in each row, e.g. "clone" on batches. */
-  rowTool?: "batch-clone" | "board-results" | "student-card" | "certificate-print";
+  rowTool?:
+    | "batch-clone"
+    | "board-results"
+    | "student-card"
+    | "certificate-print";
   /** Entity key on /admin/import — shows an "Import" button above the list. */
   importEntity?: string;
   /** Offers a CSV download of the whole table from the list header. */
@@ -2045,12 +2049,20 @@ const boardExamResource: ResourceConfig = {
   ],
   searchFields: ["title", "session", "memoNo"],
   orderBy: [{ publishedOn: "desc" }, { createdAt: "desc" }],
-  loadOptions: async () => ({ courses: await courseOptions() }),
+  loadOptions: async () => ({
+    courses: await courseOptions(),
+    batches: await batchOptions(),
+  }),
   schema: z.object({
     title: requiredText,
     session: requiredText,
     heldIn: optionalText,
     memoNo: optionalText,
+    examDate: optionalText,
+    examTime: optionalText,
+    centre: optionalText,
+    batchId: optionalText,
+    instructions: optionalText,
     publishedOn: optionalText,
     courseId: optionalText,
     boardName: optionalText,
@@ -2095,6 +2107,35 @@ const boardExamResource: ResourceConfig = {
         },
         { name: "boardName", label: "Board", type: "text", latin: true },
         {
+          name: "batchId",
+          label: "Batch sitting this examination",
+          type: "select",
+          options: options.batches ?? [],
+          hint: "Needed for the admit cards: the cards are printed for this batch's students.",
+        },
+        { name: "examDate", label: "Date of examination", type: "date" },
+        {
+          name: "examTime",
+          label: "Time",
+          type: "text",
+          latin: true,
+          placeholder: "10:00 am to 1:00 pm",
+        },
+        {
+          name: "centre",
+          label: "Examination centre",
+          type: "text",
+          full: true,
+          placeholder: "Mymensingh Polytechnic Institute",
+        },
+        {
+          name: "instructions",
+          label: "Instructions on the admit card",
+          type: "textarea",
+          full: true,
+          hint: "One per line. Left empty, the card prints the usual four: bring this card, be there half an hour early, no mobile phone, follow the invigilator.",
+        },
+        {
           name: "noticeFile",
           label: "Board notice (PDF), downloadable publicly",
           type: "file",
@@ -2114,6 +2155,11 @@ const boardExamResource: ResourceConfig = {
     memoNo: str(row.memoNo),
     publishedOn: fromDate(row.publishedOn),
     courseId: str(row.courseId),
+    batchId: str(row.batchId),
+    examDate: fromDate(row.examDate),
+    examTime: str(row.examTime),
+    centre: str(row.centre),
+    instructions: str(row.instructions),
     boardName: str(row.boardName) || "Bangladesh Technical Education Board",
     noticeFile: str(row.noticeFile),
     published: Boolean(row.published),
@@ -2125,6 +2171,11 @@ const boardExamResource: ResourceConfig = {
     memoNo: nullable(values.memoNo),
     publishedOn: toDate(values.publishedOn),
     courseId: nullable(values.courseId),
+    batchId: nullable(values.batchId),
+    examDate: toDate(values.examDate),
+    examTime: nullable(values.examTime),
+    centre: nullable(values.centre),
+    instructions: nullable(values.instructions),
     boardName: str(values.boardName) || "Bangladesh Technical Education Board",
     noticeFile: nullable(values.noticeFile),
     published: Boolean(values.published),

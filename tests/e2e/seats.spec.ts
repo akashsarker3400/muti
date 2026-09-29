@@ -15,11 +15,11 @@ async function setSeats(page: Page, seats: string, filled: string) {
     .locator("tr", { hasText: "CMU-BTEB Batch" })
     .getByRole("link", { name: "Edit" })
     .click();
-  await page.waitForURL(/\/admin\/batches\/[^/]+$/);
+  await expect(page).toHaveURL(/\/admin\/batches\/[^/]+$/);
   await page.locator("#field-seats").fill(seats);
   await page.locator("#field-seatsFilled").fill(filled);
   await page.getByRole("button", { name: "Save" }).click();
-  await page.waitForURL(/\/admin\/batches$/);
+  await expect(page).toHaveURL(/\/admin\/batches$/);
 }
 
 /** The badge in the course page header, not the related-courses grid. */
@@ -77,10 +77,10 @@ test.describe("live seat counter", () => {
       .locator("tr", { hasText: "CMU-BTEB Batch" })
       .getByRole("link", { name: "Edit" })
       .click();
-    await page.waitForURL(/\/admin\/batches\/[^/]+$/);
+    await expect(page).toHaveURL(/\/admin\/batches\/[^/]+$/);
     await page.locator("#field-showSeatCounter").uncheck();
     await page.getByRole("button", { name: "Save" }).click();
-    await page.waitForURL(/\/admin\/batches$/);
+    await expect(page).toHaveURL(/\/admin\/batches$/);
 
     await page.goto("/bn/courses/cmu-bteb");
     await expect(
@@ -96,12 +96,12 @@ test.describe("live seat counter", () => {
       .locator("tr", { hasText: "CMU-BTEB Batch" })
       .getByRole("link", { name: "Edit" })
       .click();
-    await page.waitForURL(/\/admin\/batches\/[^/]+$/);
+    await expect(page).toHaveURL(/\/admin\/batches\/[^/]+$/);
     await page.locator("#field-showSeatCounter").check();
     await page.locator("#field-seats").fill("");
     await page.locator("#field-seatsFilled").fill("0");
     await page.getByRole("button", { name: "Save" }).click();
-    await page.waitForURL(/\/admin\/batches$/);
+    await expect(page).toHaveURL(/\/admin\/batches$/);
   });
 
   test("a batch can be cloned for the next session", async ({ page }) => {
@@ -121,7 +121,7 @@ test.describe("live seat counter", () => {
     await dialog.locator("#clone-start").fill("2027-01-10");
     await dialog.getByRole("button", { name: "Copy" }).click();
 
-    await page.waitForURL(/\/admin\/batches\/[^/]+$/);
+    await expect(page).toHaveURL(/\/admin\/batches\/[^/]+$/);
     // A clone always starts as an empty upcoming batch.
     await expect(page.locator("#field-seatsFilled")).toHaveValue("0");
     await expect(page.locator("#field-status")).toHaveValue("UPCOMING");
