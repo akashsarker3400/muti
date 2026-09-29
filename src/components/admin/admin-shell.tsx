@@ -18,6 +18,7 @@ import {
   Sparkles,
   Target,
   CalendarRange,
+  CircleHelp,
   ClipboardCheck,
   ClipboardList,
   ExternalLink,
@@ -90,6 +91,7 @@ const NAV: NavGroup[] = [
       { href: "/admin/alerts", label: "Alerts", icon: TriangleAlert },
       { href: "/admin/teacher-pay", label: "Teacher payments", icon: BadgeDollarSign },
       { href: "/admin/course-book", label: "Course book", icon: BookMarked },
+      { href: "/admin/questions", label: "Practice questions", icon: CircleHelp },
       { href: "/admin/certificates", label: "Certificates", icon: Award },
       {
         href: "/admin/certificates/issue",

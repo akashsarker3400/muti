@@ -178,5 +178,10 @@ database access, so nothing can be prerendered at build time.
   reviewer's name and date are typed (`Post.reviewedBy`/`reviewedAt`) and are
   rendered both as a byline and as `reviewedBy`/`lastReviewed` in the
   BlogPosting JSON-LD.
-- Addendum 5 part B (portal reader, MCQ bank, case images) is Phase 2: not
-  built, schema left compatible.
+- Addendum 5 part B is built: the portal reader, the question bank and the
+  case-image schema. Two rules hold throughout. Nothing is generated — not a
+  chapter, not a question — because the book is the institute's own work and a
+  wrong answer in an ultrasound question is a clinical error. And nothing
+  reaches a student until a doctor is recorded as having reviewed it; editing
+  takes that review off again. The portal reader is not gated on the book's
+  `published` flag, which governs the public marketing page instead.

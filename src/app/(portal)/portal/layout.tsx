@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
+  BookOpen,
   CalendarDays,
   ClipboardCheck,
   GraduationCap,
@@ -34,6 +35,7 @@ const TABS = [
   { href: "/portal/routine", label: "রুটিন", icon: CalendarDays },
   { href: "/portal/attendance", label: "উপস্থিতি", icon: ClipboardCheck },
   { href: "/portal/fees", label: "ফি", icon: Wallet },
+  { href: "/portal/book", label: "বই", icon: BookOpen },
   { href: "/portal/results", label: "ফলাফল", icon: GraduationCap },
 ];
 

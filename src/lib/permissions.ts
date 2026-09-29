@@ -33,6 +33,9 @@ export const PERMISSIONS = [
   "teachers.pay",
   "reports.view",
   "jobs.manage",
+  "book.content.edit",
+  "questions.manage",
+  "questions.approve",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -64,6 +67,9 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   "teachers.pay": "See what teachers are owed and record their payments",
   "reports.view": "See the owner's reports",
   "jobs.manage": "Post and edit jobs on the job board",
+  "book.content.edit": "Write the course book's chapters for the portal",
+  "questions.manage": "Add and edit practice questions",
+  "questions.approve": "Approve a question for students to practise on",
 };
 
 /**
@@ -92,6 +98,8 @@ const STAFF_DEFAULTS: ReadonlySet<Permission> = new Set([
   "exams.manage",
   "alerts.manage",
   "jobs.manage",
+  "book.content.edit",
+  "questions.manage",
 ]);
 
 /**
@@ -107,6 +115,8 @@ const TEACHER_DEFAULTS: ReadonlySet<Permission> = new Set([
   "exams.manage",
   "alerts.manage",
   "jobs.manage",
+  "book.content.edit",
+  "questions.manage",
 ]);
 
 export function hasPermission(

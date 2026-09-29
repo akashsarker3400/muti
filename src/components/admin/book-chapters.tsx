@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -19,7 +21,16 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Check, GripVertical, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import {
+  BookOpen,
+  Check,
+  GripVertical,
+  Loader2,
+  Pencil,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { deleteChapter, reorderChapters, saveChapter } from "@/app/actions/admin-book";
@@ -253,6 +264,15 @@ function ChapterRow({
         )}
       </div>
       <div className="flex items-center gap-0.5">
+        {/* The chapter's text for the portal reader (addendum 5, B1). */}
+        <Button asChild variant="ghost" size="icon-sm">
+          <Link
+            href={`/admin/course-book/chapters/${chapter.id}`}
+            aria-label={`Write chapter ${chapter.number}`}
+          >
+            <BookOpen className="size-4" aria-hidden="true" />
+          </Link>
+        </Button>
         <Button
           type="button"
           variant="ghost"

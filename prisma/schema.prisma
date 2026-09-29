@@ -327,13 +327,14 @@ model Batch {
   seatsFilledManual Boolean @default(false)
   showSeatCounter   Boolean @default(true)
 
-  alerts       Alert[]
-  exams        Exam[]
-  sessions     ClassSession[]
-  students     Student[]
-  boardExams   BoardExam[]
-  results      Result[]
-  applications Application[]
+  alerts          Alert[]
+  chaptersCovered ChapterCovered[]
+  exams           Exam[]
+  sessions        ClassSession[]
+  students        Student[]
+  boardExams      BoardExam[]
+  results         Result[]
+  applications    Application[]
 
   /// Soft delete (ERP addendum, 2.4).
   deletedAt DateTime?
@@ -451,14 +452,16 @@ model Student {
   boardRoll           String?   @unique
   boardRegistrationNo String?
 
-  feePlan        FeePlan?
-  payments       Payment[]
-  alerts         Alert[]
-  portalSessions PortalSession[]
-  marks          Mark[]
-  attendance     Attendance[]
-  certificates   Certificate[]
-  boardResults   BoardResult[]
+  feePlan          FeePlan?
+  payments         Payment[]
+  alerts           Alert[]
+  portalSessions   PortalSession[]
+  bookProgress     BookProgress[]
+  questionAttempts QuestionAttempt[]
+  marks            Mark[]
+  attendance       Attendance[]
+  certificates     Certificate[]
+  boardResults     BoardResult[]
 
   /// Soft delete (ERP addendum, 2.4).
   deletedAt     DateTime?
@@ -1101,6 +1104,13 @@ model CourseBookChapter {
   isSample  Boolean    @default(false)
   sortOrder Int        @default(0)
 
+  content   CourseBookContent?
+  progress  BookProgress[]
+  questions Question[]
+  cases     CaseImage[]
+  /// Batches whose teacher has marked this chapter as covered in class.
+  covered   ChapterCovered[]
+
   @@unique([bookId, number])
 }
 
@@ -1536,4 +1546,113 @@ model PortalSession {
   lastSeenAt DateTime @default(now())
 
   @@index([studentId])
+}
+
+/// The text of one chapter, for the portal reader (addendum 5, B1).
+///
+/// Typed or converted by the office from the book and checked by a doctor
+/// before students see it. Nothing writes this automatically: the book is the
+/// institute's own work and its accuracy is a medical matter.
+model CourseBookContent {
+  id         String            @id @default(cuid())
+  chapterId  String            @unique
+  chapter    CourseBookChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  bodyHtml   String            @db.Text
+  version    Int               @default(1)
+  /// Not shown to students until a doctor has read it.
+  reviewed   Boolean           @default(false)
+  reviewedBy String?
+  reviewedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Which chapters a student has finished (addendum 5, B1).
+model BookProgress {
+  id          String            @id @default(cuid())
+  studentId   String
+  student     Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  chapterId   String
+  chapter     CourseBookChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  completedAt DateTime          @default(now())
+
+  @@unique([studentId, chapterId])
+  @@index([studentId])
+}
+
+/// A teacher marking a chapter as covered for one batch (addendum 5, B4), so
+/// students know what to read before the next class.
+model ChapterCovered {
+  id        String            @id @default(cuid())
+  chapterId String
+  chapter   CourseBookChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  batchId   String
+  batch     Batch             @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  markedAt  DateTime          @default(now())
+
+  @@unique([chapterId, batchId])
+}
+
+/// One practice question (addendum 5, B2).
+///
+/// `reviewed` is false until a doctor approves it, and an unreviewed question
+/// is never shown to a student. Nothing here is generated: a wrong answer in
+/// an ultrasound question is a clinical error, not a typo.
+model Question {
+  id           String            @id @default(cuid())
+  chapterId    String
+  chapter      CourseBookChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  stem         String            @db.Text
+  /// The choices, in order.
+  options      String[]
+  correctIndex Int
+  explanation  String?           @db.Text
+  difficulty   Int               @default(1)
+  reviewed     Boolean           @default(false)
+  reviewedBy   String?
+
+  attempts QuestionAttempt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([chapterId, reviewed])
+}
+
+/// What a student answered, so the portal can show weak chapters.
+model QuestionAttempt {
+  id         String   @id @default(cuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  studentId  String
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  chosen     Int
+  correct    Boolean
+  createdAt  DateTime @default(now())
+
+  @@index([studentId, createdAt])
+  @@index([questionId])
+}
+
+/// A scan to read (addendum 5, B3).
+///
+/// Only images from MUTI's own machine, with the patient's consent. The
+/// column records that this was checked; nothing may be uploaded here that
+/// came from anywhere else.
+model CaseImage {
+  id           String            @id @default(cuid())
+  chapterId    String
+  chapter      CourseBookChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  image        String
+  findingLabel String
+  options      String[]
+  explanation  String?           @db.Text
+  /// Set by the office to confirm the patient consented. False keeps it hidden.
+  consented    Boolean           @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([chapterId])
 }
