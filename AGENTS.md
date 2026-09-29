@@ -100,6 +100,14 @@ database access, so nothing can be prerendered at build time.
   Every print writes a `CertificatePrint` row; handovers live on the same
   register. Editing an approved, undelivered certificate clears its approval
   (`beforeWrite` on the certificates resource).
+- SMS and WhatsApp go through `sendTemplate`/`sendMessage` in
+  `src/lib/messaging.ts`, never a gateway directly. Every attempt writes a
+  `MessageLog` row; anything automatic passes a `dedupeKey` (the column is
+  unique, which is what makes the daily job idempotent). Template wording
+  lives in `MessageTemplate`, with the built-in set in
+  `src/lib/messaging-defaults.ts` (kept separate so `prisma/seed.ts` can
+  import it without pulling in server-only code). A health message must never
+  carry the complaint, the age or a pregnancy field.
 - Uploads: `isPublicKey` (public `/uploads` route) vs `isSafeKey` (storage).
   Anything under `protected/` is only reachable through a signed route
   (`/api/v1/book/sample`). Videos, posters and protected files have a `Media`

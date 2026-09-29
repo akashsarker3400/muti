@@ -5,7 +5,9 @@ import { revalidatePath } from "next/cache";
 import type { ApplicationStatus } from "@/generated/prisma/enums";
 import { logActivity, requireAdmin } from "@/lib/admin-auth";
 import { bumpSeatsFilled } from "@/lib/admin/seats";
+import { sendTemplate } from "@/lib/messaging";
 import { prisma } from "@/lib/prisma";
+import { getSiteSettings } from "@/lib/site-settings";
 
 /** Admin actions for the Applications inbox (section 7.2). */
 
@@ -24,7 +26,14 @@ export async function setApplicationStatus(
   try {
     const before = await prisma.application.findUnique({
       where: { id },
-      select: { status: true, batchId: true },
+      select: {
+        status: true,
+        batchId: true,
+        name: true,
+        phone: true,
+        course: { select: { nameEn: true } },
+        batch: { select: { name: true } },
+      },
     });
 
     await prisma.application.update({
@@ -39,6 +48,28 @@ export async function setApplicationStatus(
       else if (before.status === "ADMITTED") {
         await bumpSeatsFilled(before.batchId, -1);
       }
+    }
+
+    // "Your seat is confirmed" is the one message an applicant is waiting for,
+    // so it goes the moment the office marks the admission. Once only: the
+    // dedupe key survives a status changed back and forth.
+    if (before && before.status !== "ADMITTED" && status === "ADMITTED") {
+      const settings = await getSiteSettings();
+      await sendTemplate({
+        key: "application-admitted",
+        to: before.phone,
+        values: {
+          name: before.name,
+          course: before.course?.nameEn ?? "",
+          batch: before.batch?.name ?? "",
+          phone: settings.contact.phone1,
+          institute: settings.general.shortName || settings.general.nameEn,
+        },
+        entity: "application",
+        entityId: id,
+        dedupeKey: `application-admitted:${id}`,
+        userId: admin.id,
+      });
     }
 
     await logActivity(admin.id, `status:${status}`, "application", id);

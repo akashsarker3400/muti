@@ -21,6 +21,7 @@ export const PERMISSIONS = [
   "promos.manage",
   "videos.manage",
   "book.manage",
+  "messages.manage",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -40,6 +41,7 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   "promos.manage": "Edit homepage promos",
   "videos.manage": "Edit institute videos",
   "book.manage": "Edit the course book",
+  "messages.manage": "Edit message templates and send SMS",
 };
 
 /**
@@ -60,6 +62,7 @@ const STAFF_DEFAULTS: ReadonlySet<Permission> = new Set([
   "promos.manage",
   "videos.manage",
   "book.manage",
+  "messages.manage",
 ]);
 
 export function hasPermission(

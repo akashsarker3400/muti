@@ -14,6 +14,7 @@ import { displayPhone, normalizePhone } from "@/lib/phone";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { notificationRecipients, sendMail } from "@/lib/mail";
+import { sendTemplate } from "@/lib/messaging";
 import { getSiteSettings } from "@/lib/site-settings";
 import { siteUrl } from "@/lib/env";
 import {
@@ -161,6 +162,24 @@ export async function submitAdmissionApplication(raw: unknown): Promise<FormResu
       ["Campaign", lead.utm?.utm_campaign ?? "—"],
     ],
     replyTo: data.email || undefined,
+  });
+
+  // An acknowledgement to the applicant. It never blocks the submission: the
+  // row is already saved, and a gateway that is down must not turn a filled
+  // form into an error message.
+  const settings = await getSiteSettings();
+  await sendTemplate({
+    key: "application-received",
+    to: phone,
+    values: {
+      name: data.name,
+      course: course.nameEn,
+      institute: settings.general.shortName || settings.general.nameEn,
+      phone: settings.contact.phone1,
+    },
+    entity: "application",
+    entityId: application.id,
+    dedupeKey: `application-received:${application.id}`,
   });
 
   return { ok: true };

@@ -25,6 +25,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  MessageSquare,
   MessageSquareQuote,
   Newspaper,
   NotebookPen,
@@ -62,6 +63,12 @@ const NAV: NavGroup[] = [
     items: [
       { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
       { href: "/admin/applications", label: "Applications", icon: Inbox },
+      { href: "/admin/messages", label: "Messages (SMS)", icon: MessageSquare },
+      {
+        href: "/admin/message-templates",
+        label: "Message templates",
+        icon: MessageSquareQuote,
+      },
     ],
   },
   {

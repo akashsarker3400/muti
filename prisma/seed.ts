@@ -435,6 +435,30 @@ async function seedCourseBookRows() {
   console.log(`+ ${seedBookPosts.length} course-book blog drafts ensured`);
 }
 
+/**
+ * The wording of the automatic messages (addendum 2, A4). Like the course
+ * book, this runs on every deploy because the site is already live, and the
+ * upsert never touches a template the office has edited.
+ */
+async function seedMessageTemplates() {
+  const { DEFAULT_TEMPLATES } = await import("../src/lib/messaging-defaults");
+
+  for (const template of DEFAULT_TEMPLATES) {
+    await prisma.messageTemplate.upsert({
+      where: { key: template.key },
+      update: {},
+      create: {
+        key: template.key,
+        name: template.name,
+        channel: template.channel,
+        body: template.body,
+        note: template.note,
+      },
+    });
+  }
+  console.log(`+ ${DEFAULT_TEMPLATES.length} message templates ensured`);
+}
+
 async function main() {
   console.log("Seeding MUTI database…");
 
@@ -449,6 +473,7 @@ async function main() {
   await seedAdminUser();
   await seedSettings();
   await seedCourseBookRows();
+  await seedMessageTemplates();
 
   if (!freshInstall) {
     console.log("· existing installation — skipping content seed");

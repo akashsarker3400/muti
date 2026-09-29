@@ -60,7 +60,8 @@ export type ResourceConfig = {
     | "boardExam"
     | "leadershipMessage"
     | "advisor"
-    | "promo";
+    | "promo"
+    | "messageTemplate";
   title: string;
   singular: string;
   description?: string;
@@ -2521,6 +2522,105 @@ const promoResource: ResourceConfig = {
   }),
 };
 
+/* -------------------------------------------------------------------------- */
+/* Message templates (addendum 2, A4)                                         */
+/* -------------------------------------------------------------------------- */
+
+const messageTemplateResource: ResourceConfig = {
+  key: "message-templates",
+  model: "messageTemplate",
+  title: "Message templates",
+  singular: "Template",
+  description:
+    "The wording of every SMS the system sends. Placeholders in braces are replaced when the message goes out: {name} {course} {batch} {date} {serial} {roll} {institute} {phone}. Keep an SMS under 160 English characters, or 70 in Bangla, or the gateway charges for two. Do not change the key: the code looks the template up by it.",
+  newLabel: "New template",
+  permission: "messages.manage",
+  columns: [
+    { key: "name", label: "Template" },
+    { key: "key", label: "Key", hideOnMobile: true },
+    {
+      key: "channel",
+      label: "Channel",
+      type: "badge",
+      labels: { SMS: "SMS", WHATSAPP: "WhatsApp", EMAIL: "Email" },
+    },
+    { key: "body", label: "Text", hideOnMobile: true },
+    { key: "active", label: "On" },
+  ],
+  searchFields: ["name", "key", "body"],
+  orderBy: [{ key: "asc" }],
+  schema: z.object({
+    key: requiredText,
+    name: requiredText,
+    channel: z.enum(["SMS", "WHATSAPP", "EMAIL"]).default("SMS"),
+    body: requiredText,
+    note: optionalText,
+    active: z.boolean().default(true),
+  }),
+  sections: () => [
+    {
+      id: "main",
+      label: "Template",
+      fields: [
+        { name: "name", label: "Name", type: "text", required: true },
+        {
+          name: "key",
+          label: "Key",
+          type: "text",
+          required: true,
+          latin: true,
+          hint: "The code finds the template by this. Changing it on a built-in template switches that message off.",
+        },
+        {
+          name: "channel",
+          label: "Channel",
+          type: "select",
+          required: true,
+          options: [
+            { value: "SMS", label: "SMS" },
+            { value: "WHATSAPP", label: "WhatsApp (needs the Cloud API connected)" },
+          ],
+        },
+        {
+          name: "body",
+          label: "Message",
+          type: "textarea",
+          required: true,
+          hint: "Bangla is fine. A Bangla SMS holds 70 characters per part, English 160.",
+        },
+        {
+          name: "note",
+          label: "When it is sent",
+          type: "text",
+          hint: "For the office. Not sent to anybody.",
+        },
+        {
+          name: "active",
+          label: "Send this message",
+          type: "checkbox",
+          hint: "Turn off to stop it going out without deleting the wording.",
+        },
+      ],
+    },
+  ],
+  toForm: (row) => ({
+    key: str(row.key),
+    name: str(row.name),
+    channel: str(row.channel) || "SMS",
+    body: str(row.body),
+    note: str(row.note),
+    active: Boolean(row.active),
+  }),
+  toData: (values) => ({
+    key: str(values.key).trim().toLowerCase().replace(/\s+/g, "-"),
+    name: str(values.name),
+    channel: str(values.channel) || "SMS",
+    body: str(values.body),
+    note: nullable(values.note),
+    active: Boolean(values.active),
+  }),
+};
+
 export const RESOURCES: Record<string, ResourceConfig> = {
   notices: noticeResource,
   faculty: facultyResource,
@@ -2546,6 +2646,7 @@ export const RESOURCES: Record<string, ResourceConfig> = {
   advisors: advisorResource,
   "health-services": healthServiceResource,
   promos: promoResource,
+  "message-templates": messageTemplateResource,
 };
 
 export function getResource(key: string): ResourceConfig | null {

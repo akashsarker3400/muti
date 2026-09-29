@@ -4,8 +4,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { logActivity, requirePermission } from "@/lib/admin-auth";
+import { formatDate, toBanglaDigits } from "@/lib/format";
 import { dhakaDateKey } from "@/lib/health";
+import { sendTemplate } from "@/lib/messaging";
 import { prisma } from "@/lib/prisma";
+import { getSiteSettings } from "@/lib/site-settings";
 
 /** Admin side of the free health service (addendum 4, §4). */
 
@@ -19,11 +22,24 @@ export async function setHealthAppointmentStatus(
   const admin = await requirePermission("health.appointments");
   if (!STATUSES.includes(status)) return { ok: false, error: "Invalid status." };
   try {
-    await prisma.healthAppointment.update({
+    const row = await prisma.healthAppointment.update({
       where: { id },
       data: { status, ...(note !== undefined ? { note: note.trim() || null } : {}) },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        serialNo: true,
+        serialDate: true,
+        preferredDate: true,
+      },
     });
     await logActivity(admin.id, "status", "healthAppointment", id);
+
+    // Confirming a serial is the moment the patient needs to be told the
+    // number and the day. Never the complaint: this is health data on
+    // somebody's lock screen (addendum 4, §5).
+    if (status === "CONFIRMED") await notifySerial(row, admin.id);
     revalidatePath("/admin/health");
     return { ok: true };
   } catch (error) {
@@ -97,6 +113,42 @@ export async function createHealthAppointmentAtDesk(raw: {
     },
   });
   await logActivity(admin.id, "create", "healthAppointment", row.id);
+  await notifySerial(row, admin.id);
   revalidatePath("/admin/health");
   return { ok: true, serialNo };
+}
+
+/** The "your serial is N" message, sent once per appointment. */
+async function notifySerial(
+  row: {
+    id: string;
+    name: string;
+    phone: string;
+    serialNo: number;
+    serialDate: string;
+    preferredDate?: Date | null;
+  },
+  userId: string,
+): Promise<void> {
+  const settings = await getSiteSettings();
+  const day =
+    row.preferredDate ??
+    new Date(
+      `${row.serialDate.slice(0, 4)}-${row.serialDate.slice(4, 6)}-${row.serialDate.slice(6, 8)}T00:00:00.000Z`,
+    );
+
+  await sendTemplate({
+    key: "appointment-confirmed",
+    to: row.phone,
+    values: {
+      name: row.name,
+      serial: toBanglaDigits(row.serialNo),
+      date: formatDate(day, "bn"),
+      institute: settings.general.shortName || settings.general.nameEn,
+    },
+    entity: "appointment",
+    entityId: row.id,
+    dedupeKey: `appointment-confirmed:${row.id}`,
+    userId,
+  });
 }

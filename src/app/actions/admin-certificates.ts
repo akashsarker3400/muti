@@ -395,3 +395,55 @@ export async function clearCertificateDelivery(
     return { ok: false, error: "Could not undo that." };
   }
 }
+
+/**
+ * "Your certificate is ready, please collect it" by SMS.
+ *
+ * Kept off the approval action on purpose: approving forty certificates must
+ * stay instant, and the office often approves in the evening but wants the
+ * students told in the morning. One message per certificate, ever.
+ */
+export async function notifyCertificateReady(
+  ids: string[],
+): Promise<{ ok: boolean; sent?: number; skipped?: number; error?: string }> {
+  const admin = await requirePermission("certificates.manage");
+  const wanted = [...new Set(ids.filter(Boolean))].slice(0, 100);
+  if (wanted.length === 0) return { ok: false, error: "Nothing selected." };
+
+  const { sendTemplate } = await import("@/lib/messaging");
+  const settings = await getSiteSettings();
+  const institute = settings.general.shortName || settings.general.nameEn;
+
+  const certificates = await prisma.certificate.findMany({
+    where: { id: { in: wanted }, deletedAt: null, approvedAt: { not: null } },
+    select: {
+      id: true,
+      student: { select: { name: true, phone: true, roll: true } },
+      course: { select: { nameEn: true } },
+    },
+  });
+
+  let sent = 0;
+  let skipped = 0;
+  for (const certificate of certificates) {
+    const result = await sendTemplate({
+      key: "certificate-ready",
+      to: certificate.student.phone ?? "",
+      values: {
+        name: certificate.student.name,
+        roll: certificate.student.roll,
+        course: certificate.course.nameEn,
+        institute,
+      },
+      entity: "certificate",
+      entityId: certificate.id,
+      dedupeKey: `certificate-ready:${certificate.id}`,
+      userId: admin.id,
+    });
+    if (result.sent) sent += 1;
+    else skipped += 1;
+  }
+
+  revalidatePath("/admin/certificates/register");
+  return { ok: true, sent, skipped };
+}

@@ -6,6 +6,7 @@ import {
   BadgeCheck,
   Handshake,
   Loader2,
+  MessageSquare,
   Printer,
   RotateCcw,
   ShieldCheck,
@@ -14,6 +15,7 @@ import { toast } from "sonner";
 
 import {
   clearCertificateDelivery,
+  notifyCertificateReady,
   recordCertificateDelivery,
   setCertificateApproval,
 } from "@/app/actions/admin-certificates";
@@ -73,6 +75,7 @@ export function CertificateRegister({
   const pendingApproval = rows.filter(
     (row) => !row.approvedAt && row.status === "VALID",
   );
+  const approvedRows = rows.filter((row) => row.approvedAt && row.status === "VALID");
   const selected = [...ticked].filter((id) => rows.some((row) => row.id === id));
 
   function toggle(id: string, next: boolean) {
@@ -114,8 +117,50 @@ export function CertificateRegister({
     });
   }
 
+  function notify() {
+    const ready = selected.filter((id) =>
+      rows.some((row) => row.id === id && row.approvedAt && row.status === "VALID"),
+    );
+    if (ready.length === 0) {
+      toast.error("Tick approved certificates first.");
+      return;
+    }
+    startTransition(async () => {
+      const result = await notifyCertificateReady(ready);
+      if (!result.ok) {
+        toast.error(result.error ?? "Could not send.");
+        return;
+      }
+      toast.success(
+        `${result.sent} student${result.sent === 1 ? "" : "s"} told by SMS.` +
+          (result.skipped ? ` ${result.skipped} skipped (see Messages).` : ""),
+      );
+      setTicked(new Set());
+      router.refresh();
+    });
+  }
+
   return (
     <div className="space-y-4">
+      {approvedRows.length > 0 && (
+        <Panel className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-[color:var(--muted-foreground)]">
+            Tick the approved certificates and tell those students by SMS that they can
+            collect them. One message per certificate, ever.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="cta"
+            disabled={pending || selected.length === 0}
+            onClick={notify}
+          >
+            <MessageSquare className="size-4" aria-hidden="true" />
+            Tell {selected.length > 0 ? selected.length : ""} by SMS
+          </Button>
+        </Panel>
+      )}
+
       {canApprove && pendingApproval.length > 0 && (
         <Panel className="flex flex-wrap items-center justify-between gap-3">
           <label className="flex items-center gap-2 text-sm font-medium">
@@ -167,7 +212,7 @@ export function CertificateRegister({
           <table className="w-full min-w-[52rem] border-collapse text-sm">
             <thead>
               <tr className="border-b border-[color:var(--border)] bg-[color:var(--bg-soft)]">
-                {canApprove && <th scope="col" className="w-10 px-4 py-3" />}
+                <th scope="col" className="w-10 px-4 py-3" />
                 <th scope="col" className="px-4 py-3 text-start font-semibold">
                   Number
                 </th>
@@ -204,16 +249,14 @@ export function CertificateRegister({
                 return (
                   <Fragment key={row.id}>
                     <tr className="hover:bg-[color:var(--bg-soft)]">
-                      {canApprove && (
-                        <td className="px-4 py-2.5">
-                          <Checkbox
-                            checked={ticked.has(row.id)}
-                            disabled={revoked || Boolean(row.deliveredAt)}
-                            onCheckedChange={(next) => toggle(row.id, next === true)}
-                            aria-label={`Select ${row.certificateNo}`}
-                          />
-                        </td>
-                      )}
+                      <td className="px-4 py-2.5">
+                        <Checkbox
+                          checked={ticked.has(row.id)}
+                          disabled={revoked || Boolean(row.deliveredAt)}
+                          onCheckedChange={(next) => toggle(row.id, next === true)}
+                          aria-label={`Select ${row.certificateNo}`}
+                        />
+                      </td>
                       <td className="px-4 py-2.5 font-latin whitespace-nowrap">
                         {row.certificateNo}
                         {revoked && (
@@ -319,7 +362,7 @@ export function CertificateRegister({
 
                     {openHandover === row.id && (
                       <tr className="bg-[color:var(--bg-soft)]">
-                        <td colSpan={canApprove ? 8 : 7} className="px-4 py-4">
+                        <td colSpan={8} className="px-4 py-4">
                           <HandoverForm
                             row={row}
                             onDone={() => {

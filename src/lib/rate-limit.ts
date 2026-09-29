@@ -8,7 +8,13 @@ import { prisma } from "@/lib/prisma";
  * ever run with more than one instance.
  */
 export type RateLimitScope =
-  "application" | "verify" | "login" | "health" | "photo" | "certificateNumber";
+  | "application"
+  | "verify"
+  | "login"
+  | "health"
+  | "photo"
+  | "certificateNumber"
+  | "message";
 
 const WINDOWS: Record<RateLimitScope, { max: number; windowMs: number }> = {
   // 5 submissions per hour per IP (section 5.6).
@@ -25,6 +31,10 @@ const WINDOWS: Record<RateLimitScope, { max: number; windowMs: number }> = {
   // a stuck loop or a careless script cannot burn thousands of numbers out of
   // the series before anyone notices.
   certificateNumber: { max: 120, windowMs: 60 * 60 * 1000 },
+  // Messages an admin sends by hand. Each one is charged by the gateway, so
+  // the cap is per account rather than per IP: a shared office connection
+  // must not stop the second person working.
+  message: { max: 60, windowMs: 60 * 60 * 1000 },
 };
 
 /** Best-effort client IP from the proxy headers Coolify / Cloudflare set. */

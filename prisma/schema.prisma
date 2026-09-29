@@ -193,6 +193,7 @@ model User {
   approvedCertificates Certificate[]      @relation("CertificateApprover")
   issuedCertificates   Certificate[]      @relation("CertificateIssuer")
   certificatePrints    CertificatePrint[]
+  messages             MessageLog[]
 }
 
 /// Single row (id = 1) holding the whole Site Settings JSON blob (section 7.11).
@@ -1046,4 +1047,69 @@ model BookSampleDownload {
 
   @@index([applicationId])
   @@index([createdAt])
+}
+
+/// Which way a message went out (addendum 2, A4 — SMS and WhatsApp).
+enum MessageChannel {
+  SMS
+  WHATSAPP
+  EMAIL
+}
+
+enum MessageStatus {
+  /// Accepted by the provider.
+  SENT
+  /// The provider refused it, or no provider is configured.
+  FAILED
+  /// Deliberately not sent: no phone number, or the office turned it off.
+  SKIPPED
+}
+
+/// The wording of one automatic or one-click message. Seeded with a set of
+/// keys the code knows about; the office edits the text, never the key.
+model MessageTemplate {
+  id      String         @id @default(cuid())
+  /// Stable identifier the sender looks up, e.g. "application-received".
+  key     String         @unique
+  name    String
+  channel MessageChannel @default(SMS)
+  /// Placeholders in braces: {name} {course} {batch} {date} {time} {serial}
+  /// {roll} {institute} {phone}. Unknown ones are left as typed.
+  body    String         @db.Text
+  active  Boolean        @default(true)
+  note    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Every message the system sent or tried to send. This is the outbox the
+/// office reads when a student says "I was never told", and the record that
+/// stops an automatic reminder going out twice.
+model MessageLog {
+  id        String         @id @default(cuid())
+  channel   MessageChannel
+  /// Phone in +8801XXXXXXXXX form, or an email address.
+  to        String
+  body      String         @db.Text
+  status    MessageStatus
+  /// Which provider accepted or refused it, for reading the log later.
+  provider  String?
+  error     String?
+  template  String?
+  /// What the message was about: "application", "student", "appointment", …
+  entity    String?
+  entityId  String?
+  /// Set for automatic messages only, and unique, so a reminder sent once is
+  /// never sent again however often the job runs.
+  dedupeKey String?        @unique
+  /// The admin who pressed send; empty for anything the scheduler sent.
+  userId    String?
+  user      User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entity, entityId])
+  @@index([channel, status])
 }
