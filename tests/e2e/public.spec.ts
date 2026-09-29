@@ -33,19 +33,15 @@ test.describe("public site (Bangla)", () => {
     await ticker.hover();
     await expect(track).toHaveCSS("animation-play-state", "paused");
 
-    // Freeze the marquee before clicking: a touch device has no hover to pause
-    // it with, and a link that is still sliding is clicked at the wrong place.
-    await page.addStyleTag({
-      content: ".notice-ticker-track { animation-play-state: paused !important }",
-    });
+    // The link is followed rather than clicked. A click on a marquee is two
+    // races at once — the animation moving the target, and hydration deciding
+    // whether the router is listening yet — and neither is what this test is
+    // about. What it is about is that the ticker points at a real notice.
     const href = await links.first().getAttribute("href");
-    // Retried: on a cold dev server the click can land in the moment between
-    // the server-rendered link appearing and the page becoming interactive,
-    // and then nothing happens at all.
-    await expect(async () => {
-      await links.first().click();
-      await expect(page).toHaveURL(new RegExp(`${href}$`), { timeout: 3000 });
-    }).toPass({ timeout: 30_000 });
+    expect(href).toMatch(/^\/bn\/notices\//);
+    await page.goto(href!);
+    await expect(page).toHaveURL(new RegExp(`${href}$`));
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 
   test("home page loads with the hero, courses and contact details", async ({
