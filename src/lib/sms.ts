@@ -78,15 +78,11 @@ export function buildRequest(
   message: string,
 ): { url: string; init: RequestInit } {
   switch (provider) {
-    // eSMS / DianaSMS (the Xend platform, https://esms.com.bd). Bearer token,
-    // form-encoded body, one number or a comma separated list.
+    // eSMS / DianaSMS (the Xend platform, https://esms.com.bd). Bearer token
+    // and a JSON body, one number or a comma separated list. It must be JSON:
+    // the live server ignored a form-encoded body and answered "The recipient
+    // field is required" although every field was there.
     case "esms": {
-      const body = new URLSearchParams({
-        recipient: number,
-        sender_id: options.senderId ?? "",
-        type: isUnicode(message) ? "unicode" : "plain",
-        message,
-      });
       return {
         url: xendEndpoint(options.url),
         init: {
@@ -94,9 +90,14 @@ export function buildRequest(
           headers: {
             authorization: `Bearer ${options.apiKey}`,
             accept: "application/json",
-            "content-type": "application/x-www-form-urlencoded",
+            "content-type": "application/json",
           },
-          body: body.toString(),
+          body: JSON.stringify({
+            recipient: number,
+            sender_id: options.senderId ?? "",
+            type: isUnicode(message) ? "unicode" : "plain",
+            message,
+          }),
         },
       };
     }

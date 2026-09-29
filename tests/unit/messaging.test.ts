@@ -89,7 +89,7 @@ describe("gateway number", () => {
 });
 
 describe("eSMS / DianaSMS (the Xend platform)", () => {
-  it("posts a bearer token and a form body to the documented endpoint", () => {
+  it("posts a bearer token and a JSON body to the documented endpoint", () => {
     const { url, init } = buildRequest(
       "esms",
       { apiKey: "TOKEN", senderId: "MUTI" },
@@ -99,10 +99,17 @@ describe("eSMS / DianaSMS (the Xend platform)", () => {
     expect(url).toBe("https://login.esms.com.bd/api/v3/sms/send");
     expect(init.method).toBe("POST");
     expect((init.headers as Record<string, string>).authorization).toBe("Bearer TOKEN");
-    const body = new URLSearchParams(String(init.body));
-    expect(body.get("recipient")).toBe("8801778838644");
-    expect(body.get("sender_id")).toBe("MUTI");
-    expect(body.get("message")).toBe("hello");
+    // JSON, not a form: the live gateway ignored a form body and answered
+    // "The recipient field is required".
+    expect((init.headers as Record<string, string>)["content-type"]).toBe(
+      "application/json",
+    );
+    expect(JSON.parse(String(init.body))).toEqual({
+      recipient: "8801778838644",
+      sender_id: "MUTI",
+      type: "plain",
+      message: "hello",
+    });
   });
 
   it("sends Bangla as unicode, not plain", () => {
@@ -116,7 +123,7 @@ describe("eSMS / DianaSMS (the Xend platform)", () => {
       "8801778838644",
       "আপনার ক্লাস শুরু হচ্ছে",
     );
-    expect(new URLSearchParams(String(bangla.init.body)).get("type")).toBe("unicode");
+    expect(JSON.parse(String(bangla.init.body)).type).toBe("unicode");
 
     const english = buildRequest(
       "esms",
@@ -124,7 +131,7 @@ describe("eSMS / DianaSMS (the Xend platform)", () => {
       "8801778838644",
       "Your class starts soon",
     );
-    expect(new URLSearchParams(String(english.init.body)).get("type")).toBe("plain");
+    expect(JSON.parse(String(english.init.body)).type).toBe("plain");
   });
 
   it("uses the DianaSMS host when one is configured, however it is pasted", () => {
