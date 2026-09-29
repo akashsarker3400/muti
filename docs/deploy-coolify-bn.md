@@ -365,6 +365,13 @@ schedule: 0 2 * * *
 command: curl -fsS -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/run
 ```
 
+মালিকের সাপ্তাহিক সারসংক্ষেপের জন্য আরও একটি টাস্ক:
+
+```
+schedule: 0 9 * * 6
+command: curl -fsS -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/weekly
+```
+
 একটার জন্য আলাদা সময় দরকার হলে আলাদা ঠিকানাও আছে:
 `/api/cron/messages`, `/api/cron/anonymize`, `/api/cron/backup`।
 একটা কাজ আটকে গেলেও বাকিগুলো চলে।
