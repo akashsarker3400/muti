@@ -269,3 +269,71 @@ export function BookJsonLd({
     />
   );
 }
+
+/**
+ * One blog post (section 10, and addendum 5 A5 for the review byline).
+ *
+ * `reviewedBy` is the part that matters for a medical article: Google's own
+ * guidance for health content asks who checked it, and a reader deserves the
+ * same answer. When the office has not recorded a reviewer the property is
+ * left out rather than filled with the institute's name, because that would
+ * be a claim nobody made.
+ */
+export function ArticleJsonLd({
+  post,
+  settings,
+  locale,
+  path,
+}: {
+  post: {
+    titleBn: string | null;
+    titleEn: string;
+    excerpt: string | null;
+    cover: string | null;
+    tags: string[];
+    publishedAt: Date | null;
+    updatedAt: Date;
+    reviewedBy: string | null;
+    reviewedAt: Date | null;
+  };
+  settings: SiteSettings;
+  locale: Locale;
+  path: string;
+}) {
+  const publisher = {
+    "@type": "EducationalOrganization",
+    name: pick(locale, settings.general.nameBn, settings.general.nameEn),
+    url: siteUrl,
+    ...(settings.branding.logo
+      ? { logo: { "@type": "ImageObject", url: `${siteUrl}${settings.branding.logo}` } }
+      : {}),
+  };
+
+  return (
+    <JsonLd
+      data={{
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: pick(locale, post.titleBn, post.titleEn).slice(0, 110),
+        ...(post.excerpt ? { description: post.excerpt } : {}),
+        inLanguage: locale === "bn" ? "bn-BD" : "en",
+        mainEntityOfPage: { "@type": "WebPage", "@id": `${siteUrl}${path}` },
+        url: `${siteUrl}${path}`,
+        ...(post.cover ? { image: [`${siteUrl}${post.cover}`] } : {}),
+        ...(post.publishedAt ? { datePublished: post.publishedAt.toISOString() } : {}),
+        dateModified: post.updatedAt.toISOString(),
+        author: publisher,
+        publisher,
+        ...(post.tags.length > 0 ? { keywords: post.tags.join(", ") } : {}),
+        ...(post.reviewedBy
+          ? {
+              reviewedBy: { "@type": "Person", name: post.reviewedBy },
+              ...(post.reviewedAt
+                ? { lastReviewed: post.reviewedAt.toISOString() }
+                : {}),
+            }
+          : {}),
+      }}
+    />
+  );
+}

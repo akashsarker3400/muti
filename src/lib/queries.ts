@@ -306,6 +306,52 @@ export const getPostBySlug = cache(async (slug: string) => {
   });
 });
 
+/**
+ * Other posts a reader of this one would want, most shared tags first.
+ *
+ * Internal links between related articles are the cheapest thing a small site
+ * can do for its search ranking, and the most useful thing for somebody who
+ * has just read about hydronephrosis grading. Falls back to the newest posts
+ * when nothing shares a tag, so the section is never empty on a young blog.
+ */
+export const getRelatedPosts = cache(
+  async (slug: string, tags: string[], take = 3) => {
+    try {
+      const pool = await prisma.post.findMany({
+        where: {
+          published: true,
+          publishedAt: { lte: new Date() },
+          slug: { not: slug },
+        },
+        orderBy: { publishedAt: "desc" },
+        take: 40,
+        select: {
+          slug: true,
+          titleBn: true,
+          titleEn: true,
+          excerpt: true,
+          cover: true,
+          tags: true,
+          publishedAt: true,
+        },
+      });
+
+      const wanted = new Set(tags.map((tag) => tag.toLowerCase()));
+      return pool
+        .map((post) => ({
+          post,
+          shared: post.tags.filter((tag) => wanted.has(tag.toLowerCase())).length,
+        }))
+        .sort((a, b) => b.shared - a.shared)
+        .slice(0, take)
+        .map((entry) => entry.post);
+    } catch (error) {
+      console.error("getRelatedPosts failed", error);
+      return [];
+    }
+  },
+);
+
 export const getPageBySlug = cache(async (slug: string) => {
   try {
     return await prisma.page.findFirst({ where: { slug, published: true } });

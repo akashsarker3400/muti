@@ -330,7 +330,12 @@
     "title": "Blog",
     "subtitle": "Writing about ultrasound education and careers",
     "empty": "No posts have been published yet.",
-    "publishedOn": "Published"
+    "publishedOn": "Published",
+    "reviewedBy": "Medically reviewed by {name}",
+    "reviewedOn": "reviewed {date}",
+    "updatedOn": "Updated",
+    "readingTime": "{minutes} min read",
+    "related": "Read next"
   },
   "faq": {
     "title": "Frequently asked questions",

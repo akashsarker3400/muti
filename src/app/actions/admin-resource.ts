@@ -48,6 +48,9 @@ export async function saveResource(
     return { ok: false, errors: zodFieldErrors(parsed.error) };
   }
 
+  const rule = resource.validate?.(parsed.data as Record<string, unknown>);
+  if (rule) return { ok: false, error: rule };
+
   const admin = await requireAdmin();
 
   // Some resources need to compare against the row as it is today — batches

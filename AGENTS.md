@@ -112,5 +112,10 @@ database access, so nothing can be prerendered at build time.
   Anything under `protected/` is only reachable through a signed route
   (`/api/v1/book/sample`). Videos, posters and protected files have a `Media`
   row; ordinary images and PDFs do not.
+- A blog post with `needsReview` cannot be published: the rule is the
+  `validate` hook on the blog resource, enforced in `saveResource`. The
+  reviewer's name and date are typed (`Post.reviewedBy`/`reviewedAt`) and are
+  rendered both as a byline and as `reviewedBy`/`lastReviewed` in the
+  BlogPosting JSON-LD.
 - Addendum 5 part B (portal reader, MCQ bank, case images) is Phase 2: not
   built, schema left compatible.

@@ -740,6 +740,11 @@ model Post {
   /// is published (addendum 5, A5).
   needsReview Boolean   @default(false)
 
+  /// Who checked the medical content, and when (addendum 5, A5). The reviewer
+  /// is a doctor, not necessarily an admin account, so the name is typed.
+  reviewedBy String?
+  reviewedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

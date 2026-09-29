@@ -90,6 +90,11 @@ export type ResourceConfig = {
   schema: z.ZodType;
   sections: (options: OptionMap) => FormSection[];
   loadOptions?: () => Promise<OptionMap>;
+  /**
+   * A rule the zod schema cannot express because it spans fields. Return a
+   * message to refuse the save; the form shows it above the buttons.
+   */
+  validate?: (values: Record<string, unknown>) => string | null;
   /** Database row -> form values. */
   toForm: (row: Record<string, unknown>) => FormValues;
   /** Form values -> Prisma data. Runs after `schema` has validated. */
@@ -926,6 +931,8 @@ const postResource: ResourceConfig = {
     published: z.boolean().default(false),
     publishedAt: optionalText,
     needsReview: z.boolean().default(false),
+    reviewedBy: optionalText,
+    reviewedAt: optionalText,
   }),
   sections: () => [
     {
@@ -970,17 +977,36 @@ const postResource: ResourceConfig = {
           name: "needsReview",
           label: "Needs faculty review",
           type: "checkbox",
-          hint: "Drafts written from the course book keep this ticked until a doctor has checked the medical content. Untick after review, then publish.",
+          hint: "Drafts written from the course book keep this ticked until a doctor has checked the medical content. The post cannot be published while it is ticked.",
         },
+        {
+          name: "reviewedBy",
+          label: "Medically reviewed by",
+          type: "text",
+          hint: "The doctor who checked it, with their degree, e.g. “Dr. Ashraful Islam, MBBS, DMU”. Printed under the title, which is what makes a medical article trustworthy to a reader and to Google.",
+        },
+        { name: "reviewedAt", label: "Date of review", type: "date" },
         publishedField,
       ],
     },
   ],
+  /**
+   * Addendum 5, A5: the course-book drafts carry medical claims, so one
+   * cannot be published while it is still marked as needing a doctor's
+   * review. Enforced here rather than in the form, because a server action is
+   * a public endpoint.
+   */
+  validate: (values) =>
+    Boolean(values.published) && Boolean(values.needsReview)
+      ? "This post is still marked “Needs faculty review”. A doctor must check the medical content first: write the reviewer’s name below, untick the review box, then publish."
+      : null,
   toForm: (row) => ({
     titleBn: str(row.titleBn),
     titleEn: str(row.titleEn),
     slug: str(row.slug),
     excerpt: str(row.excerpt),
+    reviewedBy: str(row.reviewedBy),
+    reviewedAt: fromDate(row.reviewedAt),
     bodyBn: str(row.bodyBn),
     bodyEn: str(row.bodyEn),
     cover: str(row.cover),
@@ -1010,6 +1036,11 @@ const postResource: ResourceConfig = {
       // Publishing without a date stamps "now"; a draft keeps no date.
       publishedAt: explicitDate ?? (published ? new Date() : null),
       needsReview: Boolean(values.needsReview),
+      reviewedBy: nullable(values.reviewedBy),
+      // A reviewer's name with no date is stamped today: the office has just
+      // typed it, and a byline without a date is worth less than no byline.
+      reviewedAt:
+        toDate(values.reviewedAt) ?? (str(values.reviewedBy) ? new Date() : null),
     };
   },
 };
