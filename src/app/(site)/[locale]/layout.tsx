@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import "@/app/globals.css";
 
 import { Analytics } from "@/components/site/analytics";
+import { VisitorBeacon } from "@/components/site/visitor-beacon";
 import { AnnouncementBar } from "@/components/site/announcement-bar";
 import { BrandTheme } from "@/components/site/brand-theme";
 import { LeadTracker } from "@/components/site/lead-tracker";
@@ -158,6 +159,7 @@ export default async function SiteLayout({
         <BrandTheme settings={settings} />
         <LeadTracker />
         <Analytics settings={settings} />
+        {settings.integrations.visitorStats && <VisitorBeacon locale={locale} />}
       </body>
     </html>
   );

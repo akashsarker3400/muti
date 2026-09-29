@@ -86,6 +86,12 @@ database access, so nothing can be prerendered at build time.
   at rest with a key derived from `AUTH_SECRET`. Auth.js needs a
   `CredentialsSignin` **subclass** per outcome, because the constructor
   argument is the message, not the `code` the client reads.
+- Visitor counting is ours: `<VisitorBeacon>` posts to `/api/v1/hit` and
+  `src/lib/visitors.ts` stores a path, a day and a daily-rotating hash. Never
+  store an address or set a cookie there, and keep `/admin` out of the counts.
+- The nightly `pg_dump` lives in `src/lib/backup.ts`; `DATABASE_URL` must go
+  through `pgDumpUrl()` first, because libpq rejects Prisma's `?schema=`.
+  Backups are super admin only and readable only through `/api/admin/backup`.
 - Security headers live in `next.config.ts`; add a new embed origin to the CSP
   there or the iframe will silently fail.
 - `ADMIN_HOST` (optional) serves the admin panel from its own hostname; the

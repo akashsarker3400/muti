@@ -1118,3 +1118,24 @@ model MessageLog {
   @@index([entity, entityId])
   @@index([channel, status])
 }
+
+/// One page view, counted without a cookie and without storing an address
+/// (addendum 2, A6). `visitor` is a hash that changes every day, so the same
+/// person can be counted once today and is unrecognisable tomorrow.
+model PageView {
+  id           String   @id @default(cuid())
+  /// "YYYYMMDD" in Dhaka time, which is the day the office thinks in.
+  day          String
+  path         String
+  locale       String?
+  /// Host only, never the full referring URL.
+  referrerHost String?
+  /// "mobile" or "desktop".
+  device       String?
+  visitor      String
+  createdAt    DateTime @default(now())
+
+  @@index([day])
+  @@index([day, path])
+  @@index([day, visitor])
+}

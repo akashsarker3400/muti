@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import {
   Award,
   BadgeCheck,
+  BarChart3,
+  DatabaseBackup,
   BadgePlus,
   BookOpen,
   CreditCard,
@@ -153,6 +155,13 @@ const NAV: NavGroup[] = [
     title: "System",
     items: [
       { href: "/admin/settings", label: "Site settings", icon: Settings },
+      { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+      {
+        href: "/admin/backups",
+        label: "Backups",
+        icon: DatabaseBackup,
+        superAdminOnly: true,
+      },
       { href: "/admin/media", label: "Media", icon: Images },
       { href: "/admin/needs-english", label: "Needs English", icon: Languages },
       { href: "/admin/security", label: "Security", icon: ShieldCheck },

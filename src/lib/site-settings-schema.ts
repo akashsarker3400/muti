@@ -137,6 +137,12 @@ export const siteSettingsSchema = z.object({
       metaPixelId: optionalString,
       /** Comma separated list; SMTP credentials stay in env (section 7.11). */
       notifyEmails: optionalString,
+      /**
+       * First-party visitor counting (addendum 2, A6). On by default: it sets
+       * no cookie, stores no address, and is the only way the office sees
+       * whether anybody read a page.
+       */
+      visitorStats: z.boolean().default(true),
     })
     .prefault({}),
 
@@ -366,6 +372,7 @@ export const defaultSiteSettings: SiteSettings = siteSettingsSchema.parse({
   integrations: {
     ga4Id: "",
     metaPixelId: "",
+    visitorStats: true,
     notifyEmails: "mymensinghultrasound@gmail.com",
   },
   footer: {

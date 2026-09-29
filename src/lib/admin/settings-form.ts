@@ -436,6 +436,13 @@ export const settingsFormSections: FormSection[] = [
         latin: true,
       },
       {
+        name: "integrations.visitorStats",
+        label: "Count visitors on this site",
+        type: "checkbox",
+        full: true,
+        hint: "Our own counter, shown under Analytics in the admin. No cookie, no address stored, nothing sent to another company. Turning it off leaves the Analytics page empty from that day.",
+      },
+      {
         name: "integrations.notifyEmails",
         label: "Notification emails",
         type: "text",

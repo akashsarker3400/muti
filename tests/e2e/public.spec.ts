@@ -35,8 +35,13 @@ test.describe("public site (Bangla)", () => {
       content: ".notice-ticker-track { animation-play-state: paused !important }",
     });
     const href = await links.first().getAttribute("href");
-    await links.first().click();
-    await expect(page).toHaveURL(new RegExp(`${href}$`));
+    // Retried: on a cold dev server the click can land in the moment between
+    // the server-rendered link appearing and the page becoming interactive,
+    // and then nothing happens at all.
+    await expect(async () => {
+      await links.first().click();
+      await expect(page).toHaveURL(new RegExp(`${href}$`), { timeout: 3000 });
+    }).toPass({ timeout: 30_000 });
   });
 
   test("home page loads with the hero, courses and contact details", async ({

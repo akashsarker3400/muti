@@ -9,9 +9,19 @@
  */
 const PUBLIC = /^[a-z0-9-]+\/[a-z0-9]+\.(webp|jpe?g|png|gif|svg|pdf|mp4)$/i;
 const PROTECTED = /^protected\/[a-z0-9-]+\/[a-z0-9]+\.(pdf)$/i;
+/**
+ * Database dumps: "protected/backups/20260929-031500.dump". Its own pattern
+ * rather than a looser `protected/` rule, so the only thing that can ever be
+ * written or read under that prefix is a file this application named.
+ */
+const BACKUP = /^protected\/backups\/\d{8}-\d{6}\.dump$/;
 
 export function isSafeKey(key: string): boolean {
-  return PUBLIC.test(key) || PROTECTED.test(key);
+  return PUBLIC.test(key) || PROTECTED.test(key) || BACKUP.test(key);
+}
+
+export function isBackupKey(key: string): boolean {
+  return BACKUP.test(key);
 }
 
 export function isPublicKey(key: string): boolean {

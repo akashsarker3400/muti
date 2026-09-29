@@ -62,7 +62,15 @@ RUN npm init -y > /dev/null \
 # --- runtime ---------------------------------------------------------------
 FROM base AS runner
 # ffmpeg makes the poster frame for uploaded videos (homepage additions, 2b).
-RUN apk add --no-cache ffmpeg
+# pg_dump is the nightly backup (addendum 2, A6). The package name carries the
+# major version on Alpine and moves between releases, so the fallbacks keep a
+# rename from breaking the whole image; the backup page reports honestly if
+# none of them landed.
+RUN apk add --no-cache ffmpeg \
+  && (apk add --no-cache postgresql17-client \
+    || apk add --no-cache postgresql16-client \
+    || apk add --no-cache postgresql-client \
+    || echo "WARNING: no postgresql client package; /admin/backups will say so")
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000

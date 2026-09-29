@@ -14,7 +14,8 @@ export type RateLimitScope =
   | "health"
   | "photo"
   | "certificateNumber"
-  | "message";
+  | "message"
+  | "hit";
 
 const WINDOWS: Record<RateLimitScope, { max: number; windowMs: number }> = {
   // 5 submissions per hour per IP (section 5.6).
@@ -35,6 +36,9 @@ const WINDOWS: Record<RateLimitScope, { max: number; windowMs: number }> = {
   // the cap is per account rather than per IP: a shared office connection
   // must not stop the second person working.
   message: { max: 60, windowMs: 60 * 60 * 1000 },
+  // Page views. Generous for a real reader, low enough that a script cannot
+  // quietly inflate the office's visitor numbers.
+  hit: { max: 240, windowMs: 60 * 60 * 1000 },
 };
 
 /** Best-effort client IP from the proxy headers Coolify / Cloudflare set. */
