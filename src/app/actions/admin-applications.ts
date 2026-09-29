@@ -2,12 +2,22 @@
 
 import { revalidatePath } from "next/cache";
 
+import { Prisma } from "@/generated/prisma/client";
 import type { ApplicationStatus } from "@/generated/prisma/enums";
 import { logActivity, requireAdmin } from "@/lib/admin-auth";
+import {
+  applicationEditSchema,
+  diffApplication,
+  EDIT_ERROR_TEXT,
+  toApplicationValues,
+  type ApplicationEditInput,
+} from "@/lib/admin/application-edit";
 import { bumpSeatsFilled } from "@/lib/admin/seats";
 import { sendTemplate } from "@/lib/messaging";
 import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/site-settings";
+import { fieldErrors } from "@/lib/validation";
+import { normalizeBmdc } from "@/lib/verify";
 
 /** Admin actions for the Applications inbox (section 7.2). */
 
@@ -189,5 +199,128 @@ export async function bulkSetStatus(
   } catch (error) {
     console.error("bulkSetStatus failed", error);
     return { ok: false, error: "The change could not be saved." };
+  }
+}
+
+/**
+ * Super admin correction of an application after it was sent (a typo in the
+ * name, a wrong number, the wrong course). Every save writes the old and new
+ * value of each changed field to the activity log, so a correction can be
+ * traced back. When the applicant is already a student, `syncStudent` copies
+ * the corrected personal fields to that record too: only the fields changed
+ * in this save, so a correction made on the student record is not undone.
+ * Course and batch are not copied, because a student's course carries a roll
+ * number and a fee plan.
+ */
+export async function updateApplication(
+  id: string,
+  input: ApplicationEditInput,
+  options: { syncStudent?: boolean } = {},
+): Promise<{
+  ok: boolean;
+  error?: string;
+  fieldErrors?: Record<string, string>;
+  changed?: number;
+  studentUpdated?: boolean;
+}> {
+  const admin = await requireAdmin();
+  if (admin.role !== "SUPER_ADMIN") {
+    return { ok: false, error: "Only a super admin can edit an application." };
+  }
+
+  const parsed = applicationEditSchema.safeParse(input);
+  if (!parsed.success) {
+    const errors = fieldErrors(parsed.error);
+    for (const key of Object.keys(errors)) {
+      errors[key] = EDIT_ERROR_TEXT[errors[key]!] ?? errors[key]!;
+    }
+    return {
+      ok: false,
+      error: "Please correct the marked fields.",
+      fieldErrors: errors,
+    };
+  }
+  const values = toApplicationValues(parsed.data);
+
+  try {
+    const before = await prisma.application.findUnique({
+      where: { id },
+      include: { student: { select: { id: true } } },
+    });
+    if (!before) return { ok: false, error: "Application not found." };
+
+    if (values.batchId) {
+      const batch = await prisma.batch.findUnique({
+        where: { id: values.batchId },
+        select: { courseId: true },
+      });
+      if (!batch || batch.courseId !== values.courseId) {
+        return {
+          ok: false,
+          error: "That batch belongs to a different course.",
+          fieldErrors: { batchId: "Choose a batch of the selected course." },
+        };
+      }
+    }
+
+    const changes = diffApplication(before, values);
+    if (Object.keys(changes).length === 0) return { ok: true, changed: 0 };
+
+    await prisma.application.update({
+      where: { id },
+      data: { ...values, education: values.education ?? Prisma.DbNull },
+    });
+
+    // An admitted applicant holds a seat in their batch; moving them moves it.
+    if (before.status === "ADMITTED" && before.batchId !== values.batchId) {
+      await bumpSeatsFilled(before.batchId, -1);
+      await bumpSeatsFilled(values.batchId, 1);
+    }
+
+    let studentUpdated = false;
+    if (options.syncStudent && before.student) {
+      const studentData: Record<string, unknown> = {};
+      const copy: Array<[keyof typeof values, string]> = [
+        ["name", "name"],
+        ["phone", "phone"],
+        ["email", "email"],
+        ["dateOfBirth", "dateOfBirth"],
+        ["fatherName", "fatherName"],
+        ["motherName", "motherName"],
+        ["nationalId", "nid"],
+        ["bloodGroup", "bloodGroup"],
+        ["presentAddress", "address"],
+      ];
+      for (const [from, to] of copy) {
+        if (from in changes) studentData[to] = values[from];
+      }
+      if ("bmdc" in changes) {
+        studentData.bmdc = values.bmdc;
+        studentData.bmdcNormalized = values.bmdc ? normalizeBmdc(values.bmdc) : null;
+      }
+      if (Object.keys(studentData).length > 0) {
+        await prisma.student.update({
+          where: { id: before.student.id },
+          data: studentData,
+        });
+        await logActivity(
+          admin.id,
+          "edit-from-application",
+          "student",
+          before.student.id,
+          studentData as Prisma.InputJsonValue,
+        );
+        studentUpdated = true;
+      }
+    }
+
+    await logActivity(admin.id, "edit", "application", id, changes);
+    revalidatePath("/admin/applications");
+    revalidatePath(`/admin/applications/${id}/edit`);
+    if (studentUpdated) revalidatePath("/admin/students");
+    return { ok: true, changed: Object.keys(changes).length, studentUpdated };
+  } catch (error) {
+    console.error("updateApplication failed", error);
+    return { ok: false, error: "The changes could not be saved." };
   }
 }

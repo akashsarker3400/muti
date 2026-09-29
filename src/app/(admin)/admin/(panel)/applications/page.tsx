@@ -10,6 +10,7 @@ import { OfficeApplicationButton } from "@/components/admin/office-application-b
 import { SearchBox } from "@/components/admin/search-box";
 import { AdminPageHeader, EmptyState, Panel } from "@/components/admin/ui";
 import { Button } from "@/components/ui/button";
+import { requireAdmin } from "@/lib/admin-auth";
 import { buildApplicationWhere } from "@/lib/admin/application-filters";
 import { LEAD_SOURCE_LABELS } from "@/lib/lead-source";
 import { prisma } from "@/lib/prisma";
@@ -59,6 +60,7 @@ export default async function ApplicationsPage({
     page?: string;
   }>;
 }) {
+  const admin = await requireAdmin();
   const filters = await searchParams;
   const page = Math.max(1, Number.parseInt(filters.page ?? "1", 10) || 1);
 
@@ -221,7 +223,7 @@ export default async function ApplicationsPage({
           description="Change the filters and try again."
         />
       ) : (
-        <ApplicationsTable rows={applications} />
+        <ApplicationsTable rows={applications} canEdit={admin.role === "SUPER_ADMIN"} />
       )}
 
       <AdminPagination

@@ -114,6 +114,9 @@ database access, so nothing can be prerendered at build time.
   `/api/v1/portal`, which is what section C asks for.
 - Phone numbers are stored normalised (`+8801…`). Look one up with
   `phoneVariants()`, because rows saved before that change kept the local form.
+- `logActivity(user, action, entity, id, detail?)`: pass `detail` as
+  `{ field: { from, to } }` for a correction worth tracing back (application
+  edits do; the edit page lists them).
 - Named permissions live in `src/lib/permissions.ts`; guard a page or action
   with `requirePermission("…")`. A resource in `src/lib/admin/resources.ts`
   declares its own `permission` and the generic pages enforce it.

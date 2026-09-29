@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
+import type { Prisma } from "@/generated/prisma/client";
 import type { Role } from "@/generated/prisma/enums";
 import { hasPermission, type Permission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
@@ -76,10 +77,11 @@ export async function logActivity(
   action: string,
   entity: string,
   entityId?: string | null,
+  detail?: Prisma.InputJsonValue,
 ) {
   try {
     await prisma.activityLog.create({
-      data: { userId, action, entity, entityId: entityId ?? null },
+      data: { userId, action, entity, entityId: entityId ?? null, detail },
     });
   } catch (error) {
     console.error("Failed to write activity log", error);

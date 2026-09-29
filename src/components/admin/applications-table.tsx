@@ -4,7 +4,16 @@ import { AdmitButton } from "@/components/admin/admit-button";
 import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Eye, Loader2, Phone, Printer, Trash2, Upload, UserRound } from "lucide-react";
+import {
+  Eye,
+  Loader2,
+  Pencil,
+  Phone,
+  Printer,
+  Trash2,
+  Upload,
+  UserRound,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -86,7 +95,14 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 /** Applications inbox with selection, bulk status change and a detail view. */
-export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
+export function ApplicationsTable({
+  rows,
+  canEdit = false,
+}: {
+  rows: AdminApplication[];
+  /** Super admin only: corrections to what the applicant typed. */
+  canEdit?: boolean;
+}) {
   const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [detail, setDetail] = useState<AdminApplication | null>(null);
@@ -457,6 +473,14 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                     Print form
                   </a>
                 </Button>
+                {canEdit && (
+                  <Button asChild variant="outline" size="cta">
+                    <a href={`/admin/applications/${detail.id}/edit`}>
+                      <Pencil className="size-4" aria-hidden="true" />
+                      Edit
+                    </a>
+                  </Button>
+                )}
                 <Button
                   type="button"
                   variant="destructive"

@@ -925,10 +925,14 @@ model ActivityLog {
   action   String
   entity   String
   entityId String?
+  /// What changed, for a correction worth tracing back:
+  /// { field: { from, to } }. Null for ordinary actions.
+  detail   Json?
 
   createdAt DateTime @default(now())
 
   @@index([createdAt])
+  @@index([entity, entityId])
 }
 
 /// Postgres-backed rate limiter for public forms and /verify (section 11).
