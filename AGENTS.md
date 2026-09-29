@@ -105,6 +105,15 @@ database access, so nothing can be prerendered at build time.
   typed, because a grade and a mark that disagree is the mistake nobody spots
   until a student brings the sheet back. A blank mark means "did not sit" and
   stays null all the way to the database; it is not a zero.
+- The student portal (`/portal`) has its **own** session (`PortalSession`, the
+  `muti_portal` cookie) and its own root layout, and is excluded from the
+  locale middleware. A student must never end up holding anything the office
+  holds. Codes and session tokens are stored hashed. An unknown phone number
+  gets the same answer as a known one, or the login page becomes a way to
+  discover who the students are. Everything the portal reads is also
+  `/api/v1/portal`, which is what section C asks for.
+- Phone numbers are stored normalised (`+8801…`). Look one up with
+  `phoneVariants()`, because rows saved before that change kept the local form.
 - Named permissions live in `src/lib/permissions.ts`; guard a page or action
   with `requirePermission("…")`. A resource in `src/lib/admin/resources.ts`
   declares its own `permission` and the generic pages enforce it.

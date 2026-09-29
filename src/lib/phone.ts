@@ -39,3 +39,17 @@ export function telHref(input: string): string {
   const normalized = normalizePhone(input);
   return `tel:${normalized ?? input}`;
 }
+
+/**
+ * Every shape a Bangladeshi number might be stored in.
+ *
+ * Numbers typed into the admin before the column was normalised are kept as
+ * "01778838644"; everything since is "+8801778838644". A lookup by phone has
+ * to find both, or a student signs in to be told they do not exist.
+ */
+export function phoneVariants(input: string): string[] {
+  const normalized = normalizePhone(input);
+  if (!normalized) return [];
+  const local = normalized.replace(/^\+88/, "");
+  return [normalized, local, `88${local}`];
+}

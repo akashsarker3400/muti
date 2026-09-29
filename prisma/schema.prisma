@@ -451,13 +451,14 @@ model Student {
   boardRoll           String?   @unique
   boardRegistrationNo String?
 
-  feePlan      FeePlan?
-  payments     Payment[]
-  alerts       Alert[]
-  marks        Mark[]
-  attendance   Attendance[]
-  certificates Certificate[]
-  boardResults BoardResult[]
+  feePlan        FeePlan?
+  payments       Payment[]
+  alerts         Alert[]
+  portalSessions PortalSession[]
+  marks          Mark[]
+  attendance     Attendance[]
+  certificates   Certificate[]
+  boardResults   BoardResult[]
 
   /// Soft delete (ERP addendum, 2.4).
   deletedAt     DateTime?
@@ -1506,4 +1507,33 @@ model Job {
   updatedAt DateTime @updatedAt
 
   @@index([published, deadline])
+}
+
+/// One-time codes for the student portal (addendum 2, B12).
+///
+/// The code is stored hashed: a database dump must not be a list of working
+/// login codes, even for the five minutes each one lives.
+model Otp {
+  id        String    @id @default(cuid())
+  phone     String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int       @default(0)
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([phone, createdAt])
+}
+
+/// A signed-in student's session, kept server side so the office can end one.
+model PortalSession {
+  id         String   @id @default(cuid())
+  studentId  String
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@index([studentId])
 }

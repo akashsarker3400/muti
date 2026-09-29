@@ -15,7 +15,8 @@ export type RateLimitScope =
   | "photo"
   | "certificateNumber"
   | "message"
-  | "hit";
+  | "hit"
+  | "otp";
 
 const WINDOWS: Record<RateLimitScope, { max: number; windowMs: number }> = {
   // 5 submissions per hour per IP (section 5.6).
@@ -39,6 +40,10 @@ const WINDOWS: Record<RateLimitScope, { max: number; windowMs: number }> = {
   // Page views. Generous for a real reader, low enough that a script cannot
   // quietly inflate the office's visitor numbers.
   hit: { max: 240, windowMs: 60 * 60 * 1000 },
+  // Portal sign-in. Each code costs an SMS, so this is both a security limit
+  // and a spending one: without it, a script could empty the gateway balance
+  // onto somebody else's phone.
+  otp: { max: 10, windowMs: 15 * 60 * 1000 },
 };
 
 /** Best-effort client IP from the proxy headers Coolify / Cloudflare set. */

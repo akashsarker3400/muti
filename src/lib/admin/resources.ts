@@ -2,6 +2,8 @@ import "server-only";
 
 import { z } from "zod";
 
+import { normalizePhone } from "@/lib/phone";
+
 import type { FormSection, FormValues } from "@/lib/admin/fields";
 import { slugify } from "@/lib/admin/slug";
 import type { Permission } from "@/lib/permissions";
@@ -74,11 +76,7 @@ export type ResourceConfig = {
   baseWhere?: Record<string, unknown>;
   columns: ResourceColumn[];
   /** Renders an extra action in each row, e.g. "clone" on batches. */
-  rowTool?:
-    | "batch-clone"
-    | "board-results"
-    | "student-card"
-    | "certificate-print";
+  rowTool?: "batch-clone" | "board-results" | "student-card" | "certificate-print";
   /** Entity key on /admin/import — shows an "Import" button above the list. */
   importEntity?: string;
   /** Offers a CSV download of the whole table from the list header. */
@@ -1580,7 +1578,11 @@ const studentResource: ResourceConfig = {
     certificateNo: nullable(values.certificateNo),
     name: str(values.name),
     nameBn: nullable(values.nameBn),
-    phone: nullable(values.phone),
+    // One shape in the column: a lookup by phone (the portal sign-in, the
+    // duplicate check) cannot match three spellings of the same number.
+    phone: values.phone
+      ? (normalizePhone(str(values.phone)) ?? nullable(values.phone))
+      : null,
     email: nullable(values.email),
     gender: nullable(values.gender),
     dateOfBirth: toDate(values.dateOfBirth),

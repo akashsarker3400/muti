@@ -298,8 +298,12 @@ Built so far, in the order addendum 2 B14 sets out:
 | B12 Student portal (PWA)        | Not started.                                                                                                                                                                  |
 | B13 Permissions                 | Added as each module lands.                                                                                                                                                   |
 
-Section C (mobile app) is not built. Its standing requirement is that every
-portal feature also exists as a JSON endpoint under `/api/v1/portal/*`.
+Section C (mobile app) is not built, and is not meant to be. Its standing
+requirement **is** met: every portal read and the whole sign-in flow answer as
+JSON at `/api/v1/portal` (`?what=overview|routine|attendance|fees|results|certificates`,
+and `POST {action}` for the code and the sign-in), authenticated by the same
+session token as a bearer. No portal feature lives only inside a server
+component.
 
 ---
 

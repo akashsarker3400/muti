@@ -5,6 +5,7 @@ import {
   displayPhone,
   isValidPhone,
   normalizePhone,
+  phoneVariants,
   telHref,
   waNumber,
 } from "@/lib/phone";
@@ -67,5 +68,20 @@ describe("phone formatting", () => {
 
   it("builds a tel: href with the country code", () => {
     expect(telHref("01778838644")).toBe("tel:+8801778838644");
+  });
+});
+
+describe("phone variants, for looking a student up", () => {
+  it("offers every shape the column might hold", () => {
+    // Rows saved before the column was normalised kept the local form.
+    expect(phoneVariants("01778-838644")).toEqual([
+      "+8801778838644",
+      "01778838644",
+      "8801778838644",
+    ]);
+  });
+
+  it("offers nothing for a number that is not valid", () => {
+    expect(phoneVariants("12345")).toEqual([]);
   });
 });

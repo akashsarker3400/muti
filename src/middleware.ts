@@ -60,6 +60,13 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
+  // The student portal has its own root layout and its own session, and no
+  // locale prefix: it is Bangla for everybody. The locale middleware would
+  // only rewrite it to a route that does not exist.
+  if (pathname === "/portal" || pathname.startsWith("/portal/")) {
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith("/admin")) {
     // The login page itself must stay reachable.
     if (pathname === "/admin/login") return NextResponse.next();
