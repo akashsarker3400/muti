@@ -55,7 +55,10 @@ export default async function TeacherPayPage({
       />
 
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
-        <StatCard label="Classes taken" value={dues.reduce((sum, d) => sum + d.sessions, 0)} />
+        <StatCard
+          label="Classes taken"
+          value={dues.reduce((sum, d) => sum + d.sessions, 0)}
+        />
         <StatCard label="Due for the period" value={formatMoney(owed, "en")} />
         <StatCard label="Already paid" value={formatMoney(paidOut, "en")} />
       </div>

@@ -68,7 +68,11 @@ export default async function ReceiptPage({
 
       <div
         className="sheet bg-white text-black shadow-[var(--shadow-card)] print:shadow-none"
-        style={{ width: "210mm", height: "297mm", fontFamily: "var(--font-body-serif), Georgia, serif" }}
+        style={{
+          width: "210mm",
+          height: "297mm",
+          fontFamily: "var(--font-body-serif), Georgia, serif",
+        }}
       >
         {copies.map((copy, index) => (
           <div
@@ -123,7 +127,9 @@ export default async function ReceiptPage({
             <div className="absolute inset-x-[14mm] bottom-[10mm] flex items-end justify-between text-[9pt]">
               <span className="text-[color:#666]">
                 {settings.contact.phone1}
-                {settings.general.govtCode ? ` · code ${settings.general.govtCode}` : ""}
+                {settings.general.govtCode
+                  ? ` · code ${settings.general.govtCode}`
+                  : ""}
               </span>
               <span className="text-center">
                 <span className="block w-[45mm] border-t border-black pt-1">

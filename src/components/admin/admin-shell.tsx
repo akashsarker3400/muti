@@ -103,7 +103,7 @@ const NAV: NavGroup[] = [
         label: "Certificate register",
         icon: ClipboardList,
       },
-      { href: "/admin/board-exams", label: "Board results", icon: Trophy },
+      { href: "/admin/board-exams", label: "Exams & results", icon: Trophy },
       { href: "/admin/results", label: "Results (notices)", icon: Trophy },
       { href: "/admin/import", label: "Import (CSV/Excel)", icon: Upload },
       { href: "/admin/verification-logs", label: "Verification log", icon: BadgeCheck },

@@ -36,8 +36,7 @@ export default async function AnalyticsPage({
   ]);
 
   const busiest = Math.max(1, ...summary.days.map((entry) => entry.views));
-  const mobile =
-    summary.devices.find((entry) => entry.device === "mobile")?.views ?? 0;
+  const mobile = summary.devices.find((entry) => entry.device === "mobile")?.views ?? 0;
   const mobileShare =
     summary.totalViews > 0 ? Math.round((mobile / summary.totalViews) * 100) : 0;
 

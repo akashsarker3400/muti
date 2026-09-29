@@ -48,6 +48,9 @@ describe("certificate and roll normalisation", () => {
   it("keeps only digits of a roll", () => {
     expect(normalizeRoll("৩৮২৫০০০১২৮")).toBe("3825000128");
     expect(normalizeRoll("38 25-000128")).toBe("3825000128");
+    // The institute's own roll keeps its letters and dashes.
+    expect(normalizeRoll(" muti-2026-cmu-001 ")).toBe("MUTI-2026-CMU-001");
+    expect(normalizeRoll("MUTI-২০২৬-CMU-০০১")).toBe("MUTI-2026-CMU-001");
   });
 });
 
@@ -103,12 +106,12 @@ describe("import header matching", () => {
 
   it("ignores case, spaces and underscores in headers", () => {
     expect(
-      matchHeaders(students, ["Roll", "NAME", "Course Code", "board-roll", "unknown"]),
+      matchHeaders(students, ["Roll", "NAME", "Course Code", "father-name", "unknown"]),
     ).toEqual({
       0: "roll",
       1: "name",
       2: "course_code",
-      3: "board_roll",
+      3: "father_name",
     });
   });
 

@@ -28,9 +28,20 @@ export function normalizeCertificateNo(input: string): string {
   return latinDigits(input).trim().replace(/\s+/g, "").toUpperCase();
 }
 
-/** Board rolls and registration numbers are digits only. */
+/**
+ * Result rolls and registration numbers. The exams are MUTI's own, so a roll
+ * is normally the institute roll ("MUTI-2026-CMU-001"): letters, digits and
+ * dashes, compared in upper case with spaces dropped. A roll with no letters
+ * is an older all-digit number and keeps digits only, so "38 25-000128"
+ * still finds "3825000128".
+ */
 export function normalizeRoll(input: string): string {
-  return latinDigits(input).replace(/\D/g, "");
+  const latin = latinDigits(input).trim();
+  if (!/[A-Za-z]/.test(latin)) return latin.replace(/\D/g, "");
+  return latin
+    .toUpperCase()
+    .replace(/\s+/g, "")
+    .replace(/[^A-Z0-9-]/g, "");
 }
 
 /**

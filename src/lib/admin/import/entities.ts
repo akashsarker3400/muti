@@ -121,18 +121,6 @@ export const IMPORT_ENTITIES: Record<string, ImportEntity> = {
         en: "ACTIVE / COMPLETED / DROPPED (blank = ACTIVE)",
         example: "ACTIVE",
       },
-      {
-        key: "board_roll",
-        bn: "BTEB বোর্ড রোল (১০ সংখ্যা)",
-        en: "BTEB board roll (10 digits)",
-        example: "3825000128",
-      },
-      {
-        key: "board_registration_no",
-        bn: "বোর্ড রেজিস্ট্রেশন নম্বর",
-        en: "Board registration number",
-        example: "2500012345",
-      },
     ],
   },
   certificates: {
@@ -198,17 +186,17 @@ export const IMPORT_ENTITIES: Record<string, ImportEntity> = {
   },
   "board-results": {
     key: "board-results",
-    labelBn: "বোর্ড ফলাফল",
-    labelEn: "Board results",
+    labelBn: "পরীক্ষার ফলাফল",
+    labelEn: "Exam results",
     matchKey: ["roll"],
     needsContext: "examId",
     columns: [
       {
         key: "roll",
         required: true,
-        bn: "বোর্ড রোল (১০ সংখ্যা)",
-        en: "Board roll (10 digits)",
-        example: "3825000128",
+        bn: "শিক্ষার্থীর রোল",
+        en: "Student roll",
+        example: "MUTI-2026-CMU-001",
       },
       {
         key: "registration_no",

@@ -24,7 +24,10 @@ export async function requestCode(
   // institute's balance on somebody else's phone.
   const limit = await checkRateLimit("otp");
   if (!limit.allowed) {
-    return { ok: false, error: "Too many codes asked for. Try again in a few minutes." };
+    return {
+      ok: false,
+      error: "Too many codes asked for. Try again in a few minutes.",
+    };
   }
 
   const result = await issueOtp(phone);
@@ -288,9 +291,7 @@ export async function readChapter(chapterId: string) {
   };
 }
 
-export async function markChapterRead(
-  chapterId: string,
-): Promise<{ ok: boolean }> {
+export async function markChapterRead(chapterId: string): Promise<{ ok: boolean }> {
   const student = await currentStudent();
   if (!student) return { ok: false };
 

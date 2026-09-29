@@ -141,10 +141,10 @@ export default async function BatchSessionsPage({
         <p className="flex items-start gap-2">
           <ClipboardCheck className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
           <span>
-            <AdminBadge tone="success">Taken</AdminBadge> means the register has
-            been saved for that class. A student&rsquo;s attendance percentage counts
-            present and late against the classes marked taken, so a class nobody
-            registered does not count against anybody.
+            <AdminBadge tone="success">Taken</AdminBadge> means the register has been
+            saved for that class. A student&rsquo;s attendance percentage counts present
+            and late against the classes marked taken, so a class nobody registered does
+            not count against anybody.
           </span>
         </p>
       </Panel>

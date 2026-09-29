@@ -68,8 +68,8 @@ export default async function BackupsPage() {
           <strong>These dumps are on the same machine as the database.</strong> That
           protects against a mistaken deletion, not against losing the server. Add
           Cloudflare R2 (see the deployment guide) and every backup is written off the
-          server automatically, or keep using the database service&rsquo;s own backup
-          to an S3 bucket alongside this.
+          server automatically, or keep using the database service&rsquo;s own backup to
+          an S3 bucket alongside this.
         </Panel>
       )}
 
@@ -131,9 +131,9 @@ export default async function BackupsPage() {
   --dbname "$DATABASE_URL" 20260929-031500.dump`}
         </pre>
         <p className="mt-2 text-[color:var(--muted-foreground)]">
-          A downloaded dump contains every student, applicant and patient record.
-          Keep it as carefully as the files in the office cupboard, and delete it from
-          your laptop once you are done.
+          A downloaded dump contains every student, applicant and patient record. Keep
+          it as carefully as the files in the office cupboard, and delete it from your
+          laptop once you are done.
         </p>
       </Panel>
     </>

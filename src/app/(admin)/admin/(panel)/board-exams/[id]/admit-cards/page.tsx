@@ -92,7 +92,10 @@ export default async function AdmitCardsPage({
         async (student) =>
           [
             student.id,
-            await qrSvg(`${siteUrl}/card/${signCardToken(student.id, requiredEnv("AUTH_SECRET"))}`, 96),
+            await qrSvg(
+              `${siteUrl}/card/${signCardToken(student.id, requiredEnv("AUTH_SECRET"))}`,
+              96,
+            ),
           ] as const,
       ),
     ),
@@ -120,8 +123,8 @@ export default async function AdmitCardsPage({
 
         {!exam.batch && (
           <Panel className="mb-4 text-sm">
-            <strong>No batch is set on this examination.</strong> Open it and choose
-            the batch sitting it; the admit cards are printed for that batch&rsquo;s
+            <strong>No batch is set on this examination.</strong> Open it and choose the
+            batch sitting it; the admit cards are printed for that batch&rsquo;s
             students.
           </Panel>
         )}
@@ -191,10 +194,11 @@ export default async function AdmitCardsPage({
                     Admit Card
                   </h2>
                   <p className="mt-2 text-[11pt] font-semibold">{exam.title}</p>
-                  <p className="text-[9.5pt] text-[color:#444]">
-                    {exam.boardName}
-                    {exam.session ? ` · Session ${exam.session}` : ""}
-                  </p>
+                  {exam.session && (
+                    <p className="text-[9.5pt] text-[color:#444]">
+                      Session {exam.session}
+                    </p>
+                  )}
                 </div>
 
                 <div className="mt-[6mm] flex items-start gap-6">
@@ -206,12 +210,7 @@ export default async function AdmitCardsPage({
                       label="Course"
                       value={exam.course?.fullNameEn ?? exam.batch?.course.fullNameEn}
                     />
-                    <Row label="Roll No" value={student.boardRoll || student.roll} latin />
-                    <Row
-                      label="Registration No"
-                      value={student.boardRegistrationNo}
-                      latin
-                    />
+                    <Row label="Roll No" value={student.roll} latin />
                     <Row label="Session / Batch" value={exam.batch?.name} />
                   </dl>
 
@@ -257,8 +256,7 @@ export default async function AdmitCardsPage({
                       { name: "", title: "Signature of the Candidate", image: "" },
                       {
                         name: settings.documents.sign1Name,
-                        title:
-                          settings.documents.sign1Title || "Head of the Institute",
+                        title: settings.documents.sign1Title || "Head of the Institute",
                         image: settings.documents.sign1Image,
                       },
                     ]}

@@ -225,12 +225,6 @@ export default async function StudentCardPage({
                 latin
               />
               <CardRow label="BMDC Registration" value={student.bmdc} latin />
-              <CardRow label="Board Roll" value={student.boardRoll} latin />
-              <CardRow
-                label="Board Registration Number"
-                value={student.boardRegistrationNo}
-                latin
-              />
               <CardRow label="Session / Batch" value={student.batch?.name} />
               <CardRow
                 label="Date of Admission"

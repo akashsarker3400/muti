@@ -8,6 +8,7 @@ import { parseImportDate } from "@/lib/admin/csv";
 import { IMPORT_ENTITIES, MAX_ROWS } from "@/lib/admin/import/entities";
 import { normalizePhone } from "@/lib/phone";
 import { prisma } from "@/lib/prisma";
+import { studentsByResultRoll } from "@/lib/result-roll";
 import { latinDigits, normalizeBmdc, normalizeRoll } from "@/lib/verify";
 
 /**
@@ -106,8 +107,6 @@ const validators: Record<string, Validator> = {
     const gender = upper(row.gender);
     if (gender && !["MALE", "FEMALE", "OTHER"].includes(gender))
       return `gender “${row.gender}” is invalid`;
-    const boardRoll = row.board_roll?.trim() ? normalizeRoll(row.board_roll) : null;
-    if (boardRoll && boardRoll.length !== 10) return "board_roll must be 10 digits";
     const bmdc = optional(row.bmdc);
     return {
       key: roll.toUpperCase(),
@@ -129,10 +128,6 @@ const validators: Record<string, Validator> = {
         batchId,
         admissionDate: optionalDate(row.admission_date),
         status,
-        boardRoll,
-        boardRegistrationNo: optional(row.board_registration_no)
-          ? normalizeRoll(row.board_registration_no!)
-          : null,
       },
     };
   },
@@ -359,16 +354,13 @@ export async function runImport(
     context,
   );
 
-  // Board rows link to students by board roll on the way in.
+  // Result rows link to students by their roll on the way in.
   const boardStudents =
     entity === "board-results"
       ? new Map(
-          (
-            await prisma.student.findMany({
-              where: { boardRoll: { in: prepared.map((p) => p.key) } },
-              select: { id: true, boardRoll: true },
-            })
-          ).map((s) => [s.boardRoll!, s.id]),
+          [...(await studentsByResultRoll(prepared.map((p) => p.key)))].map(
+            ([roll, student]) => [roll, student.id],
+          ),
         )
       : new Map<string, string>();
 

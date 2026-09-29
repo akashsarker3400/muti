@@ -43,8 +43,6 @@ const EXPORTERS: Record<string, Exporter> = {
       "completion_date",
       "status",
       "grade",
-      "board_roll",
-      "board_registration_no",
       "verifiable",
     ],
     rows: () =>
@@ -74,8 +72,6 @@ const EXPORTERS: Record<string, Exporter> = {
       date(r.completionDate),
       r.status,
       r.resultGrade,
-      r.boardRoll,
-      r.boardRegistrationNo,
       r.verifiable ? "yes" : "no",
     ],
   },

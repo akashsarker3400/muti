@@ -58,7 +58,8 @@ export async function createFeePlan(input: {
     include: { course: true, feePlan: { select: { id: true } } },
   });
   if (!student) return { ok: false, error: "That student no longer exists." };
-  if (student.feePlan) return { ok: false, error: "This student already has a fee plan." };
+  if (student.feePlan)
+    return { ok: false, error: "This student already has a fee plan." };
 
   const course = student.course;
   const otherFees =
@@ -104,11 +105,16 @@ export async function saveInstallment(input: {
 }): Promise<{ ok: boolean; error?: string }> {
   const admin = await requirePermission("fees.edit");
 
-  const dueDate = input.dueDate ? new Date(`${input.dueDate}T00:00:00.000Z`) : undefined;
+  const dueDate = input.dueDate
+    ? new Date(`${input.dueDate}T00:00:00.000Z`)
+    : undefined;
   if (dueDate && Number.isNaN(dueDate.getTime())) {
     return { ok: false, error: "That date could not be read." };
   }
-  if (input.amount !== undefined && (!Number.isFinite(input.amount) || input.amount < 0)) {
+  if (
+    input.amount !== undefined &&
+    (!Number.isFinite(input.amount) || input.amount < 0)
+  ) {
     return { ok: false, error: "The amount must be a whole number of Taka." };
   }
 

@@ -110,9 +110,9 @@ export default async function MessagesPage({
 
       {!provider && (
         <Panel className="mb-4 text-sm">
-          <strong>No SMS gateway is configured yet.</strong> Messages are recorded
-          here as “not sent” so nothing is lost, and they start going out the moment
-          the gateway details are set. Ask the developer to set{" "}
+          <strong>No SMS gateway is configured yet.</strong> Messages are recorded here
+          as “not sent” so nothing is lost, and they start going out the moment the
+          gateway details are set. Ask the developer to set{" "}
           <code className="font-latin">SMS_PROVIDER</code>,{" "}
           <code className="font-latin">SMS_API_KEY</code> and{" "}
           <code className="font-latin">SMS_SENDER_ID</code> on the server.
@@ -184,7 +184,9 @@ export default async function MessagesPage({
                     </td>
                     <td className="px-4 py-2.5 align-top">
                       <AdminBadge tone={TONE[row.status]}>
-                        {row.status === "SKIPPED" ? "not sent" : row.status.toLowerCase()}
+                        {row.status === "SKIPPED"
+                          ? "not sent"
+                          : row.status.toLowerCase()}
                       </AdminBadge>
                       {row.error && (
                         <span className="mt-1 block max-w-[18rem] text-xs text-[color:var(--muted-foreground)]">

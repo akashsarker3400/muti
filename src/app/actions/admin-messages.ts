@@ -30,12 +30,18 @@ export async function sendTestMessage(input: {
   const body = input.body.trim();
   if (!body) return { ok: false, error: "Write the message first." };
   if (body.length > 640) {
-    return { ok: false, error: "That is too long for an SMS. Keep it under 640 characters." };
+    return {
+      ok: false,
+      error: "That is too long for an SMS. Keep it under 640 characters.",
+    };
   }
 
   const limit = await checkRateLimit("message", admin.id);
   if (!limit.allowed) {
-    return { ok: false, error: "Too many messages from this account in the last hour." };
+    return {
+      ok: false,
+      error: "Too many messages from this account in the last hour.",
+    };
   }
 
   const result = await sendMessage({

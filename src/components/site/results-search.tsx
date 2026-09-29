@@ -78,7 +78,9 @@ export function ResultsSearch({
         <fieldset className="mb-4">
           <legend className="mb-2 text-sm font-medium">{t("searchBy")}</legend>
           <div className="flex flex-wrap gap-2">
-            {(["roll", "registration", "bmdc"] as const).map((option) => (
+            {/* Registration numbers belonged to the board exams; MUTI's own exams
+                are found by the institute roll or the BMDC number. */}
+            {(["roll", "bmdc"] as const).map((option) => (
               <label
                 key={option}
                 className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-4 text-sm font-medium transition ${
@@ -136,7 +138,7 @@ export function ResultsSearch({
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder={t(`placeholder.${mode}`)}
-                inputMode={mode === "bmdc" ? "text" : "numeric"}
+                inputMode="text"
                 dir="ltr"
                 autoComplete="off"
                 className="h-11 font-latin"
@@ -210,7 +212,7 @@ function ResultCard({
         <div>
           <h2 className="font-latin text-base font-semibold">{row.examTitle}</h2>
           <p className="font-latin text-xs text-[color:var(--muted-foreground)]">
-            {[row.boardName, row.session, row.heldIn].filter(Boolean).join(" · ")}
+            {[row.session, row.heldIn].filter(Boolean).join(" · ")}
           </p>
         </div>
         <span

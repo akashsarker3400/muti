@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { logActivity, requirePermission } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
+import { studentsByResultRoll } from "@/lib/result-roll";
 import { normalizeRoll } from "@/lib/verify";
 
 /** Board result rows for one exam (addendum 3, §2). */
@@ -41,7 +42,7 @@ function toGpa(value: string): { gpa: number | null; error?: string } {
 
 /**
  * Upserts every row on (examId, roll). Rows whose roll matches a student's
- * `boardRoll` are linked to that student on the way in.
+ * institute roll are linked to that student on the way in.
  */
 export async function saveBoardResultRows(
   examId: string,
@@ -68,7 +69,7 @@ export async function saveBoardResultRows(
     }
     const rollNormalized = normalizeRoll(parsed.data.roll);
     if (rollNormalized.length < 4) {
-      errors.push({ row: index + 1, message: "Roll must be numeric" });
+      errors.push({ row: index + 1, message: "Roll is missing or too short" });
       return;
     }
     const { gpa, error } = toGpa(parsed.data.gpa);
@@ -83,11 +84,8 @@ export async function saveBoardResultRows(
     return { ok: false, error: "No valid rows to save.", errors };
   }
 
-  const [students, existing] = await Promise.all([
-    prisma.student.findMany({
-      where: { boardRoll: { in: rows.map((row) => row.rollNormalized) } },
-      select: { id: true, boardRoll: true },
-    }),
+  const [holders, existing] = await Promise.all([
+    studentsByResultRoll(rows.map((row) => row.rollNormalized)),
     prisma.boardResult.findMany({
       where: {
         boardExamId: examId,
@@ -96,7 +94,6 @@ export async function saveBoardResultRows(
       select: { roll: true },
     }),
   ]);
-  const byRoll = new Map(students.map((s) => [s.boardRoll!, s.id]));
   const existingRolls = new Set(existing.map((row) => row.roll));
 
   let linked = 0;
@@ -106,7 +103,7 @@ export async function saveBoardResultRows(
     const chunk = rows.slice(start, start + 200);
     await prisma.$transaction(
       chunk.map((row) => {
-        const studentId = byRoll.get(row.rollNormalized) ?? null;
+        const studentId = holders.get(row.rollNormalized)?.id ?? null;
         if (studentId) linked += 1;
         const data = {
           registrationNo: row.registrationNo
@@ -148,7 +145,7 @@ export async function deleteBoardResultRow(id: string): Promise<{ ok: boolean }>
   return { ok: true };
 }
 
-/** Links unlinked rows to students whose `boardRoll` matches. */
+/** Links unlinked rows to the students whose roll matches. */
 export async function autoLinkBoardResults(
   examId: string,
 ): Promise<{ ok: boolean; linked: number }> {
@@ -159,18 +156,14 @@ export async function autoLinkBoardResults(
   });
   if (rows.length === 0) return { ok: true, linked: 0 };
 
-  const students = await prisma.student.findMany({
-    where: { boardRoll: { in: rows.map((row) => row.roll) } },
-    select: { id: true, boardRoll: true },
-  });
-  const byRoll = new Map(students.map((s) => [s.boardRoll!, s.id]));
+  const holders = await studentsByResultRoll(rows.map((row) => row.roll));
 
   const updates = rows
-    .filter((row) => byRoll.has(row.roll))
+    .filter((row) => holders.has(row.roll))
     .map((row) =>
       prisma.boardResult.update({
         where: { id: row.id },
-        data: { studentId: byRoll.get(row.roll)! },
+        data: { studentId: holders.get(row.roll)!.id },
       }),
     );
   if (updates.length > 0) await prisma.$transaction(updates);

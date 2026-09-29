@@ -44,7 +44,12 @@ export async function saveExam(input: {
     const exam = input.id
       ? await prisma.exam.update({ where: { id: input.id }, data })
       : await prisma.exam.create({ data });
-    await logActivity(admin.id, input.id ? "exam-save" : "exam-create", "exam", exam.id);
+    await logActivity(
+      admin.id,
+      input.id ? "exam-save" : "exam-create",
+      "exam",
+      exam.id,
+    );
     revalidatePath(`/admin/batches/${input.batchId}/exams`);
     return { ok: true, id: exam.id };
   } catch (error) {
@@ -170,7 +175,12 @@ export async function publishExam(
       where: { id },
       data: { published, publishedAt: published ? new Date() : null },
     });
-    await logActivity(admin.id, published ? "exam-publish" : "exam-unpublish", "exam", id);
+    await logActivity(
+      admin.id,
+      published ? "exam-publish" : "exam-unpublish",
+      "exam",
+      id,
+    );
     revalidatePath(`/admin/exams/${id}`);
     revalidatePath(`/admin/batches/${exam.batch.id}/exams`);
 

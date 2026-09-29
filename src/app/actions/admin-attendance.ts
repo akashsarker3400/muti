@@ -202,12 +202,7 @@ export async function markAttendance(input: {
       }),
     ]);
 
-    await logActivity(
-      access.admin.id,
-      "attendance",
-      "classSession",
-      input.sessionId,
-    );
+    await logActivity(access.admin.id, "attendance", "classSession", input.sessionId);
     revalidatePath(`/admin/batches/${access.session.batchId}/sessions`);
     revalidatePath(`/admin/sessions/${input.sessionId}`);
     return { ok: true, saved: marks.length };

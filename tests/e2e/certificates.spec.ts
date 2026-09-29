@@ -192,7 +192,6 @@ test.describe("admit cards", () => {
     await page.locator("#field-roll").fill(`AC-${id}`);
     await page.locator("#field-courseId").selectOption({ index: 1 });
     await page.locator("#field-batchId").selectOption({ label: batchName });
-    await page.locator("#field-boardRoll").fill(`38${String(Date.now()).slice(-8)}`);
     await save(page);
     await expect(page).toHaveURL(/\/admin\/students$/);
 
@@ -217,6 +216,11 @@ test.describe("admit cards", () => {
       const card = page.locator(".sheet").first();
       await expect(card).toContainText("Admit Card");
       await expect(card).toContainText(studentName);
+      // The exam is MUTI's own: the card carries the institute roll and
+      // names no board.
+      await expect(card).toContainText(`AC-${id}`);
+      await expect(card).not.toContainText("Technical Education Board");
+      await expect(card).not.toContainText("Registration No");
       await expect(card).toContainText("Mymensingh Polytechnic Institute");
       await expect(card).toContainText("10:00 am to 1:00 pm");
       // No date was set, so that line prints a rule to fill in by hand rather

@@ -1,6 +1,12 @@
 import Link from "next/link";
 
-import { AdminBadge, AdminPageHeader, EmptyState, Panel, StatCard } from "@/components/admin/ui";
+import {
+  AdminBadge,
+  AdminPageHeader,
+  EmptyState,
+  Panel,
+  StatCard,
+} from "@/components/admin/ui";
 import { Button } from "@/components/ui/button";
 import { requirePermission } from "@/lib/admin-auth";
 import { formatDate, formatMoney } from "@/lib/format";
@@ -45,7 +51,9 @@ export default async function FeesPage({
         orderBy: { dueDate: "asc" },
         take: 100,
         include: {
-          feePlan: { include: { student: { select: { id: true, name: true, roll: true } } } },
+          feePlan: {
+            include: { student: { select: { id: true, name: true, roll: true } } },
+          },
         },
       }),
       prisma.installment.findMany({
@@ -53,7 +61,9 @@ export default async function FeesPage({
         orderBy: { dueDate: "asc" },
         take: 100,
         include: {
-          feePlan: { include: { student: { select: { id: true, name: true, roll: true } } } },
+          feePlan: {
+            include: { student: { select: { id: true, name: true, roll: true } } },
+          },
         },
       }),
       prisma.payment.findMany({
@@ -75,8 +85,7 @@ export default async function FeesPage({
       }),
     ]);
 
-  const stillOwed =
-    (outstanding._sum.amount ?? 0) - (outstanding._sum.paidAmount ?? 0);
+  const stillOwed = (outstanding._sum.amount ?? 0) - (outstanding._sum.paidAmount ?? 0);
   const overdueTotal = overdue.reduce(
     (sum, row) => sum + (row.amount - row.paidAmount),
     0,
@@ -180,7 +189,11 @@ function InstallmentList({ rows, tab }: { rows: Row[]; tab: string }) {
   if (rows.length === 0) {
     return (
       <EmptyState
-        title={tab === "overdue" ? "Nothing is overdue." : "Nothing falls due in the next month."}
+        title={
+          tab === "overdue"
+            ? "Nothing is overdue."
+            : "Nothing falls due in the next month."
+        }
       />
     );
   }

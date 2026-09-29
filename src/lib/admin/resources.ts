@@ -7,7 +7,7 @@ import { normalizePhone } from "@/lib/phone";
 import type { FormSection, FormValues } from "@/lib/admin/fields";
 import { slugify } from "@/lib/admin/slug";
 import type { Permission } from "@/lib/permissions";
-import { normalizeBmdc, parseAdvisorCategories } from "@/lib/verify";
+import { normalizeBmdc, normalizeRoll, parseAdvisorCategories } from "@/lib/verify";
 import { defaultSiteSettings } from "@/lib/site-settings-schema";
 import { prisma } from "@/lib/prisma";
 
@@ -1397,7 +1397,7 @@ const studentResource: ResourceConfig = {
     },
     { key: "verifiable", label: "Verifiable", type: "bool", hideOnMobile: true },
   ],
-  searchFields: ["roll", "certificateNo", "name", "phone", "bmdc", "boardRoll"],
+  searchFields: ["roll", "certificateNo", "name", "phone", "bmdc"],
   orderBy: [{ createdAt: "desc" }],
   include: { course: true, batch: true },
   rowTool: "student-card",
@@ -1424,8 +1424,6 @@ const studentResource: ResourceConfig = {
     nid: optionalText,
     bmdc: optionalText,
     address: optionalText,
-    boardRoll: optionalText,
-    boardRegistrationNo: optionalText,
     courseId: requiredText,
     batchId: optionalText,
     admissionDate: optionalText,
@@ -1496,19 +1494,6 @@ const studentResource: ResourceConfig = {
         { name: "nid", label: "NID", type: "text", latin: true },
         { name: "address", label: "Address", type: "textarea" },
         {
-          name: "boardRoll",
-          label: "Board roll (BTEB)",
-          type: "text",
-          latin: true,
-          hint: "10-digit board roll; results link to it automatically.",
-        },
-        {
-          name: "boardRegistrationNo",
-          label: "Board registration number",
-          type: "text",
-          latin: true,
-        },
-        {
           name: "courseId",
           label: "Course",
           type: "select",
@@ -1560,8 +1545,6 @@ const studentResource: ResourceConfig = {
     nid: str(row.nid),
     bmdc: str(row.bmdc),
     address: str(row.address),
-    boardRoll: str(row.boardRoll),
-    boardRegistrationNo: str(row.boardRegistrationNo),
     courseId: str(row.courseId),
     batchId: str(row.batchId),
     admissionDate: fromDate(row.admissionDate),
@@ -1592,8 +1575,6 @@ const studentResource: ResourceConfig = {
     bmdc: nullable(values.bmdc),
     bmdcNormalized: nullable(values.bmdc) ? normalizeBmdc(str(values.bmdc)) : null,
     address: nullable(values.address),
-    boardRoll: nullable(values.boardRoll),
-    boardRegistrationNo: nullable(values.boardRegistrationNo),
     courseId: str(values.courseId),
     batchId: nullable(values.batchId),
     admissionDate: toDate(values.admissionDate),
@@ -1608,13 +1589,14 @@ const studentResource: ResourceConfig = {
    * batches moves the seat with them (addendum 2, A1).
    */
   afterWrite: async (row, data, existing) => {
-    // A board roll typed on the student links any unlinked result rows with
-    // that roll, so the office does not have to press "auto-link" afterwards
-    // (addendum 3, §2).
-    const boardRoll = typeof data.boardRoll === "string" ? data.boardRoll : null;
-    if (boardRoll) {
+    // Result rows entered before the student existed link up as soon as the
+    // student's roll is saved, so the office does not have to press
+    // "auto-link" afterwards (addendum 3, §2). The exams are MUTI's own, so
+    // the result roll is the institute roll.
+    const roll = typeof data.roll === "string" ? normalizeRoll(data.roll) : null;
+    if (roll) {
       await prisma.boardResult.updateMany({
-        where: { roll: boardRoll, studentId: null },
+        where: { roll, studentId: null },
         data: { studentId: row.id },
       });
     }
@@ -2066,11 +2048,11 @@ const issuedCertificateResource: ResourceConfig = {
 const boardExamResource: ResourceConfig = {
   key: "board-exams",
   model: "boardExam",
-  title: "Board exams & results",
-  singular: "Board exam",
+  title: "Exams & results",
+  singular: "Exam",
   description:
-    "Add each examination whose results BTEB has published, then use the “Results” button to enter or paste the roll-wise results. Once published it can be searched on /results.",
-  newLabel: "New board exam",
+    "MUTI's own examinations. Add each exam, print its admit cards, then use the “Results” button to enter or paste the results by student roll. Once published it can be searched on /results.",
+  newLabel: "New exam",
   permission: "results.manage",
   rowTool: "board-results",
   columns: [
@@ -2097,7 +2079,6 @@ const boardExamResource: ResourceConfig = {
     instructions: optionalText,
     publishedOn: optionalText,
     courseId: optionalText,
-    boardName: optionalText,
     noticeFile: optionalText,
     published: z.boolean().default(false),
   }),
@@ -2137,7 +2118,6 @@ const boardExamResource: ResourceConfig = {
           type: "select",
           options: options.courses ?? [],
         },
-        { name: "boardName", label: "Board", type: "text", latin: true },
         {
           name: "batchId",
           label: "Batch sitting this examination",
@@ -2169,7 +2149,7 @@ const boardExamResource: ResourceConfig = {
         },
         {
           name: "noticeFile",
-          label: "Board notice (PDF), downloadable publicly",
+          label: "Result notice (PDF), downloadable publicly",
           type: "file",
         },
         {
@@ -2192,7 +2172,6 @@ const boardExamResource: ResourceConfig = {
     examTime: str(row.examTime),
     centre: str(row.centre),
     instructions: str(row.instructions),
-    boardName: str(row.boardName) || "Bangladesh Technical Education Board",
     noticeFile: str(row.noticeFile),
     published: Boolean(row.published),
   }),
@@ -2208,7 +2187,6 @@ const boardExamResource: ResourceConfig = {
     examTime: nullable(values.examTime),
     centre: nullable(values.centre),
     instructions: nullable(values.instructions),
-    boardName: str(values.boardName) || "Bangladesh Technical Education Board",
     noticeFile: nullable(values.noticeFile),
     published: Boolean(values.published),
   }),

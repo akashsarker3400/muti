@@ -3,13 +3,14 @@
 import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
+import { studentsByResultRoll } from "@/lib/result-roll";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import { getSiteSettings } from "@/lib/site-settings";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { normalizeBmdc, normalizeRoll } from "@/lib/verify";
 
 /**
- * Public board-result search by roll or registration number (addendum 3,
+ * Public result search by roll or registration number (addendum 3,
  * §2). Only published exams answer. Same protection as /verify: rate limit,
  * optional Turnstile, and a log row per lookup.
  */
@@ -72,13 +73,13 @@ export async function searchBoardResults(raw: unknown): Promise<ResultSearch> {
 
   /**
    * A BMDC search goes through the student: rows linked to them, plus rows
-   * carrying their board roll that were never linked.
+   * carrying their roll that were never linked.
    */
   const byBmdc =
     mode === "bmdc"
       ? await prisma.student.findMany({
           where: { bmdcNormalized: query },
-          select: { id: true, boardRoll: true },
+          select: { id: true, roll: true, boardRoll: true },
         })
       : [];
   const where =
@@ -90,7 +91,12 @@ export async function searchBoardResults(raw: unknown): Promise<ResultSearch> {
             OR: [
               { studentId: { in: byBmdc.map((s) => s.id) } },
               {
-                roll: { in: byBmdc.flatMap((s) => (s.boardRoll ? [s.boardRoll] : [])) },
+                roll: {
+                  in: byBmdc.flatMap((s) => [
+                    normalizeRoll(s.roll),
+                    ...(s.boardRoll ? [s.boardRoll] : []),
+                  ]),
+                },
               },
             ],
           };
@@ -126,13 +132,7 @@ export async function searchBoardResults(raw: unknown): Promise<ResultSearch> {
   const unlinkedRolls = rows
     .filter((r) => !r.studentId && !r.studentName)
     .map((r) => r.roll);
-  const holders = unlinkedRolls.length
-    ? await prisma.student.findMany({
-        where: { boardRoll: { in: unlinkedRolls } },
-        select: { boardRoll: true, name: true },
-      })
-    : [];
-  const nameByRoll = new Map(holders.map((s) => [s.boardRoll!, s.name]));
+  const holders = await studentsByResultRoll(unlinkedRolls);
 
   return {
     status: "found",
@@ -149,7 +149,7 @@ export async function searchBoardResults(raw: unknown): Promise<ResultSearch> {
       roll: row.roll,
       registrationNo: row.registrationNo,
       studentName:
-        row.studentName ?? row.student?.name ?? nameByRoll.get(row.roll) ?? null,
+        row.studentName ?? row.student?.name ?? holders.get(row.roll)?.name ?? null,
       status: row.status,
       gpa: row.gpa ? row.gpa.toFixed(2) : null,
       failedSubjects: row.failedSubjects,

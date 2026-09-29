@@ -96,7 +96,7 @@ test.describe("addendum 3", () => {
     await deleteRow(page, "/admin/students", roll);
   });
 
-  test("board results: paste a notice, publish, and search by roll", async ({
+  test("exam results: paste a notice, publish, and search by roll", async ({
     page,
   }) => {
     const id = stamp();
@@ -142,14 +142,15 @@ test.describe("addendum 3", () => {
     // The exam is also browsable below the search.
     await expect(page.getByRole("heading", { level: 3, name: title })).toBeVisible();
 
-    // A student carrying that board roll and a BMDC makes the result
-    // findable by BMDC too, written any old way.
+    // The exams are MUTI's own: a student whose roll is the result's roll is
+    // linked to it on save, which makes the result findable by BMDC too,
+    // written any old way. There is no separate board roll any more.
     const bmdc = passRoll.slice(-5);
     await page.goto("/admin/students/new");
+    await expect(page.locator("#field-boardRoll")).toHaveCount(0);
     await page.locator("#field-name").fill(`Dr. Board ${id}`);
-    await page.locator("#field-roll").fill(`B-${id}`);
+    await page.locator("#field-roll").fill(passRoll);
     await page.locator("#field-bmdc").fill(`A-${bmdc}`);
-    await page.locator("#field-boardRoll").fill(passRoll);
     await page.locator("#field-courseId").selectOption({ index: 1 });
     await save(page);
     await expect(page).toHaveURL(/\/admin\/students$/);
@@ -161,7 +162,7 @@ test.describe("addendum 3", () => {
     await expect(page.getByTestId("result-card")).toContainText(title);
     await expect(page.getByTestId("result-card")).toContainText(`Dr. Board ${id}`);
 
-    await deleteRow(page, "/admin/students", `B-${id}`);
+    await deleteRow(page, "/admin/students", passRoll);
     await deleteRow(page, "/admin/board-exams", title);
   });
 

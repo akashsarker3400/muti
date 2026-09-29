@@ -150,6 +150,14 @@ database access, so nothing can be prerendered at build time.
 - Printed documents build their QR from `siteUrl`, never the request host, and
   the certificate QR uses `/verify?t=<verifyToken>` (the only parameter that
   page reads).
+- The exams under `/admin/board-exams` ("Exams & results" in the menu) are
+  MUTI's own, not BTEB's: the URL and the `BoardExam`/`BoardResult` model
+  names are historical. A result roll is the student's institute roll
+  (`normalizeRoll` keeps letters and dashes, upper case); link rows to
+  students with `studentsByResultRoll()` in `src/lib/result-roll.ts`, which
+  still honours an old digits-only `Student.boardRoll`. The board roll and
+  board registration fields are gone from every form, card and export; the
+  columns stay so no data is lost.
 - The admit card lives at `/admin/board-exams/<id>/admit-cards`, one A4 page
   per candidate of `BoardExam.batch`. It is a printed document, not the Phase 2
   exam module: nothing here does marks, grades or attendance.

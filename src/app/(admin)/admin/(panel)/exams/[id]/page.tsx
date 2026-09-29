@@ -72,8 +72,8 @@ export default async function ExamPage({
           {exam.published && (
             <Panel className="mb-4 text-sm">
               This result is <strong>published</strong>. Changing a mark now changes
-              what a student has already been told, so correct it only with a reason
-              you would be happy to give them.
+              what a student has already been told, so correct it only with a reason you
+              would be happy to give them.
             </Panel>
           )}
 

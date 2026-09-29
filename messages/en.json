@@ -223,7 +223,7 @@
   },
   "results": {
     "title": "Result Search",
-    "subtitle": "Find board examination results by roll number or registration number.",
+    "subtitle": "Find MUTI examination results by roll number or BMDC number.",
     "searchBy": "Search by",
     "mode": {
       "roll": "Roll No",
@@ -238,14 +238,14 @@
       "bmdc": "BMDC registration number"
     },
     "placeholder": {
-      "roll": "e.g. 3825000128",
+      "roll": "e.g. MUTI-2026-CMU-001",
       "registration": "Board registration number",
       "bmdc": "e.g. A-12345"
     },
     "hint": {
-      "roll": "The board's 10-digit roll. Bangla digits are accepted.",
+      "roll": "Your MUTI roll, as printed on your admit card. Capital or small letters both work.",
       "registration": "As printed on the admit card or registration card.",
-      "bmdc": "Dashes and spaces are fine; every board result of that doctor is listed (the student record must carry the BMDC)."
+      "bmdc": "Dashes and spaces are fine; every result of that doctor is listed (the student record must carry the BMDC)."
     },
     "searchButton": "Show result",
     "status": {
@@ -262,11 +262,11 @@
     "remark": "Remark",
     "failedSubjects": "Failed subjects",
     "legend": "[T] = theory, [P] = practical. Hover a code for the subject name.",
-    "downloadNotice": "Board notice (PDF)",
-    "boardExamsTitle": "Published board results",
+    "downloadNotice": "Result notice (PDF)",
+    "boardExamsTitle": "Published results",
     "noticesTitle": "Other results and notices",
     "notFound": "No result found for this number. If you believe this is an error, please contact the office.",
-    "invalid": "Enter at least 4 digits.",
+    "invalid": "Enter at least 4 characters.",
     "captcha": "Verification did not complete. Tick the checkbox below and try again.",
     "rateLimited": "Too many attempts. Please try again in a minute.",
     "empty": "No results have been published yet.",

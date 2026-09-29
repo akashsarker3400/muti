@@ -64,11 +64,7 @@ export default async function QuestionsPage({
 
       <div className="mb-5 grid gap-3 sm:grid-cols-2">
         <StatCard label="Questions" value={questions.length} />
-        <StatCard
-          label="Approved"
-          value={approved}
-          hint="only these are practised"
-        />
+        <StatCard label="Approved" value={approved} hint="only these are practised" />
       </div>
 
       {chapters.length === 0 ? (
@@ -79,8 +75,8 @@ export default async function QuestionsPage({
       ) : (
         <>
           <Panel className="mb-5 text-sm">
-            A question is invisible to students until a doctor approves it, and any
-            edit takes the approval off again: a changed question is a new question.
+            A question is invisible to students until a doctor approves it, and any edit
+            takes the approval off again: a changed question is a new question.
           </Panel>
 
           <QuestionBank

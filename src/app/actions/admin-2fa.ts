@@ -49,11 +49,16 @@ export async function confirmTwoFactor(
   const admin = await requireAdmin();
 
   if (!verifyTotp(secret, code, admin.email)) {
-    return { ok: false, error: "That code did not match. Check the time on your phone and try again." };
+    return {
+      ok: false,
+      error: "That code did not match. Check the time on your phone and try again.",
+    };
   }
 
   const backupCodes = newBackupCodes();
-  const hashed = await Promise.all(backupCodes.map((entry) => bcrypt.hash(entry.replace("-", ""), 12)));
+  const hashed = await Promise.all(
+    backupCodes.map((entry) => bcrypt.hash(entry.replace("-", ""), 12)),
+  );
 
   await prisma.user.update({
     where: { id: admin.id },
@@ -79,7 +84,10 @@ export async function disableTwoFactor(
 
   const secret = decryptSecret(user.totpSecret, requiredEnv("AUTH_SECRET"));
   if (!secret || !verifyTotp(secret, code, admin.email)) {
-    return { ok: false, error: "Enter a current code from your authenticator to turn it off." };
+    return {
+      ok: false,
+      error: "Enter a current code from your authenticator to turn it off.",
+    };
   }
 
   await prisma.user.update({
@@ -105,7 +113,9 @@ export async function regenerateBackupCodes(
   }
 
   const backupCodes = newBackupCodes();
-  const hashed = await Promise.all(backupCodes.map((entry) => bcrypt.hash(entry.replace("-", ""), 12)));
+  const hashed = await Promise.all(
+    backupCodes.map((entry) => bcrypt.hash(entry.replace("-", ""), 12)),
+  );
   await prisma.user.update({ where: { id: admin.id }, data: { backupCodes: hashed } });
   await logActivity(admin.id, "2fa-backup-codes", "user", admin.id);
   revalidatePath("/admin/security");
@@ -144,7 +154,9 @@ export async function clearTwoFactorFor(
 }
 
 /** Unlocks an account locked out by failed attempts. */
-export async function unlockAccount(userId: string): Promise<{ ok: boolean; error?: string }> {
+export async function unlockAccount(
+  userId: string,
+): Promise<{ ok: boolean; error?: string }> {
   const admin = await requireSuperAdmin();
   try {
     await prisma.user.update({

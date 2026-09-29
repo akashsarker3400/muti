@@ -58,9 +58,9 @@ export default async function ChapterEditorPage({
       />
 
       <Panel className="mb-5 text-sm">
-        Students read this in the portal only once a doctor has marked it
-        reviewed. Editing it takes the review off again, because what was approved
-        is no longer what they would be reading.
+        Students read this in the portal only once a doctor has marked it reviewed.
+        Editing it takes the review off again, because what was approved is no longer
+        what they would be reading.
       </Panel>
 
       <ChapterEditor

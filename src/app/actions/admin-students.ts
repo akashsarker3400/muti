@@ -47,7 +47,9 @@ export async function nextRollNumber(input: { courseId: string }): Promise<RollR
  */
 export async function admitApplication(
   applicationId: string,
-): Promise<{ ok: true; studentId: string; roll: string } | { ok: false; error: string }> {
+): Promise<
+  { ok: true; studentId: string; roll: string } | { ok: false; error: string }
+> {
   const admin = await requireAdmin();
 
   const application = await prisma.application.findUnique({

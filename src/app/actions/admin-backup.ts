@@ -25,5 +25,7 @@ export async function runBackupNow(): Promise<{
   );
   revalidatePath("/admin/backups");
 
-  return result.ok ? { ok: true, size: result.size } : { ok: false, error: result.error };
+  return result.ok
+    ? { ok: true, size: result.size }
+    : { ok: false, error: result.error };
 }

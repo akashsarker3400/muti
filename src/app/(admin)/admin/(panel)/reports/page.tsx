@@ -48,9 +48,7 @@ export default async function ReportsPage() {
         />
         <StatCard
           label="Collection rate"
-          value={
-            reports.collectionRate === null ? "—" : `${reports.collectionRate}%`
-          }
+          value={reports.collectionRate === null ? "—" : `${reports.collectionRate}%`}
           hint="collected ÷ (collected + overdue)"
         />
         <StatCard
@@ -88,15 +86,26 @@ export default async function ReportsPage() {
             <table className="mt-3 w-full text-sm">
               <thead>
                 <tr className="text-start text-xs text-[color:var(--muted-foreground)]">
-                  <th scope="col" className="text-start font-medium">Source</th>
-                  <th scope="col" className="text-start font-medium">Enquiries</th>
-                  <th scope="col" className="text-start font-medium">Admitted</th>
-                  <th scope="col" className="text-start font-medium">Rate</th>
+                  <th scope="col" className="text-start font-medium">
+                    Source
+                  </th>
+                  <th scope="col" className="text-start font-medium">
+                    Enquiries
+                  </th>
+                  <th scope="col" className="text-start font-medium">
+                    Admitted
+                  </th>
+                  <th scope="col" className="text-start font-medium">
+                    Rate
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {reports.leads.map((lead) => (
-                  <tr key={lead.source} className="border-t border-[color:var(--border)]">
+                  <tr
+                    key={lead.source}
+                    className="border-t border-[color:var(--border)]"
+                  >
                     <td className="py-2">{lead.source}</td>
                     <td className="py-2 font-latin">{lead.total}</td>
                     <td className="py-2 font-latin">{lead.admitted}</td>
@@ -120,10 +129,18 @@ export default async function ReportsPage() {
             <table className="mt-3 w-full text-sm">
               <thead>
                 <tr className="text-start text-xs text-[color:var(--muted-foreground)]">
-                  <th scope="col" className="text-start font-medium">Batch</th>
-                  <th scope="col" className="text-start font-medium">Seats</th>
-                  <th scope="col" className="text-start font-medium">Attendance</th>
-                  <th scope="col" className="text-start font-medium">Due</th>
+                  <th scope="col" className="text-start font-medium">
+                    Batch
+                  </th>
+                  <th scope="col" className="text-start font-medium">
+                    Seats
+                  </th>
+                  <th scope="col" className="text-start font-medium">
+                    Attendance
+                  </th>
+                  <th scope="col" className="text-start font-medium">
+                    Due
+                  </th>
                 </tr>
               </thead>
               <tbody>
