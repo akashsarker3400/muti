@@ -61,7 +61,8 @@ export type ResourceConfig = {
     | "leadershipMessage"
     | "advisor"
     | "promo"
-    | "messageTemplate";
+    | "messageTemplate"
+    | "job";
   title: string;
   singular: string;
   description?: string;
@@ -2753,6 +2754,156 @@ const messageTemplateResource: ResourceConfig = {
   }),
 };
 
+/* -------------------------------------------------------------------------- */
+/* Job board (addendum 2, B11)                                                */
+/* -------------------------------------------------------------------------- */
+
+const jobResource: ResourceConfig = {
+  key: "jobs",
+  model: "job",
+  title: "Job board",
+  singular: "Job",
+  description:
+    "Jobs for sonographers, shown on /jobs. A job with a deadline disappears from the public list the day after it passes, so nobody applies for a post that closed last month.",
+  newLabel: "New job",
+  permission: "jobs.manage",
+  columns: [
+    { key: "title", label: "Job" },
+    { key: "organization", label: "Organisation", hideOnMobile: true },
+    { key: "location", label: "Location", hideOnMobile: true },
+    {
+      key: "type",
+      label: "Type",
+      type: "badge",
+      labels: { FULL_TIME: "Full time", PART_TIME: "Part time", CONTRACT: "Contract" },
+      hideOnMobile: true,
+    },
+    { key: "deadline", label: "Deadline", type: "date" },
+    { key: "published", label: "Published", type: "bool" },
+  ],
+  searchFields: ["title", "organization", "location"],
+  orderBy: [{ createdAt: "desc" }],
+  schema: z.object({
+    title: requiredText,
+    organization: requiredText,
+    location: requiredText,
+    type: z.enum(["FULL_TIME", "PART_TIME", "CONTRACT"]).default("FULL_TIME"),
+    salary: optionalText,
+    descriptionEn: requiredText,
+    descriptionBn: optionalText,
+    contact: requiredText,
+    applyUrl: optionalText,
+    deadline: optionalText,
+    slug: optionalText,
+    featured: z.boolean().default(false),
+    published: z.boolean().default(false),
+  }),
+  sections: () => [
+    {
+      id: "main",
+      label: "Job",
+      fields: [
+        { name: "title", label: "Job title", type: "text", required: true, full: true },
+        {
+          name: "organization",
+          label: "Organisation",
+          type: "text",
+          required: true,
+        },
+        { name: "location", label: "Location", type: "text", required: true },
+        {
+          name: "type",
+          label: "Type",
+          type: "select",
+          required: true,
+          options: [
+            { value: "FULL_TIME", label: "Full time" },
+            { value: "PART_TIME", label: "Part time" },
+            { value: "CONTRACT", label: "Contract" },
+          ],
+        },
+        {
+          name: "salary",
+          label: "Salary",
+          type: "text",
+          placeholder: "Negotiable, or 25,000-35,000",
+        },
+        {
+          name: "descriptionEn",
+          label: "Description (English)",
+          type: "richtext",
+          required: true,
+          lang: "en",
+        },
+        {
+          name: "descriptionBn",
+          label: "Description (Bangla)",
+          type: "richtext",
+          lang: "bn",
+        },
+        {
+          name: "contact",
+          label: "How to apply",
+          type: "text",
+          required: true,
+          full: true,
+          placeholder: "Phone, email or address for applications",
+        },
+        { name: "applyUrl", label: "Application link", type: "text", latin: true },
+        {
+          name: "deadline",
+          label: "Deadline",
+          type: "date",
+          hint: "The job leaves the public list the day after this date.",
+        },
+        {
+          name: "slug",
+          label: "URL slug",
+          type: "text",
+          latin: true,
+          hint: "Leave empty to build it from the title.",
+        },
+        {
+          name: "featured",
+          label: "Featured (shown first)",
+          type: "checkbox",
+        },
+        publishedField,
+      ],
+    },
+  ],
+  toForm: (row) => ({
+    title: str(row.title),
+    organization: str(row.organization),
+    location: str(row.location),
+    type: str(row.type) || "FULL_TIME",
+    salary: str(row.salary),
+    descriptionEn: str(row.descriptionEn),
+    descriptionBn: str(row.descriptionBn),
+    contact: str(row.contact),
+    applyUrl: str(row.applyUrl),
+    deadline: fromDate(row.deadline),
+    slug: str(row.slug),
+    featured: Boolean(row.featured),
+    published: Boolean(row.published),
+  }),
+  toData: (values) => ({
+    title: str(values.title),
+    organization: str(values.organization),
+    location: str(values.location),
+    type: str(values.type) || "FULL_TIME",
+    salary: nullable(values.salary),
+    descriptionEn: str(values.descriptionEn),
+    descriptionBn: nullable(values.descriptionBn),
+    contact: str(values.contact),
+    applyUrl: nullable(values.applyUrl),
+    deadline: toDate(values.deadline),
+    slug: slugify(str(values.slug) || str(values.title)),
+    featured: Boolean(values.featured),
+    published: Boolean(values.published),
+  }),
+};
+
 export const RESOURCES: Record<string, ResourceConfig> = {
   notices: noticeResource,
   faculty: facultyResource,
@@ -2779,6 +2930,7 @@ export const RESOURCES: Record<string, ResourceConfig> = {
   "health-services": healthServiceResource,
   promos: promoResource,
   "message-templates": messageTemplateResource,
+  jobs: jobResource,
 };
 
 export function getResource(key: string): ResourceConfig | null {

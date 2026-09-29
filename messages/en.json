@@ -620,5 +620,18 @@
       "DROPPED": "No longer enrolled"
     },
     "note": "Check that the photo above matches the person holding the card. This page is issued by {institute} and opens only from the QR code printed on a genuine card."
+  },
+  "jobs": {
+    "title": "Jobs",
+    "subtitle": "Openings for sonographers, posted by hospitals and clinics we work with",
+    "empty": "No job is open at the moment. Look again in a few days.",
+    "closes": "Closes",
+    "howToApply": "How to apply",
+    "apply": "Apply",
+    "type": {
+      "FULL_TIME": "Full time",
+      "PART_TIME": "Part time",
+      "CONTRACT": "Contract"
+    }
   }
 }

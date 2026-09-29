@@ -200,6 +200,7 @@ model User {
   teacherPayments      TeacherPayment[]
   paymentsTaken        Payment[]
   paymentsVoided       Payment[]          @relation("PaymentVoider")
+  jobs                 Job[]
   messages             MessageLog[]
   faculty              Faculty?
   attendanceMarked     Attendance[]
@@ -1473,4 +1474,36 @@ model TeacherPayment {
   createdAt DateTime @default(now())
 
   @@index([facultyId, periodFrom])
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+}
+
+/// A job posting for graduates (addendum 2, B11). The institute's own board:
+/// sonographers are hired by word of mouth here, and this is the word.
+model Job {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  title         String
+  organization  String
+  location      String
+  type          JobType   @default(FULL_TIME)
+  salary        String?
+  descriptionEn String    @db.Text
+  descriptionBn String?   @db.Text
+  contact       String
+  applyUrl      String?
+  deadline      DateTime?
+  published     Boolean   @default(false)
+  featured      Boolean   @default(false)
+  postedById    String?
+  postedBy      User?     @relation(fields: [postedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, deadline])
 }

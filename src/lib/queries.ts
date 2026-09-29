@@ -544,3 +544,36 @@ export const getFeaturedCourseBook = cache(async () => {
     return null;
   }
 });
+
+
+/**
+ * Published jobs that have not closed (addendum 2, B11). A job past its
+ * deadline is not listed at all: applying for a post that closed last month
+ * wastes the applicant's day and the employer's patience.
+ */
+export const getJobs = cache(async () => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return await prisma.job.findMany({
+      where: {
+        published: true,
+        OR: [{ deadline: null }, { deadline: { gte: today } }],
+      },
+      orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+      take: 60,
+    });
+  } catch (error) {
+    console.error("getJobs failed", error);
+    return [];
+  }
+});
+
+export const getJobBySlug = cache(async (slug: string) => {
+  try {
+    return await prisma.job.findFirst({ where: { slug, published: true } });
+  } catch (error) {
+    console.error("getJobBySlug failed", error);
+    return null;
+  }
+});
