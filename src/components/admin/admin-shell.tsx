@@ -16,6 +16,7 @@ import {
   Sparkles,
   Target,
   CalendarRange,
+  ClipboardCheck,
   ClipboardList,
   ExternalLink,
   FileText,
@@ -66,6 +67,7 @@ const NAV: NavGroup[] = [
     items: [
       { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
       { href: "/admin/applications", label: "Applications", icon: Inbox },
+      { href: "/admin/my-classes", label: "My classes", icon: ClipboardCheck },
       { href: "/admin/messages", label: "Messages (SMS)", icon: MessageSquare },
       {
         href: "/admin/message-templates",

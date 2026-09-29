@@ -14,6 +14,9 @@ datasource db {
 enum Role {
   SUPER_ADMIN
   STAFF
+  /// A faculty member who signs in to mark attendance for their own classes
+  /// (addendum 2, B1). Sees nothing else in the panel.
+  TEACHER
 }
 
 enum CourseLevel {
@@ -194,6 +197,8 @@ model User {
   issuedCertificates   Certificate[]      @relation("CertificateIssuer")
   certificatePrints    CertificatePrint[]
   messages             MessageLog[]
+  faculty              Faculty?
+  attendanceMarked     Attendance[]
 }
 
 /// Single row (id = 1) holding the whole Site Settings JSON blob (section 7.11).
@@ -286,6 +291,8 @@ model CourseRoutine {
 
   sortOrder Int @default(0)
 
+  sessions ClassSession[]
+
   @@index([courseId, sortOrder])
 }
 
@@ -313,6 +320,7 @@ model Batch {
   seatsFilledManual Boolean @default(false)
   showSeatCounter   Boolean @default(true)
 
+  sessions     ClassSession[]
   students     Student[]
   boardExams   BoardExam[]
   results      Result[]
@@ -434,6 +442,7 @@ model Student {
   boardRoll           String?   @unique
   boardRegistrationNo String?
 
+  attendance   Attendance[]
   certificates Certificate[]
   boardResults BoardResult[]
 
@@ -700,6 +709,12 @@ model Faculty {
   photo         String?
   sortOrder     Int     @default(0)
   published     Boolean @default(true)
+
+  /// Set when this teacher has a login of their own (addendum 2, B1).
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  sessions ClassSession[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1193,4 +1208,61 @@ model Branch {
   batches   Batch[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+}
+
+enum ClassSessionStatus {
+  PLANNED
+  DONE
+  CANCELLED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+/// One class of one batch (addendum 2, B1). Generated from the course routine
+/// and editable afterwards, because a real timetable moves.
+model ClassSession {
+  id              String             @id @default(cuid())
+  batchId         String
+  batch           Batch              @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  courseRoutineId String?
+  courseRoutine   CourseRoutine?     @relation(fields: [courseRoutineId], references: [id], onDelete: SetNull)
+  date            DateTime
+  /// Free text, because a routine says "10:00 am" rather than a timestamp.
+  startTime       String?
+  topic           String
+  type            RoutineType        @default(LECTURE)
+  teacherId       String?
+  teacher         Faculty?           @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+  status          ClassSessionStatus @default(PLANNED)
+  note            String?
+
+  attendance Attendance[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([batchId, date])
+  @@index([teacherId, date])
+}
+
+/// One student at one class. Absent rows are written too: "nobody marked it"
+/// and "marked absent" are different answers and the office needs both.
+model Attendance {
+  id         String           @id @default(cuid())
+  sessionId  String
+  session    ClassSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  studentId  String
+  student    Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status     AttendanceStatus @default(PRESENT)
+  markedById String?
+  markedBy   User?            @relation(fields: [markedById], references: [id], onDelete: SetNull)
+  markedAt   DateTime         @default(now())
+
+  @@unique([sessionId, studentId])
+  @@index([studentId])
 }

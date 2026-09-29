@@ -278,7 +278,32 @@ Each of these is a small, reversible change with a reason.
 
 ---
 
-## 6. Phase 2 — not built, schema left compatible
+## 6. Phase 2 — progress
+
+Built so far, in the order addendum 2 B14 sets out:
+
+| Module                          | Status                                                                                                                                                                        |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| B1 Attendance                   | **Done.** Classes generated from the course routine and editable; register taken on a phone; percentage on the student record; `TEACHER` role that sees only its own classes. |
+| B2 Fees, installments, payments | Not started.                                                                                                                                                                  |
+| B3 Exams and results            | Not started.                                                                                                                                                                  |
+| B4 Certificates + verify        | Done earlier (certificate register, approval, print log, `/verify`).                                                                                                          |
+| B5 ID cards                     | Done earlier (registration card and wallet card).                                                                                                                             |
+| B6 Dropout and fee alerts       | Not started.                                                                                                                                                                  |
+| B7 Teacher payments             | Not started.                                                                                                                                                                  |
+| B8 Reports and owner dashboard  | Not started.                                                                                                                                                                  |
+| B9 Weekly summary to owner      | Not started.                                                                                                                                                                  |
+| B10 SMS provider                | Done earlier (eSMS/DianaSMS, bulksmsbd, SSL Wireless, generic).                                                                                                               |
+| B11 Job board                   | Not started.                                                                                                                                                                  |
+| B12 Student portal (PWA)        | Not started.                                                                                                                                                                  |
+| B13 Permissions                 | Added as each module lands.                                                                                                                                                   |
+
+Section C (mobile app) is not built. Its standing requirement is that every
+portal feature also exists as a JSON endpoint under `/api/v1/portal/*`.
+
+---
+
+## 6a. Phase 2 — not yet built, schema left compatible
 
 Online payment (bKash/Nagad/SSLCommerz), a student portal, SMS reminders, QR
 codes on certificates linking to `/verify`, WhatsApp Business API auto-reply,

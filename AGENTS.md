@@ -7,8 +7,10 @@ Institute (MUTI)**. The specifications are kept in `docs/build-spec.md`,
 ("section 5.4" is the build spec, "addendum 2, A1" the addendum).
 `HANDOVER.md` records every outstanding TODO and every deliberate deviation.
 
-Addendum 2 section B (Phase 2: attendance, fees, exams, portal…) is **not**
-built and must not be started until the owner says "start Phase 2".
+Addendum 2 section B (Phase 2) is **being built**, in the order B14 sets out;
+`HANDOVER.md` section 6 tracks what is done. Section C (the mobile app) is not
+built: what it asks of us is that every portal feature also exists as a JSON
+endpoint under `/api/v1/portal/*`, never only inside a server component.
 `docs/erp-addendum.md` is the future-proofing brief: its section 4 is Phase 1
 and is built (see below); everything else in it is Phase 2 and must not be.
 
@@ -86,6 +88,13 @@ database access, so nothing can be prerendered at build time.
 - Scheduled work has one entry point, `/api/cron/run`, which runs every job and
   catches each separately. The single-purpose cron routes still exist for
   anyone who wants a different schedule for one of them.
+- Attendance (addendum 2, B1): `ClassSession` per class, `Attendance` per
+  student per class, with an absent row written too — "marked absent" and
+  "nobody took the register" are different answers. A percentage counts
+  present and late as attended, leaves excused out of the total, and only
+  looks at sessions marked DONE. A `TEACHER` account sees only
+  `/admin/my-classes` and may mark only sessions whose `Faculty.userId` is
+  theirs; the office may mark anybody's.
 - Named permissions live in `src/lib/permissions.ts`; guard a page or action
   with `requirePermission("…")`. A resource in `src/lib/admin/resources.ts`
   declares its own `permission` and the generic pages enforce it.

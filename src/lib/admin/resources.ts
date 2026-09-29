@@ -349,9 +349,11 @@ const facultyResource: ResourceConfig = {
   ],
   searchFields: ["name", "designation", "degrees"],
   orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+  loadOptions: async () => ({ teachers: await teacherLoginOptions() }),
   schema: z.object({
     name: requiredText,
     nameBn: optionalText,
+    userId: optionalText,
     degrees: requiredText,
     designation: requiredText,
     designationBn: optionalText,
@@ -360,7 +362,7 @@ const facultyResource: ResourceConfig = {
     sortOrder: z.coerce.number().int().default(0),
     published: z.boolean().default(true),
   }),
-  sections: () => [
+  sections: (options) => [
     {
       id: "main",
       label: "Faculty member",
@@ -399,6 +401,14 @@ const facultyResource: ResourceConfig = {
         },
         { name: "bio", label: "Short bio", type: "textarea" },
         { name: "photo", label: "Photo", type: "image" },
+        {
+          name: "userId",
+          label: "Login for this teacher",
+          type: "select",
+          options: options.teachers ?? [],
+          full: true,
+          hint: "Connects this faculty member to an admin account with the Teacher role, so they can take the register for their own classes and nothing else. Create the account under Users first.",
+        },
         sortOrderField,
         publishedField,
       ],
@@ -412,6 +422,7 @@ const facultyResource: ResourceConfig = {
     designationBn: str(row.designationBn),
     bio: str(row.bio),
     photo: str(row.photo),
+    userId: str(row.userId),
     sortOrder: toInt(row.sortOrder),
     published: row.published === undefined ? true : Boolean(row.published),
   }),
@@ -423,6 +434,7 @@ const facultyResource: ResourceConfig = {
     designationBn: nullable(values.designationBn),
     bio: nullable(values.bio),
     photo: nullable(values.photo),
+    userId: nullable(values.userId),
     sortOrder: toInt(values.sortOrder),
     published: Boolean(values.published),
   }),
@@ -1844,6 +1856,23 @@ const certificateTypeResource = contentResource({
 /* -------------------------------------------------------------------------- */
 /* Addendum 3                                                                 */
 /* -------------------------------------------------------------------------- */
+
+/**
+ * Accounts a faculty member can be linked to (addendum 2, B1). Teacher and
+ * staff accounts only: linking a super admin would quietly narrow what that
+ * person sees when they open their own classes.
+ */
+async function teacherLoginOptions(): Promise<OptionList> {
+  const users = await prisma.user.findMany({
+    where: { active: true, role: { in: ["TEACHER", "STAFF"] } },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true, email: true, role: true },
+  });
+  return users.map((user) => ({
+    value: user.id,
+    label: `${user.name} (${user.email})${user.role === "TEACHER" ? "" : " — staff"}`,
+  }));
+}
 
 async function studentOptions(): Promise<OptionList> {
   const students = await prisma.student.findMany({

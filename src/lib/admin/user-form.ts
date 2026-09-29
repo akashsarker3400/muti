@@ -23,6 +23,10 @@ export function userFormSections(isNew: boolean): FormSection[] {
           required: true,
           options: [
             { value: "STAFF", label: "Staff" },
+            {
+              value: "TEACHER",
+              label: "Teacher (their own classes only)",
+            },
             { value: "SUPER_ADMIN", label: "Super admin" },
           ],
         },

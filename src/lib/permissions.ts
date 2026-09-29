@@ -22,6 +22,8 @@ export const PERMISSIONS = [
   "videos.manage",
   "book.manage",
   "messages.manage",
+  "attendance.mark",
+  "attendance.view",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -42,6 +44,8 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   "videos.manage": "Edit institute videos",
   "book.manage": "Edit the course book",
   "messages.manage": "Edit message templates and send SMS",
+  "attendance.mark": "Mark class attendance",
+  "attendance.view": "See attendance registers and percentages",
 };
 
 /**
@@ -63,6 +67,18 @@ const STAFF_DEFAULTS: ReadonlySet<Permission> = new Set([
   "videos.manage",
   "book.manage",
   "messages.manage",
+  "attendance.mark",
+  "attendance.view",
+]);
+
+/**
+ * What a TEACHER can do (addendum 2, B1). Nothing but their own classes: a
+ * teacher signing in must not be able to read the applications inbox or the
+ * fees, so their role grants two permissions and nothing else is inherited.
+ */
+const TEACHER_DEFAULTS: ReadonlySet<Permission> = new Set([
+  "attendance.mark",
+  "attendance.view",
 ]);
 
 export function hasPermission(
@@ -70,6 +86,12 @@ export function hasPermission(
   permission: Permission,
 ): boolean {
   if (user.role === "SUPER_ADMIN") return true;
+  if (user.role === "TEACHER") {
+    return (
+      TEACHER_DEFAULTS.has(permission) ||
+      (user.permissions ?? []).includes(permission)
+    );
+  }
   if (STAFF_DEFAULTS.has(permission)) return true;
   return (user.permissions ?? []).includes(permission);
 }

@@ -14,6 +14,8 @@ import { ApplicationStatusSelect } from "@/components/admin/application-status-s
 import { AdminPageHeader, Panel, StatCard } from "@/components/admin/ui";
 import { WhatsAppIcon } from "@/components/site/icons";
 import { Button } from "@/components/ui/button";
+import { redirect } from "next/navigation";
+
 import { requireAdmin } from "@/lib/admin-auth";
 import { langOf } from "@/lib/lang";
 import { formatDate } from "@/lib/format";
@@ -34,6 +36,11 @@ const APPLICATION_TYPE_LABELS: Record<string, string> = {
 };
 
 export default async function AdminDashboard() {
+  const me = await requireAdmin();
+  // A teacher has no business on the office dashboard: applications, fees and
+  // seat counters are not theirs. Their landing page is their own classes.
+  if (me.role === "TEACHER") redirect("/admin/my-classes");
+
   const admin = await requireAdmin();
   const uploads = await uploadsHealth();
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   Check,
+  ClipboardCheck,
   Download,
   IdCard,
   ListChecks,
@@ -256,6 +257,19 @@ export default async function ResourceListPage({
                                 <Printer className="size-4" aria-hidden="true" />
                                 Print
                               </a>
+                            </Button>
+                          )}
+                          {resource.rowTool === "batch-clone" && (
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="sm"
+                              className="me-2"
+                            >
+                              <Link href={`/admin/batches/${id}/sessions`}>
+                                <ClipboardCheck className="size-4" aria-hidden="true" />
+                                Classes
+                              </Link>
                             </Button>
                           )}
                           {resource.rowTool === "batch-clone" && (
