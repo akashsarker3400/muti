@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { DEFAULT_TEMPLATES } from "@/lib/messaging-defaults";
-import { buildRequest, gatewayNumber } from "@/lib/sms";
+import { buildRequest, gatewayNumber, interpret, isUnicode } from "@/lib/sms";
 
 /**
  * The parts of messaging that can be tested without a gateway: the template
@@ -20,11 +20,13 @@ function renderTemplate(body: string, values: Record<string, string | undefined>
 
 describe("template rendering", () => {
   it("substitutes what it is given", () => {
-    expect(renderTemplate("Hello {name}, {course} starts {date}.", {
-      name: "Dr. Nusrat",
-      course: "CMU",
-      date: "5 Jan",
-    })).toBe("Hello Dr. Nusrat, CMU starts 5 Jan.");
+    expect(
+      renderTemplate("Hello {name}, {course} starts {date}.", {
+        name: "Dr. Nusrat",
+        course: "CMU",
+        date: "5 Jan",
+      }),
+    ).toBe("Hello Dr. Nusrat, CMU starts 5 Jan.");
   });
 
   it("leaves an unknown placeholder visible rather than blanking it", () => {
@@ -75,6 +77,76 @@ describe("gateway number", () => {
   it("refuses anything that is not a Bangladeshi mobile", () => {
     expect(gatewayNumber("12345")).toBeNull();
     expect(gatewayNumber("")).toBeNull();
+  });
+});
+
+describe("eSMS / DianaSMS (the Xend platform)", () => {
+  it("posts a bearer token and a form body to the documented endpoint", () => {
+    const { url, init } = buildRequest(
+      "esms",
+      { apiKey: "TOKEN", senderId: "MUTI" },
+      "8801778838644",
+      "hello",
+    );
+    expect(url).toBe("https://login.esms.com.bd/api/v3/sms/send");
+    expect(init.method).toBe("POST");
+    expect((init.headers as Record<string, string>).authorization).toBe("Bearer TOKEN");
+    const body = new URLSearchParams(String(init.body));
+    expect(body.get("recipient")).toBe("8801778838644");
+    expect(body.get("sender_id")).toBe("MUTI");
+    expect(body.get("message")).toBe("hello");
+  });
+
+  it("sends Bangla as unicode, not plain", () => {
+    // Bangla sent as "plain" arrives as mojibake and is still charged for.
+    expect(isUnicode("আপনার সিরিয়াল ১২")).toBe(true);
+    expect(isUnicode("Your serial is 12")).toBe(false);
+
+    const bangla = buildRequest(
+      "esms",
+      { apiKey: "T", senderId: "MUTI" },
+      "8801778838644",
+      "আপনার ক্লাস শুরু হচ্ছে",
+    );
+    expect(new URLSearchParams(String(bangla.init.body)).get("type")).toBe("unicode");
+
+    const english = buildRequest(
+      "esms",
+      { apiKey: "T", senderId: "MUTI" },
+      "8801778838644",
+      "Your class starts soon",
+    );
+    expect(new URLSearchParams(String(english.init.body)).get("type")).toBe("plain");
+  });
+
+  it("uses the DianaSMS host when one is configured, however it is pasted", () => {
+    for (const configured of [
+      "https://login.dianasms.com",
+      "https://login.dianasms.com/",
+      "https://login.dianasms.com//",
+      "https://login.dianasms.com/api/v3/sms/send",
+    ]) {
+      const { url } = buildRequest(
+        "esms",
+        { apiKey: "T", senderId: "MUTI", url: configured },
+        "8801778838644",
+        "hello",
+      );
+      expect(url, configured).toBe("https://login.dianasms.com/api/v3/sms/send");
+    }
+  });
+
+  it("reads success and failure out of the body, not the status code", () => {
+    // The gateway answers 200 either way, which is why this is tested.
+    expect(interpret("esms", 200, '{"status":"success","data":"…"}')).toEqual({
+      sent: true,
+    });
+    expect(
+      interpret("esms", 200, '{"status":"error","message":"Insufficient balance"}'),
+    ).toEqual({ sent: false, reason: "Insufficient balance" });
+    // A login page instead of JSON: the token is wrong or has been rotated.
+    expect(interpret("esms", 200, "<!doctype html><html>…").sent).toBe(false);
+    expect(interpret("esms", 401, "Unauthenticated.").sent).toBe(false);
   });
 });
 
