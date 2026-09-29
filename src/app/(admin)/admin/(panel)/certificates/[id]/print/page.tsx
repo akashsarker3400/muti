@@ -181,11 +181,6 @@ export default async function CertificatePrintPage({
             <h2 className="font-[family-name:var(--font-display-serif)] text-[26pt] leading-none font-bold tracking-[0.12em] text-[color:#12204f] uppercase">
               {doc.certificateTitleEn || "Certificate of Completion"}
             </h2>
-            {doc.certificateTitleBn && (
-              <p lang="bn" className="mt-1 text-[12pt] text-[color:#9a7b2f]">
-                {doc.certificateTitleBn}
-              </p>
-            )}
             <div className="mx-auto mt-2 flex w-[70mm] items-center gap-2">
               <span className="h-px flex-1 bg-[color:#9a7b2f]" />
               <span className="size-1.5 rotate-45 bg-[color:#9a7b2f]" />
@@ -193,8 +188,10 @@ export default async function CertificatePrintPage({
             </div>
           </div>
 
-          {/* Declaration */}
-          <div className="mt-[7mm] flex-1 text-center text-[12.5pt] leading-[2]">
+          {/* Declaration. Centred in whatever space is left over, so a short
+              course name and a long one both sit in a balanced page rather
+              than leaving all the slack in one band under the text. */}
+          <div className="mt-[7mm] flex flex-1 flex-col justify-center text-center text-[12.5pt] leading-[2]">
             <p>{doc.certificateLeadEn || "This is to certify that"}</p>
 
             <p
@@ -258,7 +255,7 @@ export default async function CertificatePrintPage({
           </div>
 
           {/* Facts strip */}
-          <dl className="mb-[5mm] flex items-end justify-center gap-10 text-[9pt]">
+          <dl className="mt-[6mm] mb-[7mm] flex items-end justify-center gap-10 text-[9pt]">
             <Fact label="Certificate No" value={certificate.certificateNo} latin />
             <Fact
               label="Date of issue"

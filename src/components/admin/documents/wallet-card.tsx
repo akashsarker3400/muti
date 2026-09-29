@@ -12,7 +12,6 @@ import type { SiteSettings } from "@/lib/site-settings";
 
 export type WalletStudent = {
   name: string;
-  nameBn: string | null;
   roll: string;
   photo: string | null;
   bloodGroup: string | null;
@@ -128,11 +127,6 @@ function CardFront({
           >
             {student.name}
           </dd>
-          {student.nameBn && (
-            <dd lang="bn" className="truncate text-[7pt] text-[color:#555]">
-              {student.nameBn}
-            </dd>
-          )}
           <div className="mt-[1mm] grid grid-cols-[13mm_1fr] gap-x-1">
             <dt className="text-[color:#666]">Roll</dt>
             <dd className="font-latin font-semibold">{student.roll}</dd>

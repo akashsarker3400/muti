@@ -100,6 +100,11 @@ database access, so nothing can be prerendered at build time.
 - Printed documents build their QR from `siteUrl`, never the request host, and
   the certificate QR uses `/verify?t=<verifyToken>` (the only parameter that
   page reads).
+- The certificate, the registration card and the admit card are **English
+  only**; a student's own name is the one exception. The ornamental frame is a
+  positioned `<span>` with an SVG at `size-full` inside it — set the insets on
+  the SVG itself and it renders square. A signature slot with nothing in it
+  still prints its line.
 - A certificate is a draft until it is approved: `certificates.manage` prepares
   (bulk issue at `/admin/certificates/issue`), `certificates.issue` approves on
   `/admin/certificates/register`, and the print page refuses an unapproved one.

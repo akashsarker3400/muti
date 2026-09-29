@@ -156,8 +156,12 @@ test.describe("admin: English required, Bangla optional", () => {
 
     await page.locator("#field-nameEn").fill(`Locale ${id}`);
     await page.locator("#field-fullNameEn").fill(`Locale Course ${id}`);
-    await page.getByRole("button", { name: "Save" }).click();
-    await page.waitForURL(/\/admin\/courses$/);
+    // Retried: on a cold dev server the click can land before the form is
+    // interactive, and then the save never happens at all.
+    await expect(async () => {
+      await page.getByRole("button", { name: "Save" }).click();
+      await page.waitForURL(/\/admin\/courses$/, { timeout: 5000 });
+    }).toPass({ timeout: 40_000 });
     await expect(page.getByText(`Locale ${id}`)).toBeVisible();
 
     // Clean up.

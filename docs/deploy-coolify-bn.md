@@ -319,11 +319,11 @@ SMS_API_KEY="আপনার-api-token"
 SMS_SENDER_ID="MUTI"
 ```
 
-অ্যাকাউন্টটি `login.dianasms.com`-এ হলে আরও একটি লাইন:
-
-```
-SMS_API_URL="https://login.dianasms.com"
-```
+> **`SMS_API_URL` না দেওয়াই ভালো।** ডিফল্ট `https://login.esms.com.bd` ঠিকানাটিই
+> ব্যবহার হবে। `login.dianasms.com` একই প্ল্যাটফর্ম, কিন্তু ওই ঠিকানার **SSL
+> সার্টিফিকেটের মেয়াদ শেষ** (২৯ সেপ্টেম্বর ২০২৬-এ পরীক্ষা করা) — তাই সার্ভার
+> ওখানে সংযোগই করতে পারে না, আর Messages পাতায় লেখা আসে
+> “has an expired security certificate”। দুটি ঠিকানার অ্যাকাউন্ট ও টোকেন একই।
 
 ৪. Redeploy → অ্যাডমিন → **Messages** → **Send a message** দিয়ে নিজের নম্বরে
 একটা পরীক্ষা করুন। না গেলে কারণটা ওখানেই লেখা থাকবে (ব্যালেন্স শেষ, সেন্ডার

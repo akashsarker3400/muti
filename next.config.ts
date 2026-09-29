@@ -22,10 +22,13 @@ const CSP = [
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.youtube-nocookie.com https://www.youtube.com https://www.facebook.com https://connect.facebook.net",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
-  "img-src 'self' data: blob: https://i.ytimg.com https://*.ytimg.com https://scontent.xx.fbcdn.net",
+  "img-src 'self' data: blob: https://i.ytimg.com https://*.ytimg.com https://scontent.xx.fbcdn.net https://maps.gstatic.com https://*.googleapis.com",
   "media-src 'self' blob:",
   "connect-src 'self' https://challenges.cloudflare.com https://api.brevo.com",
-  "frame-src https://challenges.cloudflare.com https://www.youtube-nocookie.com https://www.youtube.com https://www.facebook.com",
+  // Google Maps is framed on the contact block, which sits in the footer of
+  // every page: leaving it out of frame-src blocked the map site-wide and the
+  // only sign of it was a console message nobody reads.
+  "frame-src https://challenges.cloudflare.com https://www.youtube-nocookie.com https://www.youtube.com https://www.facebook.com https://www.google.com https://maps.google.com",
   "upgrade-insecure-requests",
 ].join("; ");
 

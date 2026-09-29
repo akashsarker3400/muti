@@ -229,15 +229,60 @@ export async function sendSms(phone: string, message: string): Promise<SmsResult
   }
 
   try {
-    // Ten seconds: a slow gateway must never hold a form open.
-    const response = await fetch(url, { ...init, signal: AbortSignal.timeout(10_000) });
+    // Twenty seconds. Ten was too tight for a local gateway on a bad evening,
+    // and the only thing a caller loses by waiting is an admin watching a
+    // spinner; every path that sends a message has already saved its record.
+    const response = await fetch(url, { ...init, signal: AbortSignal.timeout(20_000) });
     const text = (await response.text()).slice(0, 300);
     const verdict = interpret(provider, response.status, text);
     return verdict.sent
       ? { sent: true, provider }
       : { sent: false, provider, reason: verdict.reason };
   } catch (error) {
-    console.error("SMS gateway request failed", error);
-    return { sent: false, provider, reason: "The gateway could not be reached" };
+    console.error(`SMS gateway request to ${url} failed`, error);
+    return { sent: false, provider, reason: describeNetworkError(error, url) };
   }
+}
+
+/**
+ * Why the request never reached the gateway, in terms the office can act on.
+ *
+ * "The gateway could not be reached" is true and useless: it reads the same
+ * whether the address is misspelt, the server has no DNS, or the gateway took
+ * too long. Naming the host and the cause turns a support conversation into a
+ * one-line fix, and the wrong host is the commonest mistake of the three —
+ * the same platform serves esms.com.bd and dianasms.com, and an account only
+ * exists on one of them.
+ */
+export function describeNetworkError(error: unknown, url: string): string {
+  let host = url;
+  try {
+    host = new URL(url).host;
+  } catch {
+    // Keep the raw value: an unparseable URL is itself the answer.
+  }
+
+  const err = error as { name?: string; message?: string; cause?: { code?: string } };
+  const code = err?.cause?.code ?? "";
+
+  if (err?.name === "TimeoutError" || code === "UND_ERR_HEADERS_TIMEOUT") {
+    return `${host} did not answer within 20 seconds. The gateway may be busy; try again, and check the balance on its own dashboard.`;
+  }
+  if (code === "ENOTFOUND" || code === "EAI_AGAIN") {
+    return `${host} could not be found. Check SMS_API_URL: an account on dianasms.com cannot be reached at esms.com.bd, and the other way round.`;
+  }
+  if (code === "ECONNREFUSED" || code === "ECONNRESET") {
+    return `${host} refused the connection. Check SMS_API_URL, and that the server is allowed to make outgoing requests.`;
+  }
+  if (code === "CERT_HAS_EXPIRED") {
+    // Seen in the wild: login.dianasms.com serves the same platform as
+    // login.esms.com.bd but with a certificate that has run out, and Node
+    // refuses the connection outright. Switching the host is the whole fix.
+    return `${host} has an expired security certificate, so the server will not connect to it. Use the other address of the same account instead: set SMS_API_URL to https://login.esms.com.bd (or remove SMS_API_URL, which uses it by default).`;
+  }
+  if (code.startsWith("CERT_") || code.startsWith("ERR_TLS")) {
+    return `${host} presented a security certificate the server would not accept (${code}).`;
+  }
+
+  return `${host} could not be reached${code ? ` (${code})` : ""}.`;
 }

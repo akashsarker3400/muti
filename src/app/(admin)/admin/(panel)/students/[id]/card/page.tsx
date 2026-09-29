@@ -129,7 +129,6 @@ export default async function StudentCardPage({
         <WalletCardSheet
           student={{
             name: student.name,
-            nameBn: student.nameBn,
             roll: student.roll,
             photo: student.photo,
             bloodGroup: student.bloodGroup,
@@ -202,7 +201,6 @@ export default async function StudentCardPage({
 
             <dl className="mt-[5mm] space-y-[2mm] text-[10.5pt]">
               <CardRow label="Name of the Student" value={student.name} />
-              {student.nameBn && <CardRow label="নাম (বাংলা)" value={student.nameBn} />}
               <CardRow label="Father's Name" value={student.fatherName} />
               <CardRow label="Mother's Name" value={student.motherName} />
               <CardRow

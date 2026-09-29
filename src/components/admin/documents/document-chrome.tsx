@@ -57,53 +57,68 @@ export function DocumentBorder({
   const band = variant === "certificate" ? 9 : 6;
 
   return (
-    <svg
-      className="pointer-events-none absolute"
+    /*
+     * The span does the positioning and the SVG fills it.
+     *
+     * An SVG is a replaced element with an intrinsic ratio, so setting all
+     * four of top/right/bottom/left over-constrains it: the browser drops the
+     * bottom and sizes the height from the 1:1 viewBox. The frame came out
+     * square — two thirds of the way down a portrait card, and overflowing
+     * the foot of a landscape certificate. Sizing an ordinary box and giving
+     * the SVG width and height of 100% leaves nothing to over-constrain.
+     */
+    <span
+      className="pointer-events-none absolute block"
       style={{ top: inset, right: inset, bottom: inset, left: inset }}
-      preserveAspectRatio="none"
-      viewBox="0 0 1000 1000"
       aria-hidden="true"
     >
-      <GuillochePattern id={id} color={DOC_GOLD} />
-      {/* Guilloche band between two rules. */}
-      <rect
-        x={band}
-        y={band}
-        width={1000 - band * 2}
-        height={1000 - band * 2}
-        fill="none"
-        stroke={`url(#${id})`}
-        strokeWidth={band * 1.4}
-        opacity="0.55"
-      />
-      <rect
-        x="2"
-        y="2"
-        width="996"
-        height="996"
-        fill="none"
-        stroke={DOC_GOLD}
-        strokeWidth="1.5"
-      />
-      <rect
-        x={band * 2}
-        y={band * 2}
-        width={1000 - band * 4}
-        height={1000 - band * 4}
-        fill="none"
-        stroke={DOC_NAVY}
-        strokeWidth="2.5"
-      />
-      <rect
-        x={band * 2 + 5}
-        y={band * 2 + 5}
-        width={1000 - band * 4 - 10}
-        height={1000 - band * 4 - 10}
-        fill="none"
-        stroke={DOC_NAVY}
-        strokeWidth="0.8"
-      />
-    </svg>
+      <svg
+        className="block size-full"
+        preserveAspectRatio="none"
+        viewBox="0 0 1000 1000"
+        aria-hidden="true"
+      >
+        <GuillochePattern id={id} color={DOC_GOLD} />
+        {/* Guilloche band between two rules. */}
+        <rect
+          x={band}
+          y={band}
+          width={1000 - band * 2}
+          height={1000 - band * 2}
+          fill="none"
+          stroke={`url(#${id})`}
+          strokeWidth={band * 1.4}
+          opacity="0.55"
+        />
+        <rect
+          x="2"
+          y="2"
+          width="996"
+          height="996"
+          fill="none"
+          stroke={DOC_GOLD}
+          strokeWidth="1.5"
+        />
+        <rect
+          x={band * 2}
+          y={band * 2}
+          width={1000 - band * 4}
+          height={1000 - band * 4}
+          fill="none"
+          stroke={DOC_NAVY}
+          strokeWidth="2.5"
+        />
+        <rect
+          x={band * 2 + 5}
+          y={band * 2 + 5}
+          width={1000 - band * 4 - 10}
+          height={1000 - band * 4 - 10}
+          fill="none"
+          stroke={DOC_NAVY}
+          strokeWidth="0.8"
+        />
+      </svg>
+    </span>
   );
 }
 
@@ -150,7 +165,14 @@ export function CornerMotifs({
   );
 }
 
-/** The institute block: logo, names, authority line. */
+/**
+ * The institute block: logo, name, address, authority line.
+ *
+ * English only, on the owner's instruction: the certificate, the registration
+ * card and the admit card carry no Bangla. The one exception is a name the
+ * office typed in Bangla, which is the student's own name and belongs to
+ * them, not to the layout.
+ */
 export function Letterhead({
   settings,
   compact = false,
@@ -184,13 +206,6 @@ export function Letterhead({
           {settings.general.nameEn}
         </h1>
         <p
-          lang="bn"
-          className="leading-tight text-[color:#12204f]"
-          style={{ fontSize: compact ? "10pt" : "13pt" }}
-        >
-          {settings.general.nameBn}
-        </p>
-        <p
           className="mt-0.5 leading-tight text-[color:#555]"
           style={{ fontSize: compact ? "7pt" : "8.5pt" }}
         >
@@ -211,7 +226,15 @@ export function Letterhead({
 
 export type Signatory = { name: string; title: string; image: string };
 
-/** Up to three signature blocks, with the seal printed faintly behind them. */
+/**
+ * Up to three signature blocks, with the seal printed faintly behind them.
+ *
+ * A slot with nothing in it still prints its line. A certificate is signed by
+ * hand on plain paper, so the line is the part that has to be there; the
+ * printed name under it is a convenience. Returning nothing when the office
+ * has not filled the settings in left a blank band where the signatures
+ * belong and a certificate nobody could sign.
+ */
 export function SignatureRow({
   signatories,
   seal,
@@ -221,8 +244,9 @@ export function SignatureRow({
   seal?: string;
   width?: string;
 }) {
-  const shown = signatories.filter((s) => s.title || s.name);
-  if (shown.length === 0) return null;
+  const filled = signatories.filter((s) => s.title || s.name);
+  // Nothing configured at all: three plain lines to sign on, evenly spaced.
+  const shown = filled.length > 0 ? filled : signatories;
 
   return (
     <div className="relative flex items-end justify-between gap-6">
@@ -250,10 +274,14 @@ export function SignatureRow({
             )}
           </div>
           <div className="mx-auto border-t border-black" style={{ width }} />
-          {signatory.name && (
-            <p className="mt-0.5 text-[9pt] font-semibold">{signatory.name}</p>
-          )}
-          <p className="text-[8.5pt] text-[color:#333]">{signatory.title}</p>
+          {/* Both captions are always rendered, blank when unset, so a slot
+              with only a designation keeps its line level with the others. */}
+          <p className="mt-0.5 text-[9pt] font-semibold">
+            {signatory.name || "\u00a0"}
+          </p>
+          <p className="text-[8.5pt] text-[color:#333]">
+            {signatory.title || "\u00a0"}
+          </p>
         </div>
       ))}
     </div>

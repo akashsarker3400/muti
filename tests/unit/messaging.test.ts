@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { DEFAULT_TEMPLATES } from "@/lib/messaging-defaults";
-import { buildRequest, gatewayNumber, interpret, isUnicode } from "@/lib/sms";
+import {
+  buildRequest,
+  describeNetworkError,
+  gatewayNumber,
+  interpret,
+  isUnicode,
+} from "@/lib/sms";
 
 /**
  * The parts of messaging that can be tested without a gateway: the template
@@ -194,5 +200,38 @@ describe("gateway requests", () => {
     expect(url).toBe(
       "https://sms.example/send?key=K&to=8801778838644&from=S&text=hello%20there%20%26%20goodbye",
     );
+  });
+});
+
+describe("when the request never reaches the gateway", () => {
+  const url = "https://login.dianasms.com/api/v3/sms/send";
+  const withCode = (code: string, name = "TypeError") =>
+    Object.assign(new Error("fetch failed"), { name, cause: { code } });
+
+  it("names the expired certificate and the address that works instead", () => {
+    // Real case: dianasms.com and esms.com.bd are the same platform, and one
+    // of them was serving an expired certificate, which Node refuses.
+    const reason = describeNetworkError(withCode("CERT_HAS_EXPIRED"), url);
+    expect(reason).toContain("login.dianasms.com");
+    expect(reason).toContain("expired");
+    expect(reason).toContain("login.esms.com.bd");
+  });
+
+  it("tells a wrong host apart from a slow one", () => {
+    expect(describeNetworkError(withCode("ENOTFOUND"), url)).toContain(
+      "could not be found",
+    );
+    expect(describeNetworkError(withCode("", "TimeoutError"), url)).toContain(
+      "did not answer within 20 seconds",
+    );
+    expect(describeNetworkError(withCode("ECONNREFUSED"), url)).toContain("refused");
+  });
+
+  it("always names the host, whatever went wrong", () => {
+    expect(describeNetworkError(new Error("boom"), url)).toContain(
+      "login.dianasms.com",
+    );
+    // An unparseable address is itself the answer, so it is shown as typed.
+    expect(describeNetworkError(new Error("boom"), "not a url")).toContain("not a url");
   });
 });

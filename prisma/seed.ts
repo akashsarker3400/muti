@@ -3,6 +3,7 @@ import "dotenv/config";
 import bcrypt from "bcryptjs";
 
 import { PrismaClient } from "../src/generated/prisma/client";
+import type { Prisma } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 import { defaultSiteSettings } from "../src/lib/site-settings-schema";
@@ -73,7 +74,7 @@ async function seedAdminUser() {
 async function seedSettings() {
   const existing = await prisma.siteSetting.findUnique({ where: { id: 1 } });
   if (existing) {
-    console.log("· site settings row already exists");
+    await seedDocumentWording(existing.json);
     return;
   }
 
@@ -81,6 +82,73 @@ async function seedSettings() {
     data: { id: 1, json: defaultSiteSettings },
   });
   console.log("+ site settings");
+}
+
+/**
+ * The fixed wording of the printed documents, for a site that was already
+ * live when the certificate and card pages were built.
+ *
+ * Those installations got an empty `documents` section, so the certificate
+ * printed without its authority line, its Bangla title and its closing
+ * sentence, and nothing on screen said anything was missing.
+ *
+ * Two rules keep this from becoming the kind of migration that overwrites
+ * somebody's work. A field that already holds something is never touched, and
+ * the whole backfill runs **once ever** — the counter row below remembers it —
+ * so an office that deliberately clears a line afterwards keeps it cleared.
+ *
+ * The signatory names are not seeded at any point: nobody may put a name on a
+ * certificate except the office itself.
+ */
+const WORDING_FLAG = "settings-document-wording";
+
+async function seedDocumentWording(json: unknown) {
+  const done = await prisma.counter.findUnique({ where: { key: WORDING_FLAG } });
+  if (done) return;
+
+  // English only: the printed documents carry no Bangla (owner's instruction,
+  // 29 Sep 2026), so the Bangla fields are not seeded and are not printed.
+  const WORDING = [
+    "authorityLineEn",
+    "certificateTitleEn",
+    "certificateLeadEn",
+    "certificateClosingEn",
+    "certificateFooterEn",
+    "certificatePrefix",
+    "cardNotesEn",
+  ] as const;
+
+  const row = (json ?? {}) as Record<string, unknown>;
+  const documents = (row.documents ?? {}) as Record<string, unknown>;
+  const defaults = defaultSiteSettings.documents as unknown as Record<string, unknown>;
+
+  const filled: string[] = [];
+  const patch: Record<string, unknown> = { ...documents };
+  for (const key of WORDING) {
+    const value = documents[key];
+    const empty = value === undefined || value === null || String(value).trim() === "";
+    if (empty && defaults[key]) {
+      patch[key] = defaults[key];
+      filled.push(key);
+    }
+  }
+
+  await prisma.counter.upsert({
+    where: { key: WORDING_FLAG },
+    create: { key: WORDING_FLAG, value: 1 },
+    update: {},
+  });
+
+  if (filled.length === 0) {
+    console.log("· document wording already in place");
+    return;
+  }
+
+  await prisma.siteSetting.update({
+    where: { id: 1 },
+    data: { json: { ...row, documents: patch } as Prisma.InputJsonValue },
+  });
+  console.log(`+ document wording filled in: ${filled.join(", ")}`);
 }
 
 async function seedCoursesAndRoutines() {

@@ -484,6 +484,8 @@ export const settingsFormSections: FormSection[] = [
   {
     id: "documents",
     label: "Certificates & cards",
+    description:
+      "The printed documents are English only: the certificate, the registration card and the admit card carry no Bangla text. A student's own name still prints as the office typed it.",
     fields: [
       {
         name: "documents.certificateTitleEn",
@@ -493,23 +495,11 @@ export const settingsFormSections: FormSection[] = [
         placeholder: "Certificate of Completion",
       },
       {
-        name: "documents.certificateTitleBn",
-        label: "Certificate title (Bangla)",
-        type: "text",
-        lang: "bn",
-      },
-      {
         name: "documents.authorityLineEn",
         label: "Authority line (English)",
         type: "text",
         lang: "en",
         hint: "Printed under the institute name on both documents, e.g. the approval and code.",
-      },
-      {
-        name: "documents.authorityLineBn",
-        label: "Authority line (Bangla)",
-        type: "text",
-        lang: "bn",
       },
       {
         name: "documents.certificateLeadEn",
@@ -606,13 +596,6 @@ export const settingsFormSections: FormSection[] = [
         type: "textarea",
         full: true,
         hint: "One per line; printed as a numbered list at the foot of the registration card.",
-      },
-      {
-        name: "documents.cardNotesBn",
-        label: "Card rules (Bangla)",
-        type: "textarea",
-        full: true,
-        lang: "bn",
       },
     ],
   },

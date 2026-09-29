@@ -391,6 +391,20 @@ test.describe("printed documents", () => {
       const qr = page.locator('.sheet svg[aria-label="QR code"]');
       await expect(qr).toHaveAttribute("width", /\d+/);
 
+      // The ornamental frame fills the paper. An SVG is a replaced element, so
+      // setting all four insets over-constrains it and the browser sizes the
+      // height from the 1:1 viewBox: the frame came out square, two thirds of
+      // the way down a portrait card and past the foot of a landscape one.
+      const frame = await page.locator(".sheet").evaluate((el) => {
+        const sheet = el.getBoundingClientRect();
+        const border = el.querySelector("svg")!.getBoundingClientRect();
+        return {
+          sheetRatio: sheet.width / sheet.height,
+          borderRatio: border.width / border.height,
+        };
+      });
+      expect(Math.abs(frame.borderRatio - frame.sheetRatio)).toBeLessThan(0.1);
+
       // Registration card and wallet card.
       await page.goto("/admin/students");
       const studentRow = page.locator("tr", { hasText: roll });
