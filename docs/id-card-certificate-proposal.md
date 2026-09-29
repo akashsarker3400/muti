@@ -3,7 +3,7 @@
 Written 29 Sep 2026, after the request to "make card generate and certificate
 generate/print much more advanced".
 
-**Status: stages 1, 2A and 4 are built** (29 Sep 2026), against the BTEB
+**Status: stages 1, 2A, 3 and 4 are built** (29 Sep 2026), against the BTEB
 certificate and registration card the owner supplied as references. What is
 live now:
 
@@ -24,8 +24,9 @@ hand. Printing is on **plain white paper**: the whole design is printed, and
 the pages force colour output so nobody has to remember the "background
 graphics" checkbox.
 
-Still open from stage 3: bulk issue for a whole batch, the approval step, the
-print log and the delivery record. Stage 2B (visual template editor) is open.
+Built after that, the same day: the whole of **stage 3** — bulk issue for a
+batch, the approval step, the print log and the handover register. See below.
+Stage 2B (the visual template editor) is the only stage still open.
 
 The goal is to replace the two jobs the office does by hand today:
 
@@ -154,25 +155,43 @@ people issuing at the same moment cannot be handed the same number, and the
 result is checked against the table before it is returned, so a number the
 office typed by hand is never handed out twice. See `src/lib/certificate-number.ts`.
 
-**Issue in bulk (open).** Select a batch, see every student with their status,
-tick the ones who passed, press "Issue certificates": the system allocates the
-numbers from the series above, writes the `Certificate` rows, and produces one
-document with all of them for printing.
+**Issue in bulk (BUILT).** `/admin/certificates/issue`: choose a batch, and
+every student in it is listed in roll order with their status and grade.
+Students marked COMPLETED come pre-ticked. One press allocates a number each
+from the series above and writes the `Certificate` rows, with the batch name,
+the session and (optionally) the grade from the student record. At most 100 in
+one run, and the run costs one certificate-number rate-limit slot rather than
+one per student.
 
-**Never two numbers for one student.** A unique constraint on
-(student, course, type) already exists in spirit; make it explicit, and make
-re-issue a deliberate action that marks the old one REVOKED with a reason and
-issues a new number ending in `-R2`.
+**Never two numbers for one student (BUILT).** A student who already holds a
+certificate of the chosen type for that course cannot be ticked, and the page
+says which number they hold. That is what makes it safe to re-run the page
+after adding one late student. Re-issue after a revocation is still a
+deliberate hand action.
 
-**Print log.** Every print records who printed it and when. A certificate
-printed twice is visible. This matters the day someone claims a forgery.
+**Print log (BUILT).** `CertificatePrint` holds one row per print: who, and
+when. The print page writes it itself — the action is awaited before the print
+dialog opens, so a print cannot go unrecorded — and the register shows the
+count and the last person to print. A certificate printed four times is
+visible, which is what matters the day somebody claims a forgery.
 
-**Approval step.** Draft → approved by a super admin → printable. A staff
-account can prepare, only an approver can release. Uses the existing permission
-system (`certificates.manage` exists; add `certificates.issue`).
+**Approval step (BUILT).** Draft → approved → printable. Anyone with
+`certificates.manage` can prepare a whole batch; only `certificates.issue`
+(super admins, or a staff account the super admin grants it to) can approve.
+An unapproved certificate refuses to print, even if the print URL is opened
+directly. Editing an approved certificate withdraws its approval so that
+whoever signs it sees the change; a certificate already handed over keeps its
+approval, because the paper is with the student and the register must not say
+otherwise. Certificates issued before this step existed were approved as they
+stand by a data migration, with no approver named.
 
-**Delivery record.** Who collected the certificate, when, signature taken, or
-posted with a tracking number. Turns "we gave it to him last year" into a date.
+**Delivery record (BUILT).** The **Handover** button on the register records
+who collected the certificate, on what date, and a free note (relation, phone,
+"NID seen"). It can be undone when it was recorded against the wrong student.
+Turns "we gave it to him last year" into a date and a name.
+
+All three states are on one page, `/admin/certificates/register`, with counts
+across the top: waiting for approval, approved and in the drawer, handed over.
 
 ---
 

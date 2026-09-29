@@ -94,6 +94,12 @@ database access, so nothing can be prerendered at build time.
 - Printed documents build their QR from `siteUrl`, never the request host, and
   the certificate QR uses `/verify?t=<verifyToken>` (the only parameter that
   page reads).
+- A certificate is a draft until it is approved: `certificates.manage` prepares
+  (bulk issue at `/admin/certificates/issue`), `certificates.issue` approves on
+  `/admin/certificates/register`, and the print page refuses an unapproved one.
+  Every print writes a `CertificatePrint` row; handovers live on the same
+  register. Editing an approved, undelivered certificate clears its approval
+  (`beforeWrite` on the certificates resource).
 - Uploads: `isPublicKey` (public `/uploads` route) vs `isSafeKey` (storage).
   Anything under `protected/` is only reachable through a signed route
   (`/api/v1/book/sample`). Videos, posters and protected files have a `Media`

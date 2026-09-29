@@ -188,8 +188,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  logs       ActivityLog[]
-  importJobs ImportJob[]
+  logs                 ActivityLog[]
+  importJobs           ImportJob[]
+  approvedCertificates Certificate[]      @relation("CertificateApprover")
+  issuedCertificates   Certificate[]      @relation("CertificateIssuer")
+  certificatePrints    CertificatePrint[]
 }
 
 /// Single row (id = 1) holding the whole Site Settings JSON blob (section 7.11).
@@ -441,8 +444,24 @@ model Certificate {
   verifyToken   String            @unique @default(cuid())
   status        CertificateStatus @default(VALID)
   revokedReason String?
+
+  /// A certificate is a draft until a super admin (or `certificates.issue`)
+  /// approves it. Only an approved one may be printed or handed over, so a
+  /// staff member can prepare the whole batch without being able to release it.
+  approvedAt   DateTime?
+  approvedById String?
+  approvedBy   User?     @relation("CertificateApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  issuedById   String?
+  issuedBy     User?     @relation("CertificateIssuer", fields: [issuedById], references: [id], onDelete: SetNull)
+
+  /// Handover record: "we gave it to him last year" becomes a date and a name.
+  deliveredAt  DateTime?
+  deliveredTo  String?
+  deliveryNote String?
+
+  prints CertificatePrint[]
   /// Optional scanned copy on the uploads volume.
-  file          String?
+  file   String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -450,6 +469,19 @@ model Certificate {
 
   @@index([studentId])
   @@index([courseId, status])
+}
+
+/// One row per print of a certificate. A certificate printed twice is then
+/// visible, which matters the day somebody claims a forgery.
+model CertificatePrint {
+  id            String      @id @default(cuid())
+  certificateId String
+  certificate   Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+
+  @@index([certificateId])
 }
 
 /// Every public lookup on /verify and /results, so abuse is visible.

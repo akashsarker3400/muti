@@ -8,6 +8,7 @@ import type { Role } from "@/generated/prisma/enums";
  */
 export const PERMISSIONS = [
   "certificates.manage",
+  "certificates.issue",
   "results.manage",
   "results.publish",
   "import.run",
@@ -26,6 +27,7 @@ export type Permission = (typeof PERMISSIONS)[number];
 
 export const PERMISSION_LABELS: Record<Permission, string> = {
   "certificates.manage": "Add/edit/revoke certificates",
+  "certificates.issue": "Approve certificates for printing and handover",
   "results.manage": "Add/edit board results",
   "results.publish": "Publish results",
   "import.run": "Run CSV/Excel imports",
@@ -41,9 +43,10 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
 };
 
 /**
- * What STAFF can do without an explicit grant. Publishing results and reading
- * the verification log are held back: one is a public commitment, the other
- * shows visitor IPs.
+ * What STAFF can do without an explicit grant. Publishing results, approving
+ * certificates and reading the verification log are held back: the first two
+ * are public commitments the institute cannot take back, and the last shows
+ * visitor IPs.
  */
 const STAFF_DEFAULTS: ReadonlySet<Permission> = new Set([
   "certificates.manage",

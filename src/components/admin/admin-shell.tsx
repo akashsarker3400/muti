@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Award,
   BadgeCheck,
+  BadgePlus,
   BookOpen,
   CreditCard,
   FileCheck2,
@@ -13,6 +14,7 @@ import {
   Sparkles,
   Target,
   CalendarRange,
+  ClipboardList,
   ExternalLink,
   FileText,
   FolderOpen,
@@ -70,6 +72,16 @@ const NAV: NavGroup[] = [
       { href: "/admin/students", label: "Students", icon: GraduationCap },
       { href: "/admin/course-book", label: "Course book", icon: BookMarked },
       { href: "/admin/certificates", label: "Certificates", icon: Award },
+      {
+        href: "/admin/certificates/issue",
+        label: "Issue certificates",
+        icon: BadgePlus,
+      },
+      {
+        href: "/admin/certificates/register",
+        label: "Certificate register",
+        icon: ClipboardList,
+      },
       { href: "/admin/board-exams", label: "Board results", icon: Trophy },
       { href: "/admin/results", label: "Results (notices)", icon: Trophy },
       { href: "/admin/import", label: "Import (CSV/Excel)", icon: Upload },
@@ -275,9 +287,16 @@ export function AdminShell({
 
 function SidebarLink({ item, onNavigate }: { item: NavEntry; onNavigate: () => void }) {
   const pathname = usePathname();
-  // "/admin" must only match exactly, or every page would look active.
-  const active =
-    item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
+  // "/admin" must only match exactly, or every page would look active. A
+  // sibling deeper in the tree wins: on /admin/certificates/register only the
+  // register is highlighted, not "Certificates" as well.
+  const best = NAV.flatMap((group) => group.items)
+    .filter((entry) => entry.href !== "/admin" && pathname.startsWith(entry.href))
+    .reduce<string>(
+      (longest, entry) => (entry.href.length > longest.length ? entry.href : longest),
+      "",
+    );
+  const active = item.href === "/admin" ? pathname === "/admin" : best === item.href;
 
   return (
     <Link

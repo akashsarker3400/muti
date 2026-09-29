@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
@@ -11,6 +12,9 @@ import {
 } from "@/components/admin/documents/document-chrome";
 import { SiteUrlWarning } from "@/components/admin/documents/site-url-warning";
 import { PrintButton } from "@/components/admin/print-button";
+import { AdminPageHeader, EmptyState } from "@/components/admin/ui";
+import { Button } from "@/components/ui/button";
+import { recordCertificatePrint } from "@/app/actions/admin-certificates";
 import { requirePermission } from "@/lib/admin-auth";
 import { siteUrl } from "@/lib/env";
 import { formatDate } from "@/lib/format";
@@ -52,10 +56,34 @@ export default async function CertificatePrintPage({
     getSiteSettings(),
     prisma.certificate.findFirst({
       where: { id, deletedAt: null },
-      include: { student: true, course: true },
+      include: { student: true, course: true, _count: { select: { prints: true } } },
     }),
   ]);
   if (!certificate) notFound();
+
+  // Approval gate (proposal stage 3). A draft certificate must not reach paper:
+  // the whole point of preparing a batch is that somebody checks it first, and
+  // an unapproved print is the one mistake that cannot be taken back once the
+  // sheet has left the office.
+  if (!certificate.approvedAt) {
+    return (
+      <>
+        <AdminPageHeader
+          title="Not approved yet"
+          description={`Certificate ${certificate.certificateNo} is still a draft.`}
+        />
+        <EmptyState
+          title="This certificate has not been approved."
+          description="A super admin (or a staff member with the approval permission) must approve it on the register before it can be printed or handed over."
+          action={
+            <Button asChild variant="brand" size="cta">
+              <Link href="/admin/certificates/register">Open the register</Link>
+            </Button>
+          }
+        />
+      </>
+    );
+  }
 
   const doc = settings.documents;
   const student = certificate.student;
@@ -95,8 +123,22 @@ export default async function CertificatePrintPage({
         <span className="text-[color:var(--muted-foreground)]">
           A4 landscape on plain white paper. In the print dialog set margins to None;
           the border, seal and colours are printed with the page.
+          {certificate._count.prints > 0 && (
+            <>
+              {" "}
+              Printed {certificate._count.prints}{" "}
+              {certificate._count.prints === 1 ? "time" : "times"} already — every print
+              is recorded on the register.
+            </>
+          )}
         </span>
-        <PrintButton label="Print certificate" />
+        <PrintButton
+          label={certificate._count.prints > 0 ? "Print again" : "Print certificate"}
+          onPrinted={async () => {
+            "use server";
+            return recordCertificatePrint(certificate.id);
+          }}
+        />
       </div>
 
       <SiteUrlWarning />

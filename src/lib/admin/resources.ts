@@ -1805,7 +1805,7 @@ const issuedCertificateResource: ResourceConfig = {
   title: "Certificate",
   singular: "Certificate",
   description:
-    "The register of issued certificates. /verify answers from these by certificate number or the student’s BMDC. To revoke one, set the status to “Revoked” and give a reason.",
+    "Every issued certificate. /verify answers from these by certificate number or the student’s BMDC. Issue a whole batch at once from “Issue certificates”; approval, prints and handovers live on the register. To revoke one, set the status to “Revoked” and give a reason.",
   newLabel: "New certificate",
   permission: "certificates.manage",
   rowTool: "certificate-print",
@@ -1824,6 +1824,7 @@ const issuedCertificateResource: ResourceConfig = {
       hideOnMobile: true,
     },
     { key: "issuedAt", label: "Issued", type: "date", hideOnMobile: true },
+    { key: "approvedAt", label: "Approved", type: "bool" },
     {
       key: "status",
       label: "Status",
@@ -1961,6 +1962,15 @@ const issuedCertificateResource: ResourceConfig = {
       str(values.status) === "REVOKED" ? nullable(values.revokedReason) : null,
     file: nullable(values.file),
   }),
+  /**
+   * Editing an approved certificate withdraws the approval, so whoever signs
+   * it sees the change. Anything already handed over keeps its approval: the
+   * paper is with the student and the register must not claim otherwise.
+   */
+  beforeWrite: (data, existing) => {
+    if (!existing?.approvedAt || existing.deliveredAt) return data;
+    return { ...data, approvedAt: null, approvedById: null };
+  },
 };
 
 /** BTEB examinations (addendum 3, §2); rows are edited on their own page. */

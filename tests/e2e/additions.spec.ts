@@ -360,7 +360,22 @@ test.describe("printed documents", () => {
     await page.waitForURL(/\/admin\/certificates$/);
 
     try {
+      // A new certificate is a draft, and a draft is not printable, so approve
+      // it on the register first (certificate workflow, proposal stage 3).
+      await page.goto("/admin/certificates/register?state=draft");
+      const draftRow = page.locator("tr", { hasText: certNo });
+      await expect(async () => {
+        await draftRow.getByRole("checkbox").click();
+        await expect(page.getByRole("button", { name: /^Approve 1/ })).toBeVisible({
+          timeout: 1000,
+        });
+      }).toPass({ timeout: 30_000 });
+      page.once("dialog", (dialog) => dialog.accept());
+      await page.getByRole("button", { name: /^Approve 1/ }).click();
+      await expect(page.getByText(/1 approved\./)).toBeVisible();
+
       // Certificate: the row button opens a printable page carrying the number.
+      await page.goto("/admin/certificates");
       const certRow = page.locator("tr", { hasText: certNo });
       const certHref = await certRow
         .getByRole("link", { name: "Print" })
