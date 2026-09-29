@@ -18,6 +18,7 @@ export default async function AdminCoursesPage() {
     slug: course.slug,
     nameBn: course.nameBn,
     nameEn: course.nameEn,
+    image: course.image,
     level: course.level,
     courseFee: course.courseFee,
     published: course.published,

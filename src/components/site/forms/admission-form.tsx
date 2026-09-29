@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { errorText, Field, Honeypot, selectClass } from "@/components/site/forms/field";
+import { PhotoField } from "@/components/site/forms/photo-field";
 import { WhatsAppIcon } from "@/components/site/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,7 @@ type EducationRow = { exam: Exam; year: string; gpa: string; board: string };
 
 type FormValues = {
   name: string;
+  photo: string;
   fatherName: string;
   motherName: string;
   dateOfBirth: string;
@@ -94,6 +96,7 @@ export function AdmissionForm({
     register,
     handleSubmit,
     watch,
+    setValue,
     setError,
     formState: { errors },
   } = useForm<FormValues>({
@@ -105,6 +108,7 @@ export function AdmissionForm({
       religion: "",
       bloodGroup: "",
       nationalId: "",
+      photo: "",
       employment: "",
       phone: "",
       whatsapp: "",
@@ -148,6 +152,7 @@ export function AdmissionForm({
         dateOfBirth: values.dateOfBirth || undefined,
         religion: values.religion || undefined,
         nationalId: values.nationalId || undefined,
+        photo: values.photo || undefined,
         bloodGroup: values.bloodGroup || undefined,
         employment: values.employment || undefined,
         presentAddress: values.presentAddress || undefined,
@@ -307,6 +312,15 @@ export function AdmissionForm({
               <option value="PRIVATE">{t("employmentPrivate")}</option>
               <option value="OTHER">{t("employmentOther")}</option>
             </select>
+          )}
+        </Field>
+
+        <Field label={t("photo")} className="sm:col-span-2">
+          {() => (
+            <PhotoField
+              value={watch("photo")}
+              onChange={(url) => setValue("photo", url, { shouldDirty: true })}
+            />
           )}
         </Field>
 

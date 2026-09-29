@@ -3,7 +3,7 @@ import { Toaster } from "sonner";
 
 import "@/app/globals.css";
 
-import { fontVariables } from "@/lib/fonts";
+import { documentFontVariables, fontVariables } from "@/lib/fonts";
 import { faviconUrl, getSiteSettings } from "@/lib/site-settings";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -28,7 +28,7 @@ export const viewport: Viewport = {
  */
 export default function AdminRootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={fontVariables}>
+    <html lang="en" className={`${fontVariables} ${documentFontVariables}`}>
       <body className="min-h-dvh bg-[color:var(--bg-soft)]">
         {children}
         <Toaster position="top-center" richColors />

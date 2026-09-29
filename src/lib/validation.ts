@@ -85,6 +85,13 @@ export const admissionApplicationSchema = z.object({
     message: "qualificationRequired",
   }),
   medicalCollege: z.string().trim().max(160).optional(),
+  /** Path returned by /api/upload/photo, never a URL the visitor typed. */
+  photo: z
+    .string()
+    .trim()
+    .max(200)
+    .regex(/^\/uploads\/[\w./-]+$/, "photoInvalid")
+    .optional(),
   bmdc: z.string().trim().max(60).optional(),
   location: z.string().trim().max(160).optional(),
   batchId: z.string().trim().optional(),

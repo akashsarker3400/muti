@@ -1,7 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check, Download, ListChecks, Minus, Upload } from "lucide-react";
+import {
+  Check,
+  Download,
+  IdCard,
+  ListChecks,
+  Minus,
+  Printer,
+  Upload,
+} from "lucide-react";
 
 import { deleteResource, setResourceFlag } from "@/app/actions/admin-resource";
 import { AdminPagination } from "@/components/admin/admin-pagination";
@@ -197,6 +205,40 @@ export default async function ResourceListPage({
                                 <ListChecks className="size-4" aria-hidden="true" />
                                 Results
                               </Link>
+                            </Button>
+                          )}
+                          {resource.rowTool === "student-card" && (
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="sm"
+                              className="me-2"
+                            >
+                              <a
+                                href={`/admin/students/${id}/card`}
+                                target="_blank"
+                                rel="noopener"
+                              >
+                                <IdCard className="size-4" aria-hidden="true" />
+                                Card
+                              </a>
+                            </Button>
+                          )}
+                          {resource.rowTool === "certificate-print" && (
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="sm"
+                              className="me-2"
+                            >
+                              <a
+                                href={`/admin/certificates/${id}/print`}
+                                target="_blank"
+                                rel="noopener"
+                              >
+                                <Printer className="size-4" aria-hidden="true" />
+                                Print
+                              </a>
                             </Button>
                           )}
                           {resource.rowTool === "batch-clone" && (

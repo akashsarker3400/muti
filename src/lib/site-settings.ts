@@ -67,6 +67,13 @@ const NEVER_BLANK: Record<keyof SiteSettings, string[]> = {
   security: [],
   results: [],
   hero: [],
+  // The printed documents must never lose their fixed wording.
+  documents: [
+    "certificateTitleEn",
+    "certificateLeadEn",
+    "certificateFooterEn",
+    "certificatePrefix",
+  ],
   // The seeded TODO copy must reach the admin so the office sees what to
   // replace; a blank field would otherwise hide whole sections silently.
   health: [

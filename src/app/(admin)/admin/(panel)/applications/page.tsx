@@ -129,6 +129,7 @@ export default async function ApplicationsPage({
         ? String((row.utm as Record<string, unknown>).utm_campaign ?? "")
         : null,
     downloads: row._count.sampleDownloads,
+    photo: row.photo,
     createdAt: row.createdAt.toISOString(),
   }));
 

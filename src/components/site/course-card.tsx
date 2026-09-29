@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ArrowRight, Clock, Wallet } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
@@ -51,75 +52,95 @@ export async function CourseCard({
   const fee = courseFeeLabel(course, locale, common("contactForFee"));
 
   return (
-    <article className="group flex h-full flex-col rounded-[14px] border border-[color:var(--border)] bg-white p-5 shadow-[var(--shadow-card)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]">
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <LevelBadge label={levels(course.level)} />
-        {course.admissionOpen && (
-          <AdmissionBadge
-            open
-            labelOpen={common("admissionOpen")}
-            labelClosed={common("admissionClosed")}
-          />
-        )}
-        <SeatCounter batch={batch} locale={locale} />
-      </div>
-
-      <p className="font-latin text-xs font-semibold tracking-wide text-[color:var(--muted-foreground)]">
-        {coursesT("code")} · {course.code}
-      </p>
-      <Heading className="mt-1 text-lg font-semibold text-[color:var(--brand)]">
+    <article className="group flex h-full flex-col overflow-hidden rounded-[14px] border border-[color:var(--border)] bg-white shadow-[var(--shadow-card)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]">
+      {/* Course photo, once the office has uploaded one (admin: Courses -> Basics). */}
+      {course.image && (
         <Link
           href={`/courses/${course.slug}`}
-          className="transition group-hover:underline"
+          tabIndex={-1}
+          aria-hidden="true"
+          className="relative block aspect-[16/9] w-full overflow-hidden bg-[color:var(--bg-soft)]"
         >
-          {name}
+          <Image
+            src={course.image}
+            alt=""
+            fill
+            sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"
+            className="object-cover transition duration-300 group-hover:scale-[1.03]"
+          />
         </Link>
-      </Heading>
-      <p className="mt-1 line-clamp-2 text-sm text-[color:var(--muted-foreground)]">
-        {fullName}
-      </p>
+      )}
 
-      <dl className="mt-4 space-y-2 text-sm">
-        <div className="flex items-center gap-2">
-          <dt className="flex items-center gap-2 text-[color:var(--muted-foreground)]">
-            <Clock className="size-4 shrink-0" aria-hidden="true" />
-            {coursesT("duration")}:
-          </dt>
-          <dd className="font-medium">{duration}</dd>
+      <div className="flex min-w-0 flex-1 flex-col p-5">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <LevelBadge label={levels(course.level)} />
+          {course.admissionOpen && (
+            <AdmissionBadge
+              open
+              labelOpen={common("admissionOpen")}
+              labelClosed={common("admissionClosed")}
+            />
+          )}
+          <SeatCounter batch={batch} locale={locale} />
         </div>
-        <div className="flex items-center gap-2">
-          <dt className="flex items-center gap-2 text-[color:var(--muted-foreground)]">
-            <Wallet className="size-4 shrink-0" aria-hidden="true" />
-            {coursesT("courseFee")}:
-          </dt>
-          <dd className="nums font-semibold text-[color:var(--brand)]">{fee}</dd>
-        </div>
-      </dl>
 
-      <div className="mt-5 flex items-center gap-2 pt-1">
-        <Button asChild variant="brand" size="cta" className="flex-1">
-          <Link href={`/courses/${course.slug}`}>
-            {common("details")}
-            <ArrowRight className="size-4" aria-hidden="true" />
-          </Link>
-        </Button>
-        <Button
-          asChild
-          variant="whatsapp"
-          size="icon-cta"
-          aria-label={common("whatsapp")}
-        >
-          <a
-            href={waLink(
-              settings.contact.whatsapp,
-              courseT("whatsappPrefill", { course: name }),
-            )}
-            target="_blank"
-            rel="noopener noreferrer"
+        <p className="font-latin text-xs font-semibold tracking-wide text-[color:var(--muted-foreground)]">
+          {coursesT("code")} · {course.code}
+        </p>
+        <Heading className="mt-1 text-lg font-semibold text-[color:var(--brand)]">
+          <Link
+            href={`/courses/${course.slug}`}
+            className="transition group-hover:underline"
           >
-            <WhatsAppIcon className="size-5" />
-          </a>
-        </Button>
+            {name}
+          </Link>
+        </Heading>
+        <p className="mt-1 line-clamp-2 text-sm text-[color:var(--muted-foreground)]">
+          {fullName}
+        </p>
+
+        <dl className="mt-4 space-y-2 text-sm">
+          <div className="flex items-center gap-2">
+            <dt className="flex items-center gap-2 text-[color:var(--muted-foreground)]">
+              <Clock className="size-4 shrink-0" aria-hidden="true" />
+              {coursesT("duration")}:
+            </dt>
+            <dd className="font-medium">{duration}</dd>
+          </div>
+          <div className="flex items-center gap-2">
+            <dt className="flex items-center gap-2 text-[color:var(--muted-foreground)]">
+              <Wallet className="size-4 shrink-0" aria-hidden="true" />
+              {coursesT("courseFee")}:
+            </dt>
+            <dd className="nums font-semibold text-[color:var(--brand)]">{fee}</dd>
+          </div>
+        </dl>
+
+        <div className="mt-5 flex items-center gap-2 pt-1">
+          <Button asChild variant="brand" size="cta" className="flex-1">
+            <Link href={`/courses/${course.slug}`}>
+              {common("details")}
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          </Button>
+          <Button
+            asChild
+            variant="whatsapp"
+            size="icon-cta"
+            aria-label={common("whatsapp")}
+          >
+            <a
+              href={waLink(
+                settings.contact.whatsapp,
+                courseT("whatsappPrefill", { course: name }),
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <WhatsAppIcon className="size-5" />
+            </a>
+          </Button>
+        </div>
       </div>
     </article>
   );

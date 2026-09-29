@@ -23,6 +23,15 @@ async function uploadImage(page: Page): Promise<string> {
   return ((await response.json()) as { url: string }).url;
 }
 
+/** Generic resource lists render rows as <tr>; promos and videos use <li>. */
+async function deleteTableRow(page: Page, listPath: string, text: string) {
+  await page.goto(listPath);
+  const row = page.locator("tr", { hasText: text }).first();
+  await row.getByRole("button", { name: "Delete" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Delete" }).click();
+  await expect(page.locator("tr", { hasText: text })).toHaveCount(0);
+}
+
 async function deleteRow(page: Page, listPath: string, text: string) {
   await page.goto(listPath);
   const row = page.locator("li", { hasText: text }).first();
@@ -315,5 +324,73 @@ test.describe("course book (addendum 5)", () => {
     // Drafts are not on the public blog.
     await page.goto("/blog");
     await expect(page.getByText("Echogenicity explained")).toHaveCount(0);
+  });
+});
+
+test.describe("printed documents", () => {
+  test("the certificate, the cards and the public card page", async ({ page }) => {
+    const id = stamp();
+    const roll = `DOC-${id}`;
+
+    // A student with a photo, then a certificate for them.
+    const image = await uploadImage(page);
+    await page.goto("/admin/students/new");
+    await page.locator("#field-name").fill(`Dr. Document ${id}`);
+    await page.locator("#field-roll").fill(roll);
+    await page.locator("#field-photo").fill(image);
+    await page.locator("#field-courseId").selectOption({ index: 1 });
+    await page.getByRole("button", { name: "Save" }).click();
+    await page.waitForURL(/\/admin\/students$/);
+
+    const certNo = `DOC-C-${id}`.toUpperCase();
+    await page.goto("/admin/certificates/new");
+    await page.locator("#field-certificateNo").fill(certNo);
+    await page
+      .locator("#field-studentId")
+      .selectOption({ label: `${roll} — Dr. Document ${id}` });
+    await page.locator("#field-courseId").selectOption({ index: 1 });
+    await page.getByRole("button", { name: "Save" }).click();
+    await page.waitForURL(/\/admin\/certificates$/);
+
+    try {
+      // Certificate: the row button opens a printable page carrying the number.
+      const certRow = page.locator("tr", { hasText: certNo });
+      const certHref = await certRow
+        .getByRole("link", { name: "Print" })
+        .getAttribute("href");
+      expect(certHref).toMatch(/\/admin\/certificates\/[^/]+\/print$/);
+      await page.goto(certHref!);
+      await expect(page.locator(".sheet")).toBeVisible();
+      await expect(page.getByText(certNo, { exact: true })).toBeVisible();
+      await expect(page.getByText(`Dr. Document ${id}`)).toBeVisible();
+      // The QR is inline SVG, so the printer gets vector edges.
+      expect(await page.locator(".sheet svg").count()).toBeGreaterThan(1);
+
+      // Registration card and wallet card.
+      await page.goto("/admin/students");
+      const studentRow = page.locator("tr", { hasText: roll });
+      const cardHref = await studentRow
+        .getByRole("link", { name: "Card" })
+        .getAttribute("href");
+      await page.goto(cardHref!);
+      await expect(page.getByText("Student Registration Card")).toBeVisible();
+      await expect(page.getByText(roll)).toBeVisible();
+      await page.getByRole("link", { name: /Wallet card/ }).click();
+      await expect(page).toHaveURL(/view=wallet$/);
+      await expect(page.getByText("Student Identity Card")).toBeVisible();
+
+      // The QR opens a public page that shows the photo, and a tweaked token 404s.
+      await page.goto(cardHref!);
+      const url = await page
+        .getByText(/\/card\//)
+        .first()
+        .textContent();
+      const token = url!.split("/card/")[1]!.replace("…", "");
+      const response = await page.request.get(`/card/${token}x`);
+      expect(response.status()).toBe(404);
+    } finally {
+      await deleteTableRow(page, "/admin/certificates", certNo).catch(() => undefined);
+      await deleteTableRow(page, "/admin/students", roll).catch(() => undefined);
+    }
   });
 });

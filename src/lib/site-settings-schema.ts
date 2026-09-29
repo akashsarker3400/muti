@@ -223,6 +223,47 @@ export const siteSettingsSchema = z.object({
       categories: optionalString,
     })
     .prefault({}),
+  /**
+   * Printed documents: the course completion certificate and the student
+   * registration card. Everything the office signs or stamps lives here, so a
+   * new principal or a new seal never needs a developer.
+   */
+  documents: z
+    .object({
+      /** Line above the institute name, e.g. an affiliation. */
+      authorityLineEn: optionalString,
+      authorityLineBn: optionalString,
+      certificateTitleEn: optionalString,
+      certificateTitleBn: optionalString,
+      /** Sentence under the title, before the student's name. */
+      certificateLeadEn: optionalString,
+      /** Closing line, e.g. good wishes. */
+      certificateClosingEn: optionalString,
+      /** Red footer line, like the "no alteration or erasure" note on board papers. */
+      certificateFooterEn: optionalString,
+      /** Prefix for generated numbers, e.g. "MUTI". */
+      certificatePrefix: optionalString,
+      /** Up to three signatories, printed left to right. */
+      sign1Name: optionalString,
+      sign1Title: optionalString,
+      sign1Image: optionalString,
+      sign2Name: optionalString,
+      sign2Title: optionalString,
+      sign2Image: optionalString,
+      sign3Name: optionalString,
+      sign3Title: optionalString,
+      sign3Image: optionalString,
+      /** Round seal, printed faintly behind the signature row. */
+      sealImage: optionalString,
+      /** Watermark behind the certificate body; falls back to the logo. */
+      watermarkImage: optionalString,
+      /** Card: months the card stays valid from the admission date. 0 = no expiry line. */
+      cardValidityMonths: z.coerce.number().int().min(0).max(120).default(0),
+      /** Numbered rules printed at the foot of the card, one per line. */
+      cardNotesEn: optionalString,
+      cardNotesBn: optionalString,
+    })
+    .prefault({}),
 });
 
 export type SiteSettings = z.infer<typeof siteSettingsSchema>;
@@ -375,6 +416,34 @@ export const defaultSiteSettings: SiteSettings = siteSettingsSchema.parse({
       "দাতা, হাসপাতাল বা সংস্থা হিসেবে এই সেবায় সহযোগিতা করতে বা রোগী রেফার করতে চাইলে আমাদের সাথে যোগাযোগ করুন।",
     supportTextEn:
       "Donors, hospitals and organisations that want to support the service or refer patients are welcome to get in touch.",
+  },
+  documents: {
+    authorityLineEn: "Government approved · Institute code 57125",
+    authorityLineBn: "সরকার অনুমোদিত · প্রতিষ্ঠান কোড ৫৭১২৫",
+    certificateTitleEn: "Certificate of Completion",
+    certificateTitleBn: "কোর্স সমাপনী সনদ",
+    certificateLeadEn: "This is to certify that",
+    certificateClosingEn: "We wish every success in their professional career.",
+    certificateFooterEn:
+      "This certificate is issued without any alteration or erasure.",
+    certificatePrefix: "MUTI",
+    // TODO: the owner supplies signatory names, designations and signature images.
+    sign1Name: "",
+    sign1Title: "Chief Instructor",
+    sign1Image: "",
+    sign2Name: "",
+    sign2Title: "Principal",
+    sign2Image: "",
+    sign3Name: "",
+    sign3Title: "Chairman",
+    sign3Image: "",
+    sealImage: "",
+    watermarkImage: "",
+    cardValidityMonths: 0,
+    cardNotesEn:
+      "This card is the property of the institute and must be produced on demand.\nIt is valid only for the course and session printed on it.\nIf found, please return it to the address above.",
+    cardNotesBn:
+      "এই কার্ডটি প্রতিষ্ঠানের সম্পত্তি; চাওয়া হলে দেখাতে হবে।\nকার্ডে উল্লিখিত কোর্স ও সেশনের জন্যই এটি প্রযোজ্য।\nপাওয়া গেলে অনুগ্রহ করে উপরের ঠিকানায় ফেরত দিন।",
   },
   advisors: {
     categories:

@@ -21,7 +21,7 @@ test.describe("locales", () => {
       () => getComputedStyle(document.body).fontFamily,
     );
     expect(englishFont).toContain("Inter");
-    expect(englishFont).not.toContain("Noto Sans Bengali");
+    expect(englishFont).not.toContain("Hind Siliguri");
 
     // Visiting /bn is an explicit choice: it is remembered in the cookie.
     await page.goto("/bn");
@@ -33,7 +33,7 @@ test.describe("locales", () => {
     const banglaFont = await page.evaluate(
       () => getComputedStyle(document.body).fontFamily,
     );
-    expect(banglaFont).toContain("Noto Sans Bengali");
+    expect(banglaFont).toContain("Hind Siliguri");
     await page.goto("/");
     await expect(page).toHaveURL(/\/bn$/);
   });

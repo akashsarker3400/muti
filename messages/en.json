@@ -445,7 +445,13 @@
       "yearInvalid": "Enter a valid year (e.g. 2015)",
       "dateInvalid": "Enter a valid date",
       "monthsInvalid": "Months of pregnancy must be between 1 and 10"
-    }
+    },
+    "photo": "Passport-size photo",
+    "photoChoose": "Choose photo",
+    "photoChange": "Change photo",
+    "photoRemove": "Remove",
+    "photoHint": "Optional. A clear passport-size photo, JPG or PNG, up to 5 MB. You can also bring a print to the office.",
+    "photoFailed": "The photo could not be uploaded. Please try again or bring a print to the office."
   },
   "footer": {
     "quickLinks": "Quick links",
@@ -591,5 +597,23 @@
     "metaTitle": "Easy Ultrasound course book by MUTI | Abdomen and Pregnancy",
     "metaDescription": "MUTI's own course book for CMU and DMU students: 13 chapters on abdomen and pregnancy ultrasound with normal measurements, pathology and report formats. Download a free sample chapter.",
     "unavailable": "The sample chapter is not available right now. Please contact the office."
+  },
+  "card": {
+    "title": "Student card check",
+    "subtitle": "Scanned from a MUTI student card",
+    "valid": "Valid student card",
+    "invalid": "This student is no longer enrolled",
+    "name": "Name",
+    "roll": "Roll",
+    "course": "Course",
+    "batch": "Batch",
+    "status": "Status",
+    "admitted": "Admitted",
+    "statusOptions": {
+      "ACTIVE": "Currently enrolled",
+      "COMPLETED": "Course completed",
+      "DROPPED": "No longer enrolled"
+    },
+    "note": "Check that the photo above matches the person holding the card. This page is issued by {institute} and opens only from the QR code printed on a genuine card."
   }
 }

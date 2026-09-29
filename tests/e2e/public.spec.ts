@@ -29,6 +29,11 @@ test.describe("public site (Bangla)", () => {
     await ticker.hover();
     await expect(track).toHaveCSS("animation-play-state", "paused");
 
+    // Freeze the marquee before clicking: a touch device has no hover to pause
+    // it with, and a link that is still sliding is clicked at the wrong place.
+    await page.addStyleTag({
+      content: ".notice-ticker-track { animation-play-state: paused !important }",
+    });
     const href = await links.first().getAttribute("href");
     await links.first().click();
     await expect(page).toHaveURL(new RegExp(`${href}$`));

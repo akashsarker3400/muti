@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
  * map, so the limit survives a container restart and still works if the app is
  * ever run with more than one instance.
  */
-export type RateLimitScope = "application" | "verify" | "login" | "health";
+export type RateLimitScope = "application" | "verify" | "login" | "health" | "photo";
 
 const WINDOWS: Record<RateLimitScope, { max: number; windowMs: number }> = {
   // 5 submissions per hour per IP (section 5.6).
@@ -17,6 +17,9 @@ const WINDOWS: Record<RateLimitScope, { max: number; windowMs: number }> = {
   login: { max: 10, windowMs: 15 * 60 * 1000 },
   // Health serials: a household may book for several people from one phone.
   health: { max: 8, windowMs: 60 * 60 * 1000 },
+  // Applicant photos: a few retries per form, no more. This is the only
+  // upload endpoint a visitor can reach.
+  photo: { max: 10, windowMs: 60 * 60 * 1000 },
 };
 
 /** Best-effort client IP from the proxy headers Coolify / Cloudflare set. */

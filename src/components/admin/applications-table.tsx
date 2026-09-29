@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Eye, Loader2, Phone, Trash2 } from "lucide-react";
+import { Eye, Loader2, Phone, Printer, Trash2, Upload, UserRound } from "lucide-react";
 import { toast } from "sonner";
 
 import {
   bulkSetStatus,
   deleteApplication,
   setApplicationNote,
+  setApplicationPhoto,
 } from "@/app/actions/admin-applications";
 import { setApplicationSource } from "@/app/actions/admin-leads";
 import { AdminBadge } from "@/components/admin/ui";
@@ -63,6 +65,7 @@ export type AdminApplication = {
   campaign: string | null;
   /** Sample chapter downloads (BOOK_SAMPLE rows only). */
   downloads: number;
+  photo: string | null;
   createdAt: string;
 };
 
@@ -290,6 +293,15 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                 <DialogTitle lang={langOf(detail.name)}>{detail.name}</DialogTitle>
               </DialogHeader>
 
+              <ApplicationPhoto
+                id={detail.id}
+                photo={detail.photo}
+                onChange={(photo) => {
+                  setDetail({ ...detail, photo });
+                  router.refresh();
+                }}
+              />
+
               <dl className="space-y-2.5 text-sm">
                 <Row label="Type" value={TYPE_LABELS[detail.type] ?? detail.type} />
                 {detail.type === "BOOK_SAMPLE" && (
@@ -425,6 +437,16 @@ export function ApplicationsTable({ rows }: { rows: AdminApplication[] }) {
                     Call
                   </a>
                 </Button>
+                <Button asChild variant="outline" size="cta">
+                  <a
+                    href={`/admin/applications/${detail.id}/print`}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <Printer className="size-4" aria-hidden="true" />
+                    Print form
+                  </a>
+                </Button>
                 <Button
                   type="button"
                   variant="destructive"
@@ -558,6 +580,102 @@ function NoteEditor({
         }
       >
         Save note
+      </Button>
+    </div>
+  );
+}
+
+/**
+ * Applicant photo in the detail dialog: shown when the applicant uploaded one
+ * with the form, and uploadable here for walk-ins who brought a print. The
+ * photo goes on the printed admission form and, once the student is enrolled,
+ * onto their record.
+ */
+function ApplicationPhoto({
+  id,
+  photo,
+  onChange,
+}: {
+  id: string;
+  photo: string | null;
+  onChange: (photo: string | null) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function upload(file: File) {
+    setBusy(true);
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const response = await fetch("/api/admin/upload?max=5", { method: "POST", body });
+      const data = (await response.json()) as { url?: string; error?: string };
+      if (!response.ok || !data.url) {
+        toast.error(data.error ?? "Upload failed.");
+        return;
+      }
+      const saved = await setApplicationPhoto(id, data.url);
+      if (!saved.ok) {
+        toast.error(saved.error ?? "Could not save the photo.");
+        return;
+      }
+      toast.success("Photo saved.");
+      onChange(data.url);
+    } catch {
+      toast.error("Upload failed.");
+    } finally {
+      setBusy(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-[color:var(--border)] bg-[color:var(--bg-soft)] p-3">
+      <span className="grid aspect-[4/5] w-16 shrink-0 place-items-center overflow-hidden rounded-md border border-[color:var(--border)] bg-white">
+        {photo ? (
+          <Image
+            src={photo}
+            alt=""
+            width={64}
+            height={80}
+            className="size-full object-cover object-top"
+          />
+        ) : (
+          <UserRound
+            className="size-6 text-[color:var(--muted-foreground)]"
+            aria-hidden="true"
+          />
+        )}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium">Photo</p>
+        <p className="text-xs text-[color:var(--muted-foreground)]">
+          {photo ? "Uploaded with the application." : "No photo yet."}
+        </p>
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) void upload(file);
+        }}
+      />
+      <Button
+        type="button"
+        variant="outline"
+        size="cta"
+        disabled={busy}
+        onClick={() => inputRef.current?.click()}
+      >
+        {busy ? (
+          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+        ) : (
+          <Upload className="size-4" aria-hidden="true" />
+        )}
+        {photo ? "Replace" : "Add"}
       </Button>
     </div>
   );

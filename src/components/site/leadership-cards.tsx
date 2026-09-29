@@ -1,7 +1,7 @@
-import Image from "next/image";
 import { ArrowRight, Quote } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
+import { PersonPortrait } from "@/components/site/person-portrait";
 import { Section, SectionHeading } from "@/components/site/section";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
@@ -43,7 +43,7 @@ export async function LeadershipCards({
               className="flex h-full flex-col rounded-[14px] border border-[color:var(--border)] bg-white p-6 shadow-[var(--shadow-card)]"
             >
               <div className="flex items-center gap-4">
-                <Portrait src={message.photo} name={name} size={72} />
+                <PersonPortrait src={message.photo} name={name} width={96} />
                 <div className="min-w-0">
                   <p className="text-xs font-semibold text-[color:var(--accent-red-ink)] uppercase">
                     {role}
@@ -82,6 +82,7 @@ export async function LeadershipCards({
   );
 }
 
+/** Kept as a named export: /messages/[key] renders the same portrait. */
 export function Portrait({
   src,
   name,
@@ -91,25 +92,5 @@ export function Portrait({
   name: string;
   size: number;
 }) {
-  if (src) {
-    return (
-      <Image
-        src={src}
-        alt={name}
-        width={size}
-        height={size}
-        className="shrink-0 rounded-full object-cover"
-        style={{ width: size, height: size }}
-      />
-    );
-  }
-  return (
-    <span
-      aria-hidden="true"
-      className="grid shrink-0 place-items-center rounded-full bg-[color:var(--brand-soft)] text-2xl font-bold text-[color:var(--brand)]"
-      style={{ width: size, height: size }}
-    >
-      {name.trim().charAt(0)}
-    </span>
-  );
+  return <PersonPortrait src={src} name={name} width={size} />;
 }

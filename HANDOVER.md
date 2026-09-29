@@ -103,6 +103,23 @@ These have clear placeholders in the site today. Nothing was invented.
 | 2.41 | **Faculty review of the 8 blog drafts**             | Admin → Blog → untick "Needs faculty review", add the office's own scan images, then publish    | Drafts stay unpublished. Each ends with a TODO about images: only scans from MUTI's own machine with consent (A6).                    |
 | 2.42 | **Book description in Bangla** (optional)           | Admin → Course book → Description (Bangla)                                                      | `/bn/course-book/…` shows the English description.                                                                                    |
 
+### Added 29 Sep 2026 (photos, course images)
+
+| #    | What                                       | Where to add it                                        | What the site does meanwhile                                                                                                            |
+| ---- | ------------------------------------------ | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| 2.43 | **Course photos**                          | Admin → Courses → each course → Basics → Course image  | The card and the course page render without a photo; the admin list shows an empty frame so it is obvious which courses still need one. |
+| 2.44 | **Faculty, leadership and advisor photos** | Admin → Faculty / Leadership messages / Advisory board | A brand-coloured initial fills the portrait box.                                                                                        |
+| 2.45 | **Student photos**                         | Admin → Students → Photo (or from the application)     | The record shows an empty frame. The ID card in `docs/id-card-certificate-proposal.md` needs this photo.                                |
+
+### Added 29 Sep 2026 (printed documents)
+
+| #    | What                                     | Where to add it                                               | What the documents do meanwhile                                                                        |
+| ---- | ---------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| 2.46 | **Signatory names and signature images** | Site Settings → Certificates & cards (three slots)            | A blank line prints for anyone to sign by hand. Only the designations are filled in.                   |
+| 2.47 | **Office seal** and **watermark**        | Site Settings → Certificates & cards                          | No seal is printed; the watermark falls back to the logo.                                              |
+| 2.48 | **Certificate number series**            | Admin → Certificates (typed per certificate for now)          | The prefix in settings is only a hint; numbers are not yet allocated automatically (proposal stage 3). |
+| 2.49 | **Card validity period**                 | Site Settings → Certificates & cards → Card validity (months) | 0 prints no "Valid until" line.                                                                        |
+
 ## 3. Decisions to confirm with the owner
 
 | #    | Question                                                                                                                                                  | What the site does now                                                                                                                                                                                                                                                                                                                                                                                                                                            |
@@ -180,6 +197,24 @@ Each of these is a small, reversible change with a reason.
 | 4.32 | Publish rules                                                | The book cannot be published without chapters and the sample PDF (the form says which is missing). Removing the PDF unpublishes it again, so the lead form never offers a file that is not there.                                                                                                                                                                                    |
 | 4.33 | Video upload "install ffmpeg if missing"                     | ffmpeg/ffprobe are installed in the Docker image. Locally, a missing binary makes the upload fail with a message naming the install command rather than installing software on the developer's machine.                                                                                                                                                                              |
 | 4.34 | No em dashes anywhere                                        | Swept the UI strings, seed copy, settings defaults and the live announcement text (also the older Bangla ones). Code comments keep theirs.                                                                                                                                                                                                                                           |
+
+### Photos, course images and the Bangla font (29 Sep 2026)
+
+| #    | Change                 | What was built and why                                                                                                                                                                                                                                                                                               |
+| ---- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 4.35 | Bangla font            | Hind Siliguri replaces Noto Sans Bengali as the Bangla face (Noto stays as a glyph fallback, with SolaimanLipi and Kalpurush after it for anyone who has them locally). Hind Siliguri is what most Bangladeshi sites and newspapers set body text in: even strokes, upright conjuncts, no distortion at small sizes. |
+| 4.36 | One portrait style     | Faculty, leadership and the advisory board now share `PersonPortrait`: a 4:5 box with a soft border, `object-top` crop, never a circle. A round mask was cutting the top of the head off the office's photos.                                                                                                        |
+| 4.37 | Applicant photo upload | `/api/upload/photo` is the only upload endpoint a visitor can reach: images only, 5 MB, 10 per hour per IP, and every file is re-encoded through sharp to a 600×800 webp under a random name, so nothing a visitor sends is stored or served byte for byte.                                                          |
+| 4.38 | Printed admission form | `/admin/applications/<id>/print` renders the paper form on A4 with the online answers filled in, the photo in the corner box, an academic-record table, a "for office use" block and signature lines. Empty fields print as ruled lines so the applicant can finish it at the desk.                                  |
+
+### Printed documents (29 Sep 2026)
+
+| #    | Change                          | What was built and why                                                                                                                                                                                                                                                                          |
+| ---- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 4.39 | Certificate and card layouts    | Built as print routes (HTML with `@page`), not an image or PDF generator: the browser's "Save as PDF" already produces a press-ready file, the layout stays searchable and translatable, and nothing new has to be installed on the server. Borders are SVG so they never blur or go missing.   |
+| 4.40 | Card QR separator               | The card token uses `~` rather than `.` between id and signature. The middleware matcher skips any path containing a dot (it reads those as files), so a dotted token never reached the locale rewrite and the page 404'd. There is a unit test pinning this.                                   |
+| 4.41 | What the public card page shows | Photo, name, roll, course, batch, status and admission date only. No phone, address or parents: the page is reachable by anyone holding the card, and the point of it is face matching, not contact details. It is `noindex` and the token is signed, so it cannot be found by guessing a roll. |
+| 4.42 | Document fonts                  | Cinzel and EB Garamond are attached to the admin `<html>` only, never preloaded. A visitor to the public site downloads neither.                                                                                                                                                                |
 
 ## 5. Known issues
 

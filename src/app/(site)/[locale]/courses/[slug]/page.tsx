@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Award, BookOpen, Clock, GraduationCap, Layers } from "lucide-react";
@@ -14,6 +15,7 @@ import { SeatCounter } from "@/components/site/seat-counter";
 import { RichText } from "@/components/site/rich-text";
 import { CourseBookSection } from "@/components/site/course-book-section";
 import { RoutineTable } from "@/components/site/routine-table";
+import { cn } from "cn";
 import { Section } from "@/components/site/section";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
@@ -142,73 +144,100 @@ export default async function CourseDetailPage({
       {/* 1. Header */}
       <div className="border-b border-[color:var(--border)] bg-[color:var(--bg-soft)]">
         <div className="container-content py-8 md:py-12">
-          <div className="mb-3 flex flex-wrap items-center gap-2">
-            <LevelBadge label={levels(course.level)} />
-            <AdmissionBadge
-              open={course.admissionOpen}
-              labelOpen={common("admissionOpen")}
-              labelClosed={common("admissionClosed")}
-            />
-            {course.affiliationNote && <GovtBadge label={course.affiliationNote} />}
-            <SeatCounter batch={nextBatch} locale={locale} />
-          </div>
-
-          <p className="font-latin text-sm font-semibold text-[color:var(--muted-foreground)]">
-            {coursesT("code")} · {course.code}
-          </p>
-          <h1 className="h1 mt-1">{name}</h1>
-          <p className="mt-2 max-w-3xl text-lg text-[color:var(--muted-foreground)]">
-            {fullName}
-          </p>
-
-          <dl className="mt-5 flex flex-wrap gap-x-8 gap-y-3 text-sm">
-            <div className="flex items-center gap-2">
-              <Clock className="size-4 text-[color:var(--brand)]" aria-hidden="true" />
-              <dt className="text-[color:var(--muted-foreground)]">
-                {coursesT("duration")}:
-              </dt>
-              <dd className="font-semibold">{duration}</dd>
-            </div>
-            <div className="flex items-center gap-2">
-              <GraduationCap
-                className="size-4 text-[color:var(--brand)]"
-                aria-hidden="true"
-              />
-              <dt className="text-[color:var(--muted-foreground)]">
-                {coursesT("courseFee")}:
-              </dt>
-              <dd className="nums font-semibold">{fee}</dd>
-            </div>
-            {classes != null && classes > 0 && (
-              <div className="flex items-center gap-2">
-                <Layers
-                  className="size-4 text-[color:var(--brand)]"
-                  aria-hidden="true"
-                />
-                <dt className="text-[color:var(--muted-foreground)]">
-                  {t("totalClasses")}:
-                </dt>
-                <dd className="nums font-semibold">{formatNumber(classes, locale)}</dd>
-              </div>
+          {/* Two columns once the office has uploaded a course photo. */}
+          <div
+            className={cn(
+              "grid gap-8",
+              course.image &&
+                "lg:grid-cols-[minmax(0,1fr)_minmax(0,400px)] lg:items-center lg:gap-12",
             )}
-          </dl>
+          >
+            <div className="min-w-0">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                <LevelBadge label={levels(course.level)} />
+                <AdmissionBadge
+                  open={course.admissionOpen}
+                  labelOpen={common("admissionOpen")}
+                  labelClosed={common("admissionClosed")}
+                />
+                {course.affiliationNote && <GovtBadge label={course.affiliationNote} />}
+                <SeatCounter batch={nextBatch} locale={locale} />
+              </div>
 
-          {seatsFull && (
-            <p className="mt-5 inline-flex items-center rounded-lg bg-[color:var(--bg-soft)] px-3 py-2 text-sm text-[color:var(--muted-foreground)]">
-              {seatsT("fullNotice")}
-            </p>
-          )}
+              <p className="font-latin text-sm font-semibold text-[color:var(--muted-foreground)]">
+                {coursesT("code")} · {course.code}
+              </p>
+              <h1 className="h1 mt-1">{name}</h1>
+              <p className="mt-2 max-w-3xl text-lg text-[color:var(--muted-foreground)]">
+                {fullName}
+              </p>
 
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Button asChild variant="accent" size="cta-lg">
-              <Link href={applyHref}>{applyLabel}</Link>
-            </Button>
-            <Button asChild variant="whatsapp" size="cta-lg">
-              <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
-                <WhatsAppIcon className="size-5" />
-                {common("whatsapp")}
-              </a>
-            </Button>
+              <dl className="mt-5 flex flex-wrap gap-x-8 gap-y-3 text-sm">
+                <div className="flex items-center gap-2">
+                  <Clock
+                    className="size-4 text-[color:var(--brand)]"
+                    aria-hidden="true"
+                  />
+                  <dt className="text-[color:var(--muted-foreground)]">
+                    {coursesT("duration")}:
+                  </dt>
+                  <dd className="font-semibold">{duration}</dd>
+                </div>
+                <div className="flex items-center gap-2">
+                  <GraduationCap
+                    className="size-4 text-[color:var(--brand)]"
+                    aria-hidden="true"
+                  />
+                  <dt className="text-[color:var(--muted-foreground)]">
+                    {coursesT("courseFee")}:
+                  </dt>
+                  <dd className="nums font-semibold">{fee}</dd>
+                </div>
+                {classes != null && classes > 0 && (
+                  <div className="flex items-center gap-2">
+                    <Layers
+                      className="size-4 text-[color:var(--brand)]"
+                      aria-hidden="true"
+                    />
+                    <dt className="text-[color:var(--muted-foreground)]">
+                      {t("totalClasses")}:
+                    </dt>
+                    <dd className="nums font-semibold">
+                      {formatNumber(classes, locale)}
+                    </dd>
+                  </div>
+                )}
+              </dl>
+
+              {seatsFull && (
+                <p className="mt-5 inline-flex items-center rounded-lg bg-[color:var(--bg-soft)] px-3 py-2 text-sm text-[color:var(--muted-foreground)]">
+                  {seatsT("fullNotice")}
+                </p>
+              )}
+
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Button asChild variant="accent" size="cta-lg">
+                  <Link href={applyHref}>{applyLabel}</Link>
+                </Button>
+                <Button asChild variant="whatsapp" size="cta-lg">
+                  <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+                    <WhatsAppIcon className="size-5" />
+                    {common("whatsapp")}
+                  </a>
+                </Button>
+              </div>
+            </div>
+            {course.image && (
+              <Image
+                src={course.image}
+                alt={name}
+                width={800}
+                height={600}
+                priority
+                sizes="(min-width: 1024px) 400px, 100vw"
+                className="aspect-[4/3] w-full rounded-[14px] border border-[color:var(--border)] bg-white object-cover shadow-[var(--shadow-card)]"
+              />
+            )}
           </div>
         </div>
       </div>

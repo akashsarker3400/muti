@@ -71,6 +71,31 @@ export async function setApplicationNote(
   }
 }
 
+/** Attaches (or clears) the applicant's photo from the detail dialog. */
+export async function setApplicationPhoto(
+  id: string,
+  photo: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const admin = await requireAdmin();
+  const value = photo.trim();
+  if (value && !/^\/uploads\/[\w./-]+$/.test(value)) {
+    return { ok: false, error: "Invalid file path." };
+  }
+
+  try {
+    await prisma.application.update({
+      where: { id },
+      data: { photo: value || null },
+    });
+    await logActivity(admin.id, "photo", "application", id);
+    revalidatePath("/admin/applications");
+    return { ok: true };
+  } catch (error) {
+    console.error("setApplicationPhoto failed", error);
+    return { ok: false, error: "The photo could not be saved." };
+  }
+}
+
 export async function deleteApplication(
   id: string,
 ): Promise<{ ok: boolean; error?: string }> {

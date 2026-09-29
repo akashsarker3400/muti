@@ -20,7 +20,15 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Copy, GripVertical, Loader2, Pencil, Trash2 } from "lucide-react";
+import Image from "next/image";
+import {
+  Copy,
+  GripVertical,
+  Image as ImageIcon,
+  Loader2,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -49,6 +57,7 @@ export type AdminCourse = {
   slug: string;
   nameBn: string | null;
   nameEn: string;
+  image: string | null;
   level: string;
   courseFee: number;
   published: boolean;
@@ -212,6 +221,18 @@ function CourseRow({
       >
         <GripVertical className="size-5" aria-hidden="true" />
       </button>
+
+      {/* Thumbnail: an empty frame is a visible reminder to upload a photo. */}
+      <span className="relative block h-12 w-16 shrink-0 overflow-hidden rounded-md border border-[color:var(--border)] bg-[color:var(--bg-soft)]">
+        {course.image ? (
+          <Image src={course.image} alt="" fill sizes="64px" className="object-cover" />
+        ) : (
+          <ImageIcon
+            className="absolute inset-0 m-auto size-4 text-[color:var(--muted-foreground)]"
+            aria-hidden="true"
+          />
+        )}
+      </span>
 
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">

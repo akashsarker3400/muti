@@ -72,7 +72,7 @@ export type ResourceConfig = {
   baseWhere?: Record<string, unknown>;
   columns: ResourceColumn[];
   /** Renders an extra action in each row, e.g. "clone" on batches. */
-  rowTool?: "batch-clone" | "board-results";
+  rowTool?: "batch-clone" | "board-results" | "student-card" | "certificate-print";
   /** Entity key on /admin/import — shows an "Import" button above the list. */
   importEntity?: string;
   /** Offers a CSV download of the whole table from the list header. */
@@ -1326,6 +1326,7 @@ const studentResource: ResourceConfig = {
     "Turn on “Verifiable” to let a student’s certificate be checked on the public /verify page.",
   newLabel: "New student",
   columns: [
+    { key: "photo", label: "", type: "image" },
     { key: "roll", label: "Roll" },
     { key: "name", label: "Name" },
     { key: "course", label: "Course", path: "course.nameEn", hideOnMobile: true },
@@ -1341,6 +1342,7 @@ const studentResource: ResourceConfig = {
   searchFields: ["roll", "certificateNo", "name", "phone", "bmdc", "boardRoll"],
   orderBy: [{ createdAt: "desc" }],
   include: { course: true, batch: true },
+  rowTool: "student-card",
   importEntity: "students",
   exportCsv: true,
   detailPanel: "student-certificates",
@@ -1349,6 +1351,8 @@ const studentResource: ResourceConfig = {
     batches: await batchOptions(),
   }),
   schema: z.object({
+    photo: optionalText,
+    bloodGroup: optionalText,
     roll: requiredText,
     certificateNo: optionalText,
     name: requiredText,
@@ -1378,6 +1382,14 @@ const studentResource: ResourceConfig = {
       id: "main",
       label: "Student",
       fields: [
+        {
+          name: "photo",
+          label: "Photo",
+          type: "image",
+          full: true,
+          maxMb: 5,
+          hint: "Passport-size photo of the student. Used on the admin record and on the printed ID card.",
+        },
         { name: "name", label: "Name (English)", type: "text", required: true },
         { name: "nameBn", label: "Name (Bangla)", type: "text" },
         { name: "roll", label: "Roll", type: "text", required: true, latin: true },
@@ -1402,6 +1414,16 @@ const studentResource: ResourceConfig = {
           ],
         },
         { name: "dateOfBirth", label: "Date of birth", type: "date" },
+        {
+          name: "bloodGroup",
+          label: "Blood group",
+          type: "select",
+          options: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((group) => ({
+            value: group,
+            label: group,
+          })),
+          hint: "Printed on the ID card.",
+        },
         { name: "fatherName", label: "Father's name", type: "text" },
         { name: "motherName", label: "Mother's name", type: "text" },
         { name: "nid", label: "NID", type: "text", latin: true },
@@ -1456,6 +1478,8 @@ const studentResource: ResourceConfig = {
     },
   ],
   toForm: (row) => ({
+    photo: str(row.photo),
+    bloodGroup: str(row.bloodGroup),
     roll: str(row.roll),
     certificateNo: str(row.certificateNo),
     name: str(row.name),
@@ -1481,6 +1505,8 @@ const studentResource: ResourceConfig = {
     note: str(row.note),
   }),
   toData: (values) => ({
+    photo: nullable(values.photo),
+    bloodGroup: nullable(values.bloodGroup),
     roll: str(values.roll),
     certificateNo: nullable(values.certificateNo),
     name: str(values.name),
@@ -1782,6 +1808,7 @@ const issuedCertificateResource: ResourceConfig = {
     "The register of issued certificates. /verify answers from these by certificate number or the student’s BMDC. To revoke one, set the status to “Revoked” and give a reason.",
   newLabel: "New certificate",
   permission: "certificates.manage",
+  rowTool: "certificate-print",
   importEntity: "certificates",
   exportCsv: true,
   baseWhere: { deletedAt: null },

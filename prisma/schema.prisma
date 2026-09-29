@@ -313,6 +313,8 @@ model Application {
   batchId  String?
   batch    Batch?  @relation(fields: [batchId], references: [id], onDelete: SetNull)
 
+  /// Passport-size photo the applicant uploaded, or the office added at the desk.
+  photo          String?
   qualification  String?
   /// Which medical college the applicant graduated from.
   medicalCollege String?
@@ -356,6 +358,10 @@ model Application {
 
 model Student {
   id            String  @id @default(cuid())
+  /// Passport-size photo, used on the admin record and the ID card.
+  photo         String?
+  /// Printed on the ID card: the one fact on it that can matter in an emergency.
+  bloodGroup    String?
   roll          String  @unique
   certificateNo String? @unique
   name          String

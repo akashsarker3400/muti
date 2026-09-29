@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
+
+import { PersonPortrait } from "@/components/site/person-portrait";
 
 import {
   Dialog,
@@ -113,30 +114,10 @@ export function AdvisorGrid({
 
 function Portrait({
   advisor,
-  size = 112,
+  size = 128,
 }: {
   advisor: AdvisorCardData;
   size?: number;
 }) {
-  if (advisor.photo) {
-    return (
-      <Image
-        src={advisor.photo}
-        alt={advisor.name}
-        width={size}
-        height={size}
-        className="rounded-2xl object-cover"
-        style={{ width: size, height: size }}
-      />
-    );
-  }
-  return (
-    <span
-      aria-hidden="true"
-      className="grid place-items-center rounded-2xl bg-[color:var(--brand-soft)] text-3xl font-bold text-[color:var(--brand)]"
-      style={{ width: size, height: size }}
-    >
-      {advisor.name.trim().charAt(0)}
-    </span>
-  );
+  return <PersonPortrait src={advisor.photo} name={advisor.name} width={size} />;
 }
