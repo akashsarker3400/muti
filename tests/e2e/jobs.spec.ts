@@ -46,7 +46,12 @@ test.describe("job board", () => {
       // that closed years ago wastes everybody's time.
       await expect(page.getByText(closed)).toHaveCount(0);
 
-      await page.getByText(open).click();
+      const jobHref = await page
+        .getByRole("link")
+        .filter({ hasText: open })
+        .first()
+        .getAttribute("href");
+      await page.goto(jobHref!);
       await expect(page.getByRole("heading", { level: 1 })).toContainText(open);
       await expect(page.getByText("How to apply")).toBeVisible();
       await expect(page.getByText("Call 01778-838644")).toBeVisible();

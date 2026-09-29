@@ -349,7 +349,8 @@ test.describe("printed documents", () => {
     await page.getByRole("button", { name: "Generate" }).click();
     await expect(page.locator("#field-certificateNo")).not.toHaveValue("");
     const generated = await page.locator("#field-certificateNo").inputValue();
-    expect(generated).toMatch(/^[A-Z]+-[A-Z-]+-\d{4}-\d{4}$/);
+    // prefix, course code (which may carry digits), year, sequence.
+    expect(generated).toMatch(/^[A-Z0-9-]+-\d{4}-\d{4}$/);
 
     const certNo = `DOC-C-${id}`.toUpperCase();
     await page.locator("#field-certificateNo").fill(certNo);
