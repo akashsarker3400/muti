@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { sweepAlerts } from "@/lib/alerts";
 import { createBackup } from "@/lib/backup";
 import { anonymizeOldAppointments } from "@/lib/health";
 import { runReminders } from "@/lib/reminders";
@@ -44,6 +45,7 @@ export async function POST(request: Request) {
   }
 
   await step("reminders", runReminders);
+  await step("alerts", sweepAlerts);
   await step("anonymize", anonymizeOldAppointments);
   await step("pruneViews", pruneOldViews);
   await step("backup", createBackup);

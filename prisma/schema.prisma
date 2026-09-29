@@ -196,6 +196,8 @@ model User {
   approvedCertificates Certificate[]      @relation("CertificateApprover")
   issuedCertificates   Certificate[]      @relation("CertificateIssuer")
   certificatePrints    CertificatePrint[]
+  alertsResolved       Alert[]
+  teacherPayments      TeacherPayment[]
   paymentsTaken        Payment[]
   paymentsVoided       Payment[]          @relation("PaymentVoider")
   messages             MessageLog[]
@@ -276,6 +278,8 @@ model Course {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  teacherRates TeacherRate[]
+
   @@index([published, sortOrder])
 }
 
@@ -322,6 +326,7 @@ model Batch {
   seatsFilledManual Boolean @default(false)
   showSeatCounter   Boolean @default(true)
 
+  alerts       Alert[]
   exams        Exam[]
   sessions     ClassSession[]
   students     Student[]
@@ -447,6 +452,7 @@ model Student {
 
   feePlan      FeePlan?
   payments     Payment[]
+  alerts       Alert[]
   marks        Mark[]
   attendance   Attendance[]
   certificates Certificate[]
@@ -721,6 +727,8 @@ model Faculty {
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   sessions ClassSession[]
+  rates    TeacherRate[]
+  payments TeacherPayment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1395,4 +1403,74 @@ model Mark {
 
   @@unique([examId, studentId])
   @@index([studentId])
+}
+
+enum AlertType {
+  DROPOUT_RISK
+  OVERDUE_FEES
+  DOCS_MISSING
+}
+
+enum AlertStatus {
+  OPEN
+  RESOLVED
+}
+
+/// Something the office should look at (addendum 2, B6). Raised by the
+/// nightly job, closed by a person with a note.
+model Alert {
+  id           String      @id @default(cuid())
+  type         AlertType
+  studentId    String?
+  student      Student?    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  batchId      String?
+  batch        Batch?      @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  message      String
+  status       AlertStatus @default(OPEN)
+  note         String?
+  resolvedById String?
+  resolvedBy   User?       @relation(fields: [resolvedById], references: [id], onDelete: SetNull)
+  resolvedAt   DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([status, type])
+  @@index([studentId, type, status])
+}
+
+/// What a teacher is paid per class (addendum 2, B7). Rates change, so the
+/// row carries the date it takes effect rather than being overwritten.
+model TeacherRate {
+  id            String      @id @default(cuid())
+  facultyId     String
+  faculty       Faculty     @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  courseId      String?
+  course        Course?     @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  type          RoutineType @default(LECTURE)
+  ratePerClass  Int
+  effectiveFrom DateTime    @default(now())
+
+  createdAt DateTime @default(now())
+
+  @@index([facultyId, effectiveFrom])
+}
+
+model TeacherPayment {
+  id            String         @id @default(cuid())
+  facultyId     String
+  faculty       Faculty        @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  periodFrom    DateTime
+  periodTo      DateTime
+  sessionsCount Int
+  amount        Int
+  paidAt        DateTime?
+  method        PaymentMethod?
+  reference     String?
+  note          String?
+  createdById   String?
+  createdBy     User?          @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([facultyId, periodFrom])
 }

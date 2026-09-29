@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Award,
   BadgeCheck,
+  BadgeDollarSign,
   BarChart3,
   DatabaseBackup,
   BadgePlus,
@@ -35,6 +36,7 @@ import {
   ScrollText,
   Settings,
   ShieldCheck,
+  TriangleAlert,
   Trophy,
   Users,
   Wallet,
@@ -84,6 +86,8 @@ const NAV: NavGroup[] = [
       { href: "/admin/batches", label: "Batches", icon: CalendarRange },
       { href: "/admin/students", label: "Students", icon: GraduationCap },
       { href: "/admin/fees", label: "Fees", icon: Wallet },
+      { href: "/admin/alerts", label: "Alerts", icon: TriangleAlert },
+      { href: "/admin/teacher-pay", label: "Teacher payments", icon: BadgeDollarSign },
       { href: "/admin/course-book", label: "Course book", icon: BookMarked },
       { href: "/admin/certificates", label: "Certificates", icon: Award },
       {
