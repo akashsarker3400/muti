@@ -6,6 +6,8 @@ import { z } from "zod";
 import { authConfig } from "@/auth.config";
 import type { Role } from "@/generated/prisma/enums";
 import { requiredEnv } from "@/lib/env";
+import { logActivity } from "@/lib/admin-auth";
+import { sendLoginAlert } from "@/lib/login-alert";
 import { prisma } from "@/lib/prisma";
 import { decryptSecret, normalizeBackupCode, verifyTotp } from "@/lib/totp";
 
@@ -106,9 +108,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
         }
 
+        // Audit every sign-in; email only about an unfamiliar address.
+        await logActivity(user.id, "sign-in", "user", user.id);
+        const { stub } = await sendLoginAlert(
+          { email: user.email, name: user.name },
+          { knownStub: user.lastLoginIp },
+        );
+
         await prisma.user.update({
           where: { id: user.id },
-          data: { failedLogins: 0, lockedUntil: null, lastLoginAt: new Date() },
+          data: {
+            failedLogins: 0,
+            lockedUntil: null,
+            lastLoginAt: new Date(),
+            lastLoginIp: stub,
+          },
         });
 
         return {

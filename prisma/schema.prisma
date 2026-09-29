@@ -181,6 +181,9 @@ model User {
   failedLogins  Int       @default(0)
   lockedUntil   DateTime?
   lastLoginAt   DateTime?
+  /// Address of the last sign-in, so the alert email only fires for a new one.
+  /// Stored as a SHA-256 stub: enough to compare, not a stored IP history.
+  lastLoginIp   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
