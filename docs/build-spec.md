@@ -37,7 +37,7 @@ Non-negotiables:
 | File uploads      | Local disk volume `/app/uploads` served via Next route `/uploads/[...path]`              | Images processed with `sharp` (resize to max 1600px, webp) |
 | Email             | Nodemailer via SMTP (Gmail app password of mymensinghultrasound@gmail.com)               | For application notifications                              |
 | i18n              | `next-intl`, locales `bn` (default) and `en`, URL prefix `/en/...`, Bangla has no prefix |                                                            |
-| Fonts             | Bangla: Hind Siliguri (Google Fonts). English: Inter                                     | via `next/font`                                            |
+| Fonts             | Bangla: SolaimanLipi (self-hosted, owner's choice 29 Sep 2026). English: Inter           | via `next/font`                                            |
 | Forms/validation  | react-hook-form + zod                                                                    |                                                            |
 | Rich text (admin) | Tiptap editor, stores HTML                                                               | For notices, course descriptions, blog                     |
 | Deployment        | Dockerfile (multi-stage, standalone output) + Coolify                                    | Section 12                                                 |
@@ -130,7 +130,7 @@ Do not add a headless CMS. Build the admin panel inside the same Next.js app.
 
 **Typography**
 
-- Bangla body/headings: Hind Siliguri 400/500/600/700
+- Bangla body/headings: SolaimanLipi (one weight; headings use synthesized bold)
 - English: Inter 400/500/600/700
 - Scale: h1 36/44 mobile 28/36, h2 28/36, h3 22/30, body 16/26, small 14/22
 - Line height for Bangla is set higher (1.7) to avoid glyph clipping.

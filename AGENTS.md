@@ -56,7 +56,7 @@ database access, so nothing can be prerendered at build time.
   the office typed, wrapped in `lang="bn"` (use `langOf()` from `src/lib/lang.ts`).
 - Page metadata uses `pageAlternates(locale, path)` from `src/i18n/routing.ts`
   for canonical + hreflang (x-default = English).
-- Fonts: Inter everywhere; Hind Siliguri (Noto Sans Bengali as glyph fallback)
+- Fonts: Inter everywhere; SolaimanLipi for Bangla, self-hosted from src/fonts, Bengali unicode-range only (Noto Sans Bengali as glyph fallback)
   only under `html[lang="bn"]` and `[lang="bn"]` (see `src/lib/fonts.ts` and the
   Bangla block in `globals.css`).
 - One portrait style for people: `PersonPortrait` (4:5 box, never a circle) is

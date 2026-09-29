@@ -21,7 +21,7 @@ test.describe("locales", () => {
       () => getComputedStyle(document.body).fontFamily,
     );
     expect(englishFont).toContain("Inter");
-    expect(englishFont).not.toContain("Hind Siliguri");
+    expect(englishFont.toLowerCase()).not.toContain("solaimanlipi");
 
     // Visiting /bn is an explicit choice: it is remembered in the cookie.
     await page.goto("/bn");
@@ -33,7 +33,7 @@ test.describe("locales", () => {
     const banglaFont = await page.evaluate(
       () => getComputedStyle(document.body).fontFamily,
     );
-    expect(banglaFont).toContain("Hind Siliguri");
+    expect(banglaFont.toLowerCase()).toContain("solaimanlipi");
     await page.goto("/");
     await expect(page).toHaveURL(/\/bn$/);
   });

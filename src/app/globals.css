@@ -14,8 +14,8 @@
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-bangla:
-    var(--font-hind-siliguri), "Hind Siliguri", var(--font-noto-bengali),
-    "Noto Sans Bengali", "SolaimanLipi", "Kalpurush", ui-sans-serif, sans-serif;
+    var(--font-solaiman-lipi), "SolaimanLipi", var(--font-inter),
+    var(--font-noto-bengali), "Noto Sans Bengali", ui-sans-serif, sans-serif;
   --font-latin: var(--font-inter);
   --font-heading: var(--font-sans);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -161,7 +161,7 @@
   }
 
   /*
-   * Bangla typography (locale change): Noto Sans Bengali only where Bangla is
+   * Bangla typography (locale change): SolaimanLipi only where Bangla is
    * rendered — the /bn routes (html[lang="bn"]) and any element marked
    * lang="bn" on a mixed page. It renders smaller than Latin at the same size,
    * so Bangla pages get a 17px base; conjuncts and vowel signs need the taller
@@ -330,7 +330,7 @@
 
 /*
  * Navigation, ticker and footer link text (locale change §5): weight 500,
- * 15px Inter on English pages, 16px Noto Sans Bengali at line-height 1.6 on
+ * 15px Inter on English pages, 16px SolaimanLipi at line-height 1.6 on
  * Bangla pages. Marks above and below Bangla letters (ি ী ু ূ ্র, conjuncts)
  * are clipped by tight boxes, so every nav item, pill and badge keeps at
  * least line-height 1.5 with 3px of vertical padding and never a fixed
