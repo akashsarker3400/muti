@@ -9,6 +9,7 @@ import {
   signatoriesOf,
   VerifyBlock,
 } from "@/components/admin/documents/document-chrome";
+import { SiteUrlWarning } from "@/components/admin/documents/site-url-warning";
 import { PrintButton } from "@/components/admin/print-button";
 import { requirePermission } from "@/lib/admin-auth";
 import { siteUrl } from "@/lib/env";
@@ -58,7 +59,11 @@ export default async function CertificatePrintPage({
 
   const doc = settings.documents;
   const student = certificate.student;
-  const verifyUrl = `${siteUrl}/verify?q=${encodeURIComponent(certificate.certificateNo)}`;
+  // /verify answers ?t=<verifyToken> directly with the certificate card; ?q=
+  // is not a parameter that page reads, so a QR built from the certificate
+  // number opened nothing but an empty form. The token is also unguessable,
+  // which keeps a scanned URL from leaking the numbering series.
+  const verifyUrl = `${siteUrl}/verify?t=${encodeURIComponent(certificate.verifyToken)}`;
   const qr = await qrSvg(verifyUrl, 120);
   const watermark = doc.watermarkImage || settings.branding.logo;
   const parents = [student.fatherName, student.motherName].filter(Boolean);
@@ -93,6 +98,8 @@ export default async function CertificatePrintPage({
         </span>
         <PrintButton label="Print certificate" />
       </div>
+
+      <SiteUrlWarning />
 
       {revoked && (
         <p className="no-print mb-4 rounded-lg border border-[color:var(--error)] bg-red-50 p-3 text-sm text-[color:var(--error)]">
@@ -231,7 +238,7 @@ export default async function CertificatePrintPage({
           <div className="mt-[4mm] flex items-end justify-between gap-6">
             <VerifyBlock
               qr={qr}
-              url={verifyUrl.replace(/^https?:\/\//, "")}
+              url={`${siteUrl.replace(/^https?:\/\//, "")}/verify`}
               label="Scan to verify this certificate"
             />
             {doc.certificateFooterEn && (

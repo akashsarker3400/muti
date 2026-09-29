@@ -1,6 +1,7 @@
 import { AdminShell } from "@/components/admin/admin-shell";
 import { signOut } from "@/auth";
 import { requireAdmin } from "@/lib/admin-auth";
+import { siteUrl } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,7 @@ export default async function AdminPanelLayout({
   }
 
   return (
-    <AdminShell user={user} signOutAction={signOutAction}>
+    <AdminShell user={user} signOutAction={signOutAction} siteUrl={siteUrl}>
       {children}
     </AdminShell>
   );

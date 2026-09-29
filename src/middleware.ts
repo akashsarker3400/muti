@@ -3,6 +3,7 @@ import createMiddleware from "next-intl/middleware";
 import NextAuth from "next-auth";
 
 import { authConfig } from "@/auth.config";
+import { hostOf, routeForHost } from "@/lib/admin-host";
 import { routing } from "@/i18n/routing";
 
 const intlMiddleware = createMiddleware(routing);
@@ -11,7 +12,9 @@ const intlMiddleware = createMiddleware(routing);
 const { auth } = NextAuth(authConfig);
 
 /**
- * Two responsibilities:
+ * Three responsibilities:
+ *  - when `ADMIN_HOST` is set, the admin panel is served from its own
+ *    hostname and is not served from the public one (see src/lib/admin-host.ts)
  *  - /admin/** requires a signed-in user, so unauthenticated visitors land on
  *    the login page instead of an admin screen (pages and server actions
  *    re-check with `requireAdmin`)
@@ -19,6 +22,35 @@ const { auth } = NextAuth(authConfig);
  */
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // ---- Host routing -------------------------------------------------------
+  const routing_ = routeForHost({
+    host: hostOf(request.headers.get("host")),
+    adminHost: process.env.ADMIN_HOST ?? null,
+    pathname,
+    search: request.nextUrl.search,
+    protocol: request.nextUrl.protocol,
+  });
+
+  if (routing_.kind === "redirect-admin") {
+    return NextResponse.redirect(routing_.url, 308);
+  }
+
+  if (routing_.kind === "rewrite-admin") {
+    const url = request.nextUrl.clone();
+    url.pathname = routing_.pathname;
+    // Guard the rewritten path the same way as a direct /admin request.
+    if (routing_.pathname !== "/admin/login") {
+      const session = await auth();
+      if (!session?.user) {
+        const loginUrl = request.nextUrl.clone();
+        loginUrl.pathname = "/admin/login";
+        loginUrl.searchParams.set("next", routing_.pathname);
+        return NextResponse.rewrite(loginUrl);
+      }
+    }
+    return NextResponse.rewrite(url);
+  }
 
   // English moved to the root: the old /en/* addresses redirect permanently
   // to the same path without the prefix, query string intact.
@@ -34,7 +66,11 @@ export default async function middleware(request: NextRequest) {
 
     const session = await auth();
     if (!session?.user) {
-      const loginUrl = new URL("/admin/login", request.url);
+      // Clone rather than build from `request.url`: on the admin hostname that
+      // would send the visitor back to the public one to sign in.
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/admin/login";
+      loginUrl.search = "";
       loginUrl.searchParams.set("next", pathname);
       return NextResponse.redirect(loginUrl);
     }
@@ -47,7 +83,8 @@ export default async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Public site: everything except API routes, uploads, Next internals and
-    // files with an extension.
+    // files with an extension. On the admin hostname this same pattern is what
+    // lets `/`, `/students` and the rest be rewritten onto /admin.
     "/((?!api|uploads|_next|_vercel|.*\\..*).*)",
     // Admin panel.
     "/admin/:path*",

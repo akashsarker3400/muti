@@ -1,6 +1,6 @@
 "use server";
 
-import { requirePermission } from "@/lib/admin-auth";
+import { logActivity, requirePermission } from "@/lib/admin-auth";
 import {
   DEFAULT_CERTIFICATE_FORMAT,
   renderCertificateNumber,
@@ -8,6 +8,7 @@ import {
   type CertificateNumberParts,
 } from "@/lib/certificate-number";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { getSiteSettings } from "@/lib/site-settings";
 
 /**
@@ -26,7 +27,17 @@ export async function nextCertificateNumber(input: {
   type?: string;
   issuedAt?: string;
 }): Promise<NextNumberResult> {
-  await requirePermission("certificates.manage");
+  const admin = await requirePermission("certificates.manage");
+
+  // Every generated number is consumed from the series whether or not the
+  // certificate is saved, so cap how fast they can be spent.
+  const limit = await checkRateLimit("certificateNumber");
+  if (!limit.allowed) {
+    return {
+      ok: false,
+      error: "Too many numbers generated in the last hour. Please try again later.",
+    };
+  }
 
   const course = input.courseId
     ? await prisma.course.findUnique({
@@ -65,7 +76,12 @@ export async function nextCertificateNumber(input: {
         where: { certificateNo },
         select: { id: true },
       });
-      if (!taken) return { ok: true, certificateNo };
+      if (!taken) {
+        // Audit: a number leaving the series is a fact the office may need to
+        // account for later, even if the certificate is never saved.
+        await logActivity(admin.id, "certificate-number", "certificate", certificateNo);
+        return { ok: true, certificateNo };
+      }
     }
     return {
       ok: false,

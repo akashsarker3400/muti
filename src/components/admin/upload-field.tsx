@@ -44,13 +44,16 @@ export function UploadField({
       const body = new FormData();
       body.append("file", file);
 
-      const response = await fetch(
-        maxMb ? `/api/admin/upload?max=${maxMb}` : "/api/admin/upload",
-        {
-          method: "POST",
-          body,
-        },
-      );
+      const query = new URLSearchParams();
+      if (maxMb) query.set("max", String(maxMb));
+      // Image fields are checked on the server too: an `accept` attribute is
+      // a suggestion to the file picker, not a control.
+      if (kind === "image") query.set("images", "1");
+
+      const response = await fetch(`/api/admin/upload?${query.toString()}`, {
+        method: "POST",
+        body,
+      });
       const data = (await response.json()) as { url?: string; error?: string };
 
       if (!response.ok || !data.url) {

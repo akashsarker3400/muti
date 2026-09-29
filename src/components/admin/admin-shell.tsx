@@ -150,10 +150,17 @@ const NAV: NavGroup[] = [
 export function AdminShell({
   user,
   signOutAction,
+  siteUrl,
   children,
 }: {
   user: { name: string; email: string; role: Role };
   signOutAction: () => Promise<void>;
+  /**
+   * Absolute address of the public site. When the panel is served from its own
+   * hostname (ADMIN_HOST), "/" is the dashboard, so this link has to be
+   * absolute to actually leave the admin.
+   */
+  siteUrl: string;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -219,7 +226,7 @@ export function AdminShell({
 
         <div className="shrink-0 border-t border-[color:var(--sidebar-border)] p-3">
           <a
-            href="/"
+            href={siteUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex min-h-10 items-center gap-2 rounded-lg px-3 text-sm transition hover:bg-white/10"

@@ -43,15 +43,23 @@ export function GuillochePattern({
  */
 export function DocumentBorder({
   variant = "certificate",
+  /**
+   * Distance from the paper edge. Ordinary office printers cannot print to
+   * the edge (3 to 5 mm is typical) and these documents go on plain paper, so
+   * the ornament is kept a safe 7 mm in rather than being sliced off.
+   */
+  inset = "7mm",
 }: {
   variant?: "certificate" | "card";
+  inset?: string;
 }) {
   const id = `guilloche-${variant}`;
   const band = variant === "certificate" ? 9 : 6;
 
   return (
     <svg
-      className="pointer-events-none absolute inset-0 size-full"
+      className="pointer-events-none absolute"
+      style={{ top: inset, right: inset, bottom: inset, left: inset }}
       preserveAspectRatio="none"
       viewBox="0 0 1000 1000"
       aria-hidden="true"
@@ -99,8 +107,14 @@ export function DocumentBorder({
   );
 }
 
-/** A diamond motif in each corner, drawn in the page's own aspect ratio. */
-export function CornerMotifs({ size = 34 }: { size?: number }) {
+/** A diamond motif in each corner, inside the same printable-area inset. */
+export function CornerMotifs({
+  size = 34,
+  inset = "9mm",
+}: {
+  size?: number;
+  inset?: string;
+}) {
   const corners: Array<{ style: React.CSSProperties; turn: number }> = [
     { style: { top: 0, left: 0 }, turn: 0 },
     { style: { top: 0, right: 0 }, turn: 90 },
@@ -120,7 +134,7 @@ export function CornerMotifs({ size = 34 }: { size?: number }) {
           style={{
             ...corner.style,
             transform: `rotate(${corner.turn}deg)`,
-            margin: "3mm",
+            margin: inset,
           }}
         >
           <path

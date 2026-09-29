@@ -9,6 +9,7 @@ import {
   VerifyBlock,
 } from "@/components/admin/documents/document-chrome";
 import { WalletCardSheet } from "@/components/admin/documents/wallet-card";
+import { SiteUrlWarning } from "@/components/admin/documents/site-url-warning";
 import { PrintButton } from "@/components/admin/print-button";
 import { requireAdmin } from "@/lib/admin-auth";
 import { signCardToken } from "@/lib/card-token";
@@ -85,7 +86,7 @@ export default async function StudentCardPage({
   return (
     <div className="mx-auto w-fit">
       <style>{`
-        @page { size: ${wallet ? "A4" : "A4"}; margin: ${wallet ? "12mm" : "0"} }
+        @page { size: A4; margin: ${wallet ? "12mm" : "0"} }
         /* Plain paper: the office prints the whole design, so the colours must
            come out without anyone having to tick "background graphics". */
         .sheet { print-color-adjust: exact; -webkit-print-color-adjust: exact }
@@ -114,6 +115,8 @@ export default async function StudentCardPage({
           <PrintButton label="Print" />
         </div>
       </div>
+
+      <SiteUrlWarning />
 
       {!student.photo && (
         <p className="no-print mb-4 rounded-lg border border-[color:var(--accent-red)]/40 bg-red-50 p-3 text-sm text-[color:var(--accent-red)]">

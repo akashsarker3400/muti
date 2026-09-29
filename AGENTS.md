@@ -79,6 +79,12 @@ database access, so nothing can be prerendered at build time.
 - Health appointments are health data (addendum 4 §5): never render a
   patient's name or phone on a public page, and keep `anonymizeOldAppointments`
   in the path of anything that lists them.
+- `ADMIN_HOST` (optional) serves the admin panel from its own hostname; the
+  routing rules live in `src/lib/admin-host.ts` and are unit tested. Links from
+  the admin to the public site must be absolute (`siteUrl`), not `/`.
+- Printed documents build their QR from `siteUrl`, never the request host, and
+  the certificate QR uses `/verify?t=<verifyToken>` (the only parameter that
+  page reads).
 - Uploads: `isPublicKey` (public `/uploads` route) vs `isSafeKey` (storage).
   Anything under `protected/` is only reachable through a signed route
   (`/api/v1/book/sample`). Videos, posters and protected files have a `Media`

@@ -89,6 +89,7 @@
     "esbuild": "^0.28.2",
     "eslint": "^9",
     "eslint-config-next": "15.5.25",
+    "jsqr": "^1.4.0",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",

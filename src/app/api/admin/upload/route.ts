@@ -59,6 +59,17 @@ export async function POST(request: Request) {
   const isImage = ALLOWED_IMAGE_TYPES.has(file.type);
   const isPdf = file.type === "application/pdf";
 
+  // `?images=1` is sent by image-only fields (logos, signatures, the office
+  // seal, photos). Without it the client's `accept` attribute is the only
+  // thing standing between a PDF and a field meant to hold a picture, and an
+  // accept attribute is a suggestion, not a check.
+  if (url.searchParams.get("images") === "1" && !isImage) {
+    return NextResponse.json(
+      { error: "This field takes an image: JPG, PNG, WEBP or GIF" },
+      { status: 415 },
+    );
+  }
+
   if (!isImage && !isPdf) {
     return NextResponse.json(
       { error: "Only JPG, PNG, WEBP, GIF and PDF files are allowed" },

@@ -372,6 +372,9 @@ test.describe("printed documents", () => {
       await expect(page.getByText(`Dr. Document ${id}`)).toBeVisible();
       // The QR is inline SVG, so the printer gets vector edges.
       expect(await page.locator(".sheet svg").count()).toBeGreaterThan(1);
+      // It must carry a quiet zone, or printed paper does not scan reliably.
+      const qr = page.locator('.sheet svg[aria-label="QR code"]');
+      await expect(qr).toHaveAttribute("width", /\d+/);
 
       // Registration card and wallet card.
       await page.goto("/admin/students");
