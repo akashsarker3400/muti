@@ -39,11 +39,14 @@ test.describe("examinations", () => {
     }
 
     try {
+      // Followed by href rather than clicked: the row carries several links
+      // and a click that lands before hydration simply does nothing.
       await page.goto(`/admin/batches?q=${encodeURIComponent(batchName)}`);
-      await page
+      const examsHref = await page
         .locator("tr", { hasText: batchName })
         .getByRole("link", { name: "Exams" })
-        .click();
+        .getAttribute("href");
+      await page.goto(examsHref!);
       await expect(page.getByRole("heading", { level: 1 })).toContainText(batchName);
 
       // Add the examination.
@@ -56,7 +59,10 @@ test.describe("examinations", () => {
       await expect(page.getByText("First semester final")).toBeVisible();
 
       // Enter marks: one scores, one did not sit.
-      await page.getByRole("link", { name: "Marks" }).click();
+      const marksHref = await page
+        .getByRole("link", { name: "Marks" })
+        .getAttribute("href");
+      await page.goto(marksHref!);
       await expect(page.getByRole("heading", { level: 1 })).toContainText(
         "First semester final",
       );
@@ -98,7 +104,10 @@ test.describe("examinations", () => {
         const row = page.locator("tr", { hasText: name });
         if (await row.count()) {
           await row.getByRole("button", { name: "Delete" }).click();
-          await page.getByRole("dialog").getByRole("button", { name: "Delete" }).click();
+          await page
+            .getByRole("dialog")
+            .getByRole("button", { name: "Delete" })
+            .click();
           await page.waitForTimeout(400);
         }
       }

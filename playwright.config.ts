@@ -16,7 +16,10 @@ export default defineConfig({
   workers: 1,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",
-  timeout: 60_000,
+  // Two minutes, because these run against a dev server that compiles a route
+  // the first time it is asked for. A page that takes five seconds to build is
+  // not a slow page, and a test that fails for it is not a useful failure.
+  timeout: 120_000,
   use: {
     baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3000",
     trace: "on-first-retry",

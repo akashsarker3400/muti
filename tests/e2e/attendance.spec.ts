@@ -75,7 +75,12 @@ test.describe("attendance", () => {
       // batch is not always on the first page.
       await page.goto(`/admin/batches?q=${encodeURIComponent(batchName)}`);
       const batchRow = page.locator("tr", { hasText: batchName });
-      await batchRow.getByRole("link", { name: "Classes" }).click();
+      // Followed by href: the row carries several links, and a click landing
+      // before hydration does nothing at all.
+      const classesHref = await batchRow
+        .getByRole("link", { name: "Classes" })
+        .getAttribute("href");
+      await page.goto(classesHref!);
       await expect(page.getByRole("heading", { level: 1 })).toContainText(batchName);
 
       await expect(async () => {

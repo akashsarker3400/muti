@@ -9,13 +9,21 @@ import { expect, test, type Page } from "@playwright/test";
  */
 
 /** Sets the seat numbers on the CMU-BTEB batch and returns to the list. */
+/** Opens a table row's editor by following its link rather than clicking it. */
+async function openRow(page: Page, rowText: string) {
+  const href = await page
+    .locator("tr", { hasText: rowText })
+    .getByRole("link", { name: "Edit" })
+    .getAttribute("href");
+  await page.goto(href!);
+  await expect(page).toHaveURL(/\/admin\/batches\/[^/]+$/);
+}
+
 async function setSeats(page: Page, seats: string, filled: string) {
   await page.goto("/admin/batches");
-  await page
-    .locator("tr", { hasText: "CMU-BTEB Batch" })
-    .getByRole("link", { name: "Edit" })
-    .click();
-  await expect(page).toHaveURL(/\/admin\/batches\/[^/]+$/);
+  // Followed by href: a click on a link that is still hydrating can be
+  // swallowed, and then the test fails for something the page does fine.
+  await openRow(page, "CMU-BTEB Batch");
   await page.locator("#field-seats").fill(seats);
   await page.locator("#field-seatsFilled").fill(filled);
   await page.getByRole("button", { name: "Save" }).click();
@@ -73,10 +81,7 @@ test.describe("live seat counter", () => {
 
     // --- switching the counter off hides it entirely ---
     await page.goto("/admin/batches");
-    await page
-      .locator("tr", { hasText: "CMU-BTEB Batch" })
-      .getByRole("link", { name: "Edit" })
-      .click();
+    await openRow(page, "CMU-BTEB Batch");
     await expect(page).toHaveURL(/\/admin\/batches\/[^/]+$/);
     await page.locator("#field-showSeatCounter").uncheck();
     await page.getByRole("button", { name: "Save" }).click();
@@ -92,10 +97,7 @@ test.describe("live seat counter", () => {
 
     // Restore the seeded state so the suite can run again.
     await page.goto("/admin/batches");
-    await page
-      .locator("tr", { hasText: "CMU-BTEB Batch" })
-      .getByRole("link", { name: "Edit" })
-      .click();
+    await openRow(page, "CMU-BTEB Batch");
     await expect(page).toHaveURL(/\/admin\/batches\/[^/]+$/);
     await page.locator("#field-showSeatCounter").check();
     await page.locator("#field-seats").fill("");

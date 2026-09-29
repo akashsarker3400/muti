@@ -13,6 +13,11 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "mymensinghultrasound@gmail.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "ChangeMe123!";
 
 setup("authenticate as admin", async ({ page }) => {
+  // The warm-up below compiles every route the suite touches, which on a cold
+  // dev server is minutes rather than seconds. Paying it here is the point; it
+  // just must not be charged against the default one-minute budget.
+  setup.setTimeout(10 * 60_000);
+
   await page.goto("/admin/login");
   await page.locator("#email").fill(ADMIN_EMAIL);
   await page.locator("#password").fill(ADMIN_PASSWORD);
