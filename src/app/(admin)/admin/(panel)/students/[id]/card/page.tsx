@@ -86,6 +86,9 @@ export default async function StudentCardPage({
     <div className="mx-auto w-fit">
       <style>{`
         @page { size: ${wallet ? "A4" : "A4"}; margin: ${wallet ? "12mm" : "0"} }
+        /* Plain paper: the office prints the whole design, so the colours must
+           come out without anyone having to tick "background graphics". */
+        .sheet { print-color-adjust: exact; -webkit-print-color-adjust: exact }
         @media print {
           body { background: white }
           nav, aside, header, .no-print { display: none !important }
@@ -96,7 +99,7 @@ export default async function StudentCardPage({
 
       <div className="no-print mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-[color:var(--bg-soft)] p-3 text-sm">
         <span className="text-[color:var(--muted-foreground)]">
-          Turn on background graphics in the print dialog.{" "}
+          Plain white paper, margins set to None.{" "}
           {wallet
             ? "Wallet cards print two to a sheet; cut along the crop marks."
             : "Registration card prints on one A4 page with no margins."}

@@ -2,9 +2,10 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { nextCertificateNumber } from "@/app/actions/admin-certificates";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { Panel } from "@/components/admin/ui";
 import { MultiUploadField } from "@/components/admin/multi-upload-field";
@@ -331,6 +332,7 @@ function FieldGrid({
           key={field.name}
           field={field}
           value={values[field.name]}
+          values={values}
           error={errors[field.name]}
           setValue={setValue}
         />
@@ -342,11 +344,13 @@ function FieldGrid({
 function FieldControl({
   field,
   value,
+  values,
   error,
   setValue,
 }: {
   field: FieldDef;
   value: FormValues[string];
+  values: FormValues;
   error?: string;
   setValue: (name: string, value: FormValues[string]) => void;
 }) {
@@ -382,17 +386,35 @@ function FieldControl({
         </Label>
       )}
 
-      {field.type === "text" && (
-        <Input
-          id={id}
-          value={String(value ?? "")}
-          onChange={(event) => setValue(field.name, event.target.value)}
-          placeholder={field.placeholder}
-          dir={field.latin ? "ltr" : undefined}
-          aria-invalid={error ? true : undefined}
-          className={inputClass}
-        />
-      )}
+      {field.type === "text" &&
+        (field.generator ? (
+          <div className="flex min-w-0 gap-2">
+            <Input
+              id={id}
+              value={String(value ?? "")}
+              onChange={(event) => setValue(field.name, event.target.value)}
+              placeholder={field.placeholder}
+              dir={field.latin ? "ltr" : undefined}
+              aria-invalid={error ? true : undefined}
+              className={cn(inputClass, "min-w-0 flex-1")}
+            />
+            <GenerateButton
+              disabled={Boolean(value)}
+              onGenerate={() => generate(field, values)}
+              onResult={(next) => setValue(field.name, next)}
+            />
+          </div>
+        ) : (
+          <Input
+            id={id}
+            value={String(value ?? "")}
+            onChange={(event) => setValue(field.name, event.target.value)}
+            placeholder={field.placeholder}
+            dir={field.latin ? "ltr" : undefined}
+            aria-invalid={error ? true : undefined}
+            className={inputClass}
+          />
+        ))}
 
       {field.type === "number" && (
         <Input
@@ -549,4 +571,62 @@ function FieldControl({
       )}
     </div>
   );
+}
+
+/**
+ * Fills a field from the server: the certificate number generator takes the
+ * next number in its series (Site Settings -> Certificates & cards). The
+ * button is disabled once the field has a value, so an issued number is never
+ * silently replaced.
+ */
+function GenerateButton({
+  disabled,
+  onGenerate,
+  onResult,
+}: {
+  disabled: boolean;
+  onGenerate: () => Promise<
+    { ok: true; certificateNo: string } | { ok: false; error: string }
+  >;
+  onResult: (value: string) => void;
+}) {
+  const [pending, startTransition] = useTransition();
+
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="cta"
+      className="shrink-0"
+      disabled={disabled || pending}
+      title={disabled ? "Clear the field first to generate a new number." : undefined}
+      onClick={() =>
+        startTransition(async () => {
+          const result = await onGenerate();
+          if (result.ok) onResult(result.certificateNo);
+          else toast.error(result.error);
+        })
+      }
+    >
+      {pending ? (
+        <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+      ) : (
+        <Wand2 className="size-4" aria-hidden="true" />
+      )}
+      Generate
+    </Button>
+  );
+}
+
+function generate(field: FieldDef, values: FormValues) {
+  switch (field.generator) {
+    case "certificate-no":
+      return nextCertificateNumber({
+        courseId: String(values.courseId ?? ""),
+        type: String(values.type ?? ""),
+        issuedAt: String(values.issuedAt ?? ""),
+      });
+    default:
+      return Promise.resolve({ ok: false as const, error: "Nothing to generate." });
+  }
 }

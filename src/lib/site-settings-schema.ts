@@ -243,6 +243,8 @@ export const siteSettingsSchema = z.object({
       certificateFooterEn: optionalString,
       /** Prefix for generated numbers, e.g. "MUTI". */
       certificatePrefix: optionalString,
+      /** Shape of a generated certificate number; see src/lib/certificate-number.ts. */
+      certificateNumberFormat: optionalString,
       /** Up to three signatories, printed left to right. */
       sign1Name: optionalString,
       sign1Title: optionalString,
@@ -427,6 +429,7 @@ export const defaultSiteSettings: SiteSettings = siteSettingsSchema.parse({
     certificateFooterEn:
       "This certificate is issued without any alteration or erasure.",
     certificatePrefix: "MUTI",
+    certificateNumberFormat: "{prefix}-{course}-{year}-{seq:4}",
     // TODO: the owner supplies signatory names, designations and signature images.
     sign1Name: "",
     sign1Title: "Chief Instructor",

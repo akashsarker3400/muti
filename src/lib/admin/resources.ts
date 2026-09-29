@@ -1862,7 +1862,9 @@ const issuedCertificateResource: ResourceConfig = {
           type: "text",
           required: true,
           latin: true,
-          placeholder: "MUTI-C-2026-0117",
+          generator: "certificate-no",
+          placeholder: "MUTI-CMU-2026-0001",
+          hint: "Pick the course first, then press Generate to take the next number in the series. Type it by hand for an older certificate; a hand-typed number is never handed out again.",
         },
         {
           name: "studentId",

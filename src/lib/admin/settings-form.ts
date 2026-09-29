@@ -530,7 +530,16 @@ export const settingsFormSections: FormSection[] = [
         label: "Certificate number prefix",
         type: "text",
         latin: true,
-        hint: "Used when the admin suggests the next number, e.g. MUTI-CMU-2026-0001.",
+        hint: "The {prefix} part of the number below, e.g. MUTI.",
+      },
+      {
+        name: "documents.certificateNumberFormat",
+        label: "Certificate number format",
+        type: "text",
+        latin: true,
+        full: true,
+        placeholder: "{prefix}-{course}-{year}-{seq:4}",
+        hint: "Pressing “Generate” on a certificate fills this in and takes the next number in the series. Parts you can use: {prefix}, {course} (course code), {type} (C/S/B), {year}, {yy}, {month}, {seq} — write {seq:4} to pad to four digits. Each prefix + course + year combination counts on its own, so “{prefix}-{course}-{year}-{seq:4}” gives MUTI-CMU-2026-0001, 0002, and starts again at 0001 for DMU or for 2027. Numbers already typed by hand are never reused.",
       },
       {
         name: "documents.sealImage",

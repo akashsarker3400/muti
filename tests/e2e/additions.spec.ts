@@ -342,13 +342,20 @@ test.describe("printed documents", () => {
     await page.getByRole("button", { name: "Save" }).click();
     await page.waitForURL(/\/admin\/students$/);
 
-    const certNo = `DOC-C-${id}`.toUpperCase();
+    // The number generator takes the next one in the series, then the office
+    // can still overwrite it for an older certificate.
     await page.goto("/admin/certificates/new");
+    await page.locator("#field-courseId").selectOption({ index: 1 });
+    await page.getByRole("button", { name: "Generate" }).click();
+    await expect(page.locator("#field-certificateNo")).not.toHaveValue("");
+    const generated = await page.locator("#field-certificateNo").inputValue();
+    expect(generated).toMatch(/^[A-Z]+-[A-Z-]+-\d{4}-\d{4}$/);
+
+    const certNo = `DOC-C-${id}`.toUpperCase();
     await page.locator("#field-certificateNo").fill(certNo);
     await page
       .locator("#field-studentId")
       .selectOption({ label: `${roll} — Dr. Document ${id}` });
-    await page.locator("#field-courseId").selectOption({ index: 1 });
     await page.getByRole("button", { name: "Save" }).click();
     await page.waitForURL(/\/admin\/certificates$/);
 

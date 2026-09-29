@@ -36,6 +36,8 @@ export type FieldDef = {
   latin?: boolean;
   /** Upload size cap in MB for image/file fields (default 10). */
   maxMb?: number;
+  /** Renders a button beside a text field that fills it in from the server. */
+  generator?: "certificate-no";
 };
 
 export type FormSection = {

@@ -73,6 +73,7 @@ const NEVER_BLANK: Record<keyof SiteSettings, string[]> = {
     "certificateLeadEn",
     "certificateFooterEn",
     "certificatePrefix",
+    "certificateNumberFormat",
   ],
   // The seeded TODO copy must reach the admin so the office sees what to
   // replace; a blank field would otherwise hide whole sections silently.

@@ -75,6 +75,9 @@ export default async function CertificatePrintPage({
     <div className="mx-auto w-fit">
       <style>{`
         @page { size: A4 landscape; margin: 0 }
+        /* Plain paper: the office prints the whole design, so the colours must
+           come out without anyone having to tick "background graphics". */
+        .sheet { print-color-adjust: exact; -webkit-print-color-adjust: exact }
         @media print {
           body { background: white }
           nav, aside, header, .no-print { display: none !important }
@@ -85,8 +88,8 @@ export default async function CertificatePrintPage({
 
       <div className="no-print mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-[color:var(--bg-soft)] p-3 text-sm">
         <span className="text-[color:var(--muted-foreground)]">
-          A4 landscape. In the print dialog set margins to None and turn on background
-          graphics, or the border and seal will not print.
+          A4 landscape on plain white paper. In the print dialog set margins to None;
+          the border, seal and colours are printed with the page.
         </span>
         <PrintButton label="Print certificate" />
       </div>

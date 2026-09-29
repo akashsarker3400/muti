@@ -16,8 +16,16 @@ live now:
   line, three signatories with signature images, seal, watermark, card validity
   and the numbered card rules.
 
-Stages 2B (visual template editor) and 3 (bulk issue, number series, approval,
-print log) are still open and described below.
+Also built, on the owner's instruction (29 Sep): the **certificate number
+series**. The shape is set once in Site Settings (`{prefix}-{course}-{year}-{seq:4}`
+by default) and the **Generate** button on a certificate takes the next number
+in that series from an atomic counter, skipping any number the office typed by
+hand. Printing is on **plain white paper**: the whole design is printed, and
+the pages force colour output so nobody has to remember the "background
+graphics" checkbox.
+
+Still open from stage 3: bulk issue for a whole batch, the approval step, the
+print log and the delivery record. Stage 2B (visual template editor) is open.
 
 The goal is to replace the two jobs the office does by hand today:
 
@@ -138,11 +146,18 @@ Available field keys: `studentName`, `studentNameBn`, `fatherName`,
 This is what turns a generator into a system, and it is the part that protects
 the institute.
 
-**Issue in bulk.** Select a batch, see every student with their status, tick the
-ones who passed, press "Issue certificates". The system allocates certificate
-numbers from a defined series (`MUTI-CMU-2026-0001`, configurable pattern with a
-running counter per course and year), writes the `Certificate` rows, and
-produces one PDF with all of them for the press.
+**Number series (BUILT).** `documents.certificateNumberFormat` in Site Settings
+holds the pattern; `{prefix}`, `{course}`, `{type}`, `{year}`, `{yy}`, `{month}`
+and `{seq}` (with `{seq:4}` to pad) are substituted, and everything except
+`{seq}` forms the series key. Each series has its own row in `Counter`, so two
+people issuing at the same moment cannot be handed the same number, and the
+result is checked against the table before it is returned, so a number the
+office typed by hand is never handed out twice. See `src/lib/certificate-number.ts`.
+
+**Issue in bulk (open).** Select a batch, see every student with their status,
+tick the ones who passed, press "Issue certificates": the system allocates the
+numbers from the series above, writes the `Certificate` rows, and produces one
+document with all of them for printing.
 
 **Never two numbers for one student.** A unique constraint on
 (student, course, type) already exists in spirit; make it explicit, and make
@@ -230,7 +245,9 @@ the admin, so no visitor downloads them.
    continues rather than restarting.
 3. **Who signs**: names, designations, and signature images for each signatory,
    plus whether the seal is printed or stamped by hand.
-4. **Paper**: pre-printed stock, or plain paper with the full design printed?
+4. ~~**Paper**: pre-printed stock, or plain paper?~~ **Answered: plain white
+   paper, full design printed.** 120 gsm or heavier is worth buying for the
+   certificate; ordinary 80 gsm looks thin for something a doctor frames.
 5. **Card printing**: does the office print cards itself (PVC printer), use a
    press, or laminate A4 prints?
 6. **Language**: Bangla, English, or both on one document.

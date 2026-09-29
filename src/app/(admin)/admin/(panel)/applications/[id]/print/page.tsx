@@ -51,6 +51,9 @@ export default async function ApplicationPrintPage({
     <div className="mx-auto max-w-[820px] bg-white p-8 text-black print:max-w-none print:p-0">
       <style>{`
         @page { size: A4; margin: 14mm }
+        /* Plain paper: the office prints the whole design, so the colours must
+           come out without anyone having to tick "background graphics". */
+        .sheet { print-color-adjust: exact; -webkit-print-color-adjust: exact }
         @media print {
           body { background: white }
           nav, aside, header, .no-print { display: none !important }
