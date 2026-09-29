@@ -433,6 +433,28 @@ test.describe("printed documents", () => {
       await deleteTableRow(page, "/admin/students", roll).catch(() => undefined);
     }
   });
+
+  test("the admission form prints on one A4 page with its letterhead", async ({
+    page,
+  }) => {
+    await page.goto("/admin/applications");
+    await page.getByRole("button", { name: "Details" }).first().click();
+    const href = await page
+      .getByRole("link", { name: "Print form" })
+      .getAttribute("href");
+    await page.goto(href!);
+    await page.emulateMedia({ media: "print" });
+
+    // The print CSS hides the admin chrome; the letterhead must survive it.
+    const sheet = page.locator(".sheet");
+    await expect(sheet.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(sheet.getByText("Authorised signature, MUTI")).toBeVisible();
+    const overflow = await sheet.evaluate((el) => el.scrollHeight - el.clientHeight);
+    expect(overflow).toBeLessThanOrEqual(1);
+
+    const pdf = await PDFDocument.load(await page.pdf({ preferCSSPageSize: true }));
+    expect(pdf.getPageCount()).toBe(1);
+  });
 });
 
 test.describe("admin security", () => {
