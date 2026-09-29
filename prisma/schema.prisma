@@ -322,6 +322,7 @@ model Batch {
   seatsFilledManual Boolean @default(false)
   showSeatCounter   Boolean @default(true)
 
+  exams        Exam[]
   sessions     ClassSession[]
   students     Student[]
   boardExams   BoardExam[]
@@ -446,6 +447,7 @@ model Student {
 
   feePlan      FeePlan?
   payments     Payment[]
+  marks        Mark[]
   attendance   Attendance[]
   certificates Certificate[]
   boardResults BoardResult[]
@@ -1352,4 +1354,45 @@ model Payment {
 
   @@index([studentId, paidAt])
   @@index([paidAt])
+}
+
+/// An internal examination of one batch (addendum 2, B3). The board's own
+/// examinations stay in `BoardExam`: this is the institute's own marks.
+model Exam {
+  id          String    @id @default(cuid())
+  batchId     String
+  batch       Batch     @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  name        String
+  date        DateTime?
+  fullMarks   Int       @default(100)
+  passMarks   Int       @default(40)
+  /// Publishing writes the result notice students can see.
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  note        String?
+
+  marks Mark[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([batchId, date])
+}
+
+model Mark {
+  id        String  @id @default(cuid())
+  examId    String
+  exam      Exam    @relation(fields: [examId], references: [id], onDelete: Cascade)
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  /// Null means the student did not sit the examination.
+  marks     Int?
+  grade     String?
+  remark    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([examId, studentId])
+  @@index([studentId])
 }

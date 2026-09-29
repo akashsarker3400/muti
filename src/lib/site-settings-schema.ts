@@ -163,6 +163,11 @@ export const siteSettingsSchema = z.object({
   results: z
     .object({
       subjectCodes: optionalString,
+      /**
+       * Grade bands, one "from=grade=point" per line. Empty uses the BTEB
+       * scale, which is what these students sit their board exams under.
+       */
+      gradeScale: optionalString,
     })
     .prefault({}),
   /** Addendum 3 §6 — full-width hero slider behaviour. */
@@ -385,6 +390,8 @@ export const defaultSiteSettings: SiteSettings = siteSettingsSchema.parse({
   results: {
     // TODO: real subject names from the BTEB syllabus (addendum 3, §2).
     subjectCodes: "",
+    // Empty means the BTEB scale in src/lib/grades.ts.
+    gradeScale: "",
   },
   hero: {},
   health: {

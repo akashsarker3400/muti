@@ -18,7 +18,8 @@ export type TemplateKey =
   | "certificate-ready"
   | "payment-received"
   | "installment-due"
-  | "installment-overdue";
+  | "installment-overdue"
+  | "result-published";
 
 /**
  * The wording the office starts with. Bangla, because the recipients are
@@ -87,6 +88,13 @@ export const DEFAULT_TEMPLATES: Array<{
     channel: "SMS",
     body: "{name}, আপনার {amount} টাকার কিস্তির তারিখ পেরিয়ে গেছে। অফিসে যোগাযোগ করুন। {institute}",
     note: "Automatic, once an instalment passes its grace week.",
+  },
+  {
+    key: "result-published",
+    name: "Result published",
+    channel: "SMS",
+    body: "{name}, {course} পরীক্ষার ফল প্রকাশিত হয়েছে। অফিসে যোগাযোগ করুন বা ওয়েবসাইটে দেখুন। {institute}",
+    note: "Sent to the batch when an examination's result is published.",
   },
   {
     key: "certificate-ready",

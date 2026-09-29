@@ -101,6 +101,10 @@ database access, so nothing can be prerendered at build time.
   own receipts by `restateInstallment`, never incremented, so the two cannot
   drift. A payment is voided with a reason, never deleted: a receipt that was
   handed over is a fact. Receipt numbers come from the same atomic `Counter`.
+- Marks: the grade is computed from the mark (`src/lib/grades.ts`), never
+  typed, because a grade and a mark that disagree is the mistake nobody spots
+  until a student brings the sheet back. A blank mark means "did not sit" and
+  stays null all the way to the database; it is not a zero.
 - Named permissions live in `src/lib/permissions.ts`; guard a page or action
   with `requirePermission("…")`. A resource in `src/lib/admin/resources.ts`
   declares its own `permission` and the generic pages enforce it.

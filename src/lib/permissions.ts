@@ -28,6 +28,7 @@ export const PERMISSIONS = [
   "fees.collect",
   "fees.edit",
   "payments.void",
+  "exams.manage",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -54,6 +55,7 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   "fees.collect": "Take a payment and issue a receipt",
   "fees.edit": "Change a fee plan, its installments or a discount",
   "payments.void": "Void a payment that was taken in error",
+  "exams.manage": "Add examinations and enter marks",
 };
 
 /**
@@ -79,6 +81,7 @@ const STAFF_DEFAULTS: ReadonlySet<Permission> = new Set([
   "attendance.view",
   "fees.view",
   "fees.collect",
+  "exams.manage",
 ]);
 
 /**
@@ -91,6 +94,7 @@ const TEACHER_DEFAULTS: ReadonlySet<Permission> = new Set([
   "attendance.view",
   "fees.view",
   "fees.collect",
+  "exams.manage",
 ]);
 
 export function hasPermission(

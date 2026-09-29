@@ -9,6 +9,7 @@ import {
   ListChecks,
   Minus,
   Printer,
+  Table2,
   Upload,
   Wallet,
 } from "lucide-react";
@@ -283,6 +284,19 @@ export default async function ResourceListPage({
                               <Link href={`/admin/batches/${id}/sessions`}>
                                 <ClipboardCheck className="size-4" aria-hidden="true" />
                                 Classes
+                              </Link>
+                            </Button>
+                          )}
+                          {resource.rowTool === "batch-clone" && (
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="sm"
+                              className="me-2"
+                            >
+                              <Link href={`/admin/batches/${id}/exams`}>
+                                <Table2 className="size-4" aria-hidden="true" />
+                                Exams
                               </Link>
                             </Button>
                           )}

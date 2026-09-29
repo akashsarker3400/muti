@@ -604,6 +604,15 @@ export const settingsFormSections: FormSection[] = [
     label: "Results & verification",
     fields: [
       {
+        name: "results.gradeScale",
+        label: "Grade scale",
+        type: "textarea",
+        full: true,
+        latin: true,
+        placeholder: "80=A+=4.00",
+        hint: "One band per line: percentage from, grade, grade point. Leave empty to use the BTEB scale, which is what these students sit their board examinations under.",
+      },
+      {
         name: "results.subjectCodes",
         label: "Subject code names",
         type: "textarea",
