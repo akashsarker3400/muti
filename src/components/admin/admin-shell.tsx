@@ -45,6 +45,7 @@ import {
   Megaphone,
 } from "lucide-react";
 
+import { Logo } from "@/components/site/logo";
 import { Button } from "@/components/ui/button";
 import type { Role } from "@/generated/prisma/enums";
 import { cn } from "cn";
@@ -180,10 +181,13 @@ export function AdminShell({
   user,
   signOutAction,
   siteUrl,
+  logo,
   children,
 }: {
   user: { name: string; email: string; role: Role };
   signOutAction: () => Promise<void>;
+  /** Logo uploaded under Site Settings → Branding; empty = the placeholder. */
+  logo?: string;
   /**
    * Absolute address of the public site. When the panel is served from its own
    * hostname (ADMIN_HOST), "/" is the dashboard, so this link has to be
@@ -213,11 +217,19 @@ export function AdminShell({
         )}
       >
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-[color:var(--sidebar-border)] px-4">
-          <Link href="/admin" className="flex items-center gap-2">
-            <span className="grid size-8 place-items-center rounded-lg bg-white/10 text-sm font-bold text-white">
-              M
+          <Link href="/admin" className="flex items-center gap-2.5">
+            {/* The institute mark sits on a white tile: the uploaded logo has
+                its own white background, which would otherwise float as a
+                rectangle on the navy sidebar. */}
+            <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-lg bg-white p-1">
+              <Logo src={logo} size={40} className="size-full" />
             </span>
-            <span className="font-latin text-lg font-bold text-white">MUTI Admin</span>
+            <span className="flex flex-col leading-tight">
+              <span className="font-latin text-base font-bold text-white">
+                MUTI Admin
+              </span>
+              <span className="text-[11px] text-white/50">Control panel</span>
+            </span>
           </Link>
           <button
             type="button"

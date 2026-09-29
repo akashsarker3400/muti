@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/components/admin/login-form";
+import { Logo } from "@/components/site/logo";
 import { currentAdmin } from "@/lib/admin-auth";
+import { getSiteSettings } from "@/lib/site-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -19,12 +21,14 @@ export default async function AdminLoginPage({
     redirect(safeNext(next));
   }
 
+  const settings = await getSiteSettings();
+
   return (
     <div className="grid min-h-dvh place-items-center p-4">
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
-          <span className="mx-auto grid size-12 place-items-center rounded-xl bg-[color:var(--brand)] text-lg font-bold text-white">
-            M
+          <span className="mx-auto grid size-20 place-items-center overflow-hidden rounded-2xl border border-[color:var(--border)] bg-white p-1.5 shadow-sm">
+            <Logo src={settings.branding.logo} size={80} className="size-full" />
           </span>
           <h1 className="mt-4 text-xl font-semibold">MUTI admin panel</h1>
           <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">
