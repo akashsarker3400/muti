@@ -1,11 +1,16 @@
 import nodemailer, { type Transporter } from "nodemailer";
 
+import { brevoConfigured, sendViaBrevo } from "@/lib/brevo";
 import { optionalEnv, smtpConfigured } from "@/lib/env";
 
 /**
- * Application notification emails (section 2). SMTP is optional: when it is
- * not configured the message is logged instead, so a missing Gmail app
- * password can never lose an application — the row is already in Postgres.
+ * Outgoing email (section 2). Three routes, tried in order:
+ *
+ *  1. **Brevo** over its HTTP API when `BREVO_API_KEY` is set. Preferred: it
+ *     reports delivery and bounces, which SMTP from a container does not.
+ *  2. **SMTP** when those variables are set.
+ *  3. **The log**, so a missing key or password can never lose an
+ *     application: the row is already in Postgres either way.
  */
 
 let cached: Transporter | null = null;
@@ -56,6 +61,13 @@ export async function sendMail({
     return { sent: false, reason: "no recipients configured" };
   }
 
+  if (brevoConfigured) {
+    const result = await sendViaBrevo({ to, subject, text, html, replyTo });
+    // A Brevo failure falls through to SMTP rather than dropping the message.
+    if (result.sent) return result;
+    if (!smtpConfigured) return result;
+  }
+
   const transport = transporter();
   if (!transport) {
     console.info(
@@ -66,7 +78,7 @@ export async function sendMail({
 
   try {
     await transport.sendMail({
-      from: `"MUTI Website" <${optionalEnv("SMTP_USER")}>`,
+      from: `"${optionalEnv("MAIL_FROM_NAME") ?? "MUTI"}" <${optionalEnv("MAIL_FROM") ?? optionalEnv("SMTP_USER")}>`,
       to: to.join(", "),
       replyTo,
       subject,

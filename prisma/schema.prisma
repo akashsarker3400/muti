@@ -169,8 +169,21 @@ model User {
   /// See src/lib/permissions.ts. SUPER_ADMIN always has everything.
   permissions  String[] @default([])
   active       Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+
+  /// Two-factor authentication (TOTP). The secret is stored encrypted with a
+  /// key derived from AUTH_SECRET, so a database dump alone does not hand over
+  /// anyone's authenticator. Null means 2FA is off for this account.
+  totpSecret    String?
+  totpEnabledAt DateTime?
+  /// One-time recovery codes, bcrypt-hashed. A used code is removed.
+  backupCodes   String[]  @default([])
+  /// Failed sign-in attempts since the last success, for account lockout.
+  failedLogins  Int       @default(0)
+  lockedUntil   DateTime?
+  lastLoginAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   logs       ActivityLog[]
   importJobs ImportJob[]

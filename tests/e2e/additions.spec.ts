@@ -404,3 +404,45 @@ test.describe("printed documents", () => {
     }
   });
 });
+
+test.describe("admin security", () => {
+  test("the security page offers two-factor and states the lockout policy", async ({
+    page,
+  }) => {
+    await page.goto("/admin/security");
+    await expect(
+      page.getByRole("heading", { name: "Two-factor authentication" }),
+    ).toBeVisible();
+    await expect(page.getByText(/Eight failed attempts lock an account/)).toBeVisible();
+
+    // Enrolment renders a QR and offers the key for manual entry, and nothing
+    // is stored until a code confirms it.
+    await page.getByRole("button", { name: "Turn on" }).click();
+    await expect(page.locator("svg[aria-label='QR code']")).toBeVisible();
+    await page.getByText("Cannot scan the code?").click();
+    await expect(page.locator("code")).toContainText(/^[A-Z2-7]{16,}$/);
+
+    // A wrong code does not enable it.
+    await page.locator("#totp-code").fill("000000");
+    await page.getByRole("button", { name: "Turn on" }).click();
+    await expect(page.getByText(/did not match/)).toBeVisible();
+    await page.goto("/admin/security");
+    await expect(page.getByRole("button", { name: "Turn on" })).toBeVisible();
+  });
+
+  test("security headers are served on the public site", async ({ page }) => {
+    const response = await page.request.get("/");
+    const headers = response.headers();
+    expect(headers["x-frame-options"]).toBe("DENY");
+    expect(headers["x-content-type-options"]).toBe("nosniff");
+    expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+    expect(headers["content-security-policy"]).toContain("frame-ancestors 'none'");
+    expect(headers["content-security-policy"]).toContain("form-action 'self'");
+    expect(headers["strict-transport-security"]).toContain("max-age=");
+  });
+
+  test("the admin panel is never indexable", async ({ page }) => {
+    const response = await page.request.get("/admin/login");
+    expect(response.headers()["x-robots-tag"]).toContain("noindex");
+  });
+});

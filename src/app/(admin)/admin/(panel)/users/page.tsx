@@ -1,5 +1,8 @@
+import { ShieldCheck } from "lucide-react";
+
 import { deleteUser } from "@/app/actions/admin-users";
 import { RowActions } from "@/components/admin/row-actions";
+import { UserSecurityActions } from "@/components/admin/user-security-actions";
 import { AdminBadge, AdminPageHeader, NewButton, Panel } from "@/components/admin/ui";
 import { requireSuperAdmin } from "@/lib/admin-auth";
 import { formatDate } from "@/lib/format";
@@ -55,6 +58,15 @@ export default async function AdminUsersPage() {
                   <td className="px-4 py-2.5">
                     <span className="font-medium">{user.name}</span>
                     {!user.active && <AdminBadge tone="danger">Inactive</AdminBadge>}
+                    {user.totpEnabledAt && (
+                      <AdminBadge tone="success">
+                        <ShieldCheck className="me-1 size-3" aria-hidden="true" />
+                        2FA
+                      </AdminBadge>
+                    )}
+                    {user.lockedUntil && user.lockedUntil > new Date() && (
+                      <AdminBadge tone="danger">Locked</AdminBadge>
+                    )}
                   </td>
                   <td className="px-4 py-2.5 font-latin">{user.email}</td>
                   <td className="px-4 py-2.5">
@@ -68,6 +80,14 @@ export default async function AdminUsersPage() {
                     {formatDate(user.createdAt, "en")}
                   </td>
                   <td className="px-4 py-2.5">
+                    <UserSecurityActions
+                      userId={user.id}
+                      name={user.name}
+                      locked={Boolean(
+                        user.lockedUntil && user.lockedUntil > new Date(),
+                      )}
+                      twoFactor={Boolean(user.totpEnabledAt)}
+                    />
                     <RowActions
                       editHref={`/admin/users/${user.id}`}
                       label={user.name}

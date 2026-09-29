@@ -11,11 +11,17 @@ import { Label } from "@/components/ui/label";
 const MESSAGES = {
   invalid: "Incorrect email or password.",
   rateLimited: "Too many attempts. Please try again in a few minutes.",
+  locked:
+    "This account is locked after too many failed attempts. Try again in 15 minutes, or ask a super admin to unlock it.",
+  "2fa_invalid": "That code did not match. Check your authenticator and try again.",
 } as const;
 
 export function LoginForm({ next }: { next: string }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<keyof typeof MESSAGES | null>(null);
+  // The form only learns an account has 2FA after the password was accepted,
+  // so the code field appears on the second step rather than always.
+  const [needsCode, setNeedsCode] = useState(false);
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -27,8 +33,17 @@ export function LoginForm({ next }: { next: string }) {
         String(form.get("email") ?? ""),
         String(form.get("password") ?? ""),
         next,
+        String(form.get("code") ?? ""),
       );
-      if (!result.ok) setError(result.error ?? "invalid");
+      if (result.ok) return;
+      if (result.error === "2fa_required") {
+        setNeedsCode(true);
+        return;
+      }
+      if (result.error === "2fa_invalid") setNeedsCode(true);
+      setError(
+        result.error === "rateLimited" ? "rateLimited" : (result.error ?? "invalid"),
+      );
     });
   }
 
@@ -81,6 +96,26 @@ export function LoginForm({ next }: { next: string }) {
         />
       </div>
 
+      {needsCode && (
+        <div className="space-y-1.5">
+          <Label htmlFor="code">Authentication code</Label>
+          <Input
+            id="code"
+            name="code"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            autoFocus
+            placeholder="123456"
+            dir="ltr"
+            className="h-11 font-latin tracking-[0.3em]"
+          />
+          <p className="text-xs text-[color:var(--muted-foreground)]">
+            The six-digit code from your authenticator app. Lost your phone? Type one of
+            your backup codes instead.
+          </p>
+        </div>
+      )}
+
       <Button
         type="submit"
         variant="brand"
@@ -88,7 +123,7 @@ export function LoginForm({ next }: { next: string }) {
         disabled={pending}
         className="w-full"
       >
-        {pending ? "Signing in…" : "Sign in"}
+        {pending ? "Signing in…" : needsCode ? "Verify and sign in" : "Sign in"}
       </Button>
     </form>
   );

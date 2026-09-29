@@ -79,6 +79,15 @@ database access, so nothing can be prerendered at build time.
 - Health appointments are health data (addendum 4 §5): never render a
   patient's name or phone on a public page, and keep `anonymizeOldAppointments`
   in the path of anything that lists them.
+- Email goes through Brevo (`BREVO_API_KEY`) with SMTP as fallback and the log
+  as the last resort; `sendMail()` in `src/lib/mail.ts` is still the only entry
+  point. A failed send must never fail a visitor's submission.
+- Admin 2FA is TOTP (`src/lib/totp.ts`, unit tested). The secret is encrypted
+  at rest with a key derived from `AUTH_SECRET`. Auth.js needs a
+  `CredentialsSignin` **subclass** per outcome, because the constructor
+  argument is the message, not the `code` the client reads.
+- Security headers live in `next.config.ts`; add a new embed origin to the CSP
+  there or the iframe will silently fail.
 - `ADMIN_HOST` (optional) serves the admin panel from its own hostname; the
   routing rules live in `src/lib/admin-host.ts` and are unit tested. Links from
   the admin to the public site must be absolute (`siteUrl`), not `/`.
