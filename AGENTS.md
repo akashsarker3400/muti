@@ -95,6 +95,12 @@ database access, so nothing can be prerendered at build time.
   looks at sessions marked DONE. A `TEACHER` account sees only
   `/admin/my-classes` and may mark only sessions whose `Faculty.userId` is
   theirs; the office may mark anybody's.
+- Money is whole Taka in an `Int`, never a float: `src/lib/fees-math.ts` holds
+  the arithmetic (and is unit tested without a database), `src/lib/fees.ts` the
+  database side. An instalment's `paidAmount` is always **re-read** from its
+  own receipts by `restateInstallment`, never incremented, so the two cannot
+  drift. A payment is voided with a reason, never deleted: a receipt that was
+  handed over is a fact. Receipt numbers come from the same atomic `Counter`.
 - Named permissions live in `src/lib/permissions.ts`; guard a page or action
   with `requirePermission("…")`. A resource in `src/lib/admin/resources.ts`
   declares its own `permission` and the generic pages enforce it.

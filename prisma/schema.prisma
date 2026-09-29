@@ -196,6 +196,8 @@ model User {
   approvedCertificates Certificate[]      @relation("CertificateApprover")
   issuedCertificates   Certificate[]      @relation("CertificateIssuer")
   certificatePrints    CertificatePrint[]
+  paymentsTaken        Payment[]
+  paymentsVoided       Payment[]          @relation("PaymentVoider")
   messages             MessageLog[]
   faculty              Faculty?
   attendanceMarked     Attendance[]
@@ -442,6 +444,8 @@ model Student {
   boardRoll           String?   @unique
   boardRegistrationNo String?
 
+  feePlan      FeePlan?
+  payments     Payment[]
   attendance   Attendance[]
   certificates Certificate[]
   boardResults BoardResult[]
@@ -1265,4 +1269,87 @@ model Attendance {
 
   @@unique([sessionId, studentId])
   @@index([studentId])
+}
+
+enum InstallmentStatus {
+  DUE
+  PARTIAL
+  PAID
+  OVERDUE
+}
+
+enum PaymentMethod {
+  CASH
+  BKASH
+  NAGAD
+  BANK
+  ONLINE
+}
+
+/// What one student owes (addendum 2, B2). Money is whole Taka in an Int:
+/// no paisa is charged here, and a float would eventually lose a rupee.
+model FeePlan {
+  id             String  @id @default(cuid())
+  studentId      String  @unique
+  student        Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseFee      Int
+  otherFees      Int     @default(0)
+  discount       Int     @default(0)
+  discountReason String?
+  /// courseFee + otherFees - discount, stored so a later change to the course
+  /// price cannot silently rewrite what a student was told they owe.
+  total          Int
+  note           String?
+
+  installments Installment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Installment {
+  id         String            @id @default(cuid())
+  feePlanId  String
+  feePlan    FeePlan           @relation(fields: [feePlanId], references: [id], onDelete: Cascade)
+  seq        Int
+  label      String
+  dueDate    DateTime
+  amount     Int
+  paidAmount Int               @default(0)
+  status     InstallmentStatus @default(DUE)
+
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([feePlanId, seq])
+  @@index([status, dueDate])
+}
+
+/// One payment taken at the desk or online. Never deleted: a receipt that
+/// was handed over is a fact, so a mistake is voided with a reason instead.
+model Payment {
+  id            String        @id @default(cuid())
+  receiptNo     String        @unique
+  studentId     String
+  student       Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  installmentId String?
+  installment   Installment?  @relation(fields: [installmentId], references: [id], onDelete: SetNull)
+  amount        Int
+  method        PaymentMethod @default(CASH)
+  reference     String?
+  receivedById  String?
+  receivedBy    User?         @relation(fields: [receivedById], references: [id], onDelete: SetNull)
+  paidAt        DateTime      @default(now())
+  note          String?
+  voidedAt      DateTime?
+  voidReason    String?
+  voidedById    String?
+  voidedBy      User?         @relation("PaymentVoider", fields: [voidedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([studentId, paidAt])
+  @@index([paidAt])
 }

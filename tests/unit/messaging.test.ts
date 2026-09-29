@@ -58,6 +58,8 @@ describe("template rendering", () => {
       "roll",
       "institute",
       "phone",
+      "amount",
+      "receipt",
     ]);
     for (const template of DEFAULT_TEMPLATES) {
       for (const [, key] of template.body.matchAll(/\{(\w+)\}/g)) {

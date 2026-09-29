@@ -24,6 +24,10 @@ export const PERMISSIONS = [
   "messages.manage",
   "attendance.mark",
   "attendance.view",
+  "fees.view",
+  "fees.collect",
+  "fees.edit",
+  "payments.void",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -46,6 +50,10 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   "messages.manage": "Edit message templates and send SMS",
   "attendance.mark": "Mark class attendance",
   "attendance.view": "See attendance registers and percentages",
+  "fees.view": "See fees, installments and payments",
+  "fees.collect": "Take a payment and issue a receipt",
+  "fees.edit": "Change a fee plan, its installments or a discount",
+  "payments.void": "Void a payment that was taken in error",
 };
 
 /**
@@ -69,6 +77,8 @@ const STAFF_DEFAULTS: ReadonlySet<Permission> = new Set([
   "messages.manage",
   "attendance.mark",
   "attendance.view",
+  "fees.view",
+  "fees.collect",
 ]);
 
 /**
@@ -79,6 +89,8 @@ const STAFF_DEFAULTS: ReadonlySet<Permission> = new Set([
 const TEACHER_DEFAULTS: ReadonlySet<Permission> = new Set([
   "attendance.mark",
   "attendance.view",
+  "fees.view",
+  "fees.collect",
 ]);
 
 export function hasPermission(

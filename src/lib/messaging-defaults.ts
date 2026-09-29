@@ -15,7 +15,10 @@ export type TemplateKey =
   | "class-starting"
   | "appointment-confirmed"
   | "appointment-reminder"
-  | "certificate-ready";
+  | "certificate-ready"
+  | "payment-received"
+  | "installment-due"
+  | "installment-overdue";
 
 /**
  * The wording the office starts with. Bangla, because the recipients are
@@ -63,6 +66,27 @@ export const DEFAULT_TEMPLATES: Array<{
     channel: "SMS",
     body: "{name}, আগামীকাল {date} আপনার সিরিয়াল {serial}। {institute}",
     note: "Automatic, the day before the appointment.",
+  },
+  {
+    key: "payment-received",
+    name: "Payment received",
+    channel: "SMS",
+    body: "{name}, আপনার {amount} টাকা জমা হয়েছে। রসিদ নম্বর {receipt}। ধন্যবাদ। {institute}",
+    note: "Sent when the office records a payment.",
+  },
+  {
+    key: "installment-due",
+    name: "Instalment due",
+    channel: "SMS",
+    body: "{name}, আপনার {amount} টাকার কিস্তির শেষ তারিখ {date}। সময়মতো জমা দিন। {institute}",
+    note: "Automatic, on the 1st of the month for instalments due that month.",
+  },
+  {
+    key: "installment-overdue",
+    name: "Instalment overdue",
+    channel: "SMS",
+    body: "{name}, আপনার {amount} টাকার কিস্তির তারিখ পেরিয়ে গেছে। অফিসে যোগাযোগ করুন। {institute}",
+    note: "Automatic, once an instalment passes its grace week.",
   },
   {
     key: "certificate-ready",

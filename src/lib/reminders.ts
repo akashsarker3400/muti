@@ -1,5 +1,6 @@
 import "server-only";
 
+import { markOverdue } from "@/lib/fees";
 import { sendTemplate } from "@/lib/messaging";
 import { formatDate, toBanglaDigits } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
@@ -20,6 +21,7 @@ import { getSiteSettings } from "@/lib/site-settings";
 export type ReminderSummary = {
   classStarting: { sent: number; skipped: number };
   appointments: { sent: number; skipped: number };
+  fees: { markedOverdue: number; sent: number; skipped: number };
 };
 
 /** Midnight-to-midnight window, `days` from today, in the office's own day. */
@@ -137,6 +139,52 @@ async function remindAppointments(institute: string): Promise<{
   return { sent, skipped };
 }
 
+/**
+ * Fees (addendum 2, B2): instalments past their grace week become overdue,
+ * and the student hears about it once.
+ */
+async function remindFees(institute: string): Promise<{
+  markedOverdue: number;
+  sent: number;
+  skipped: number;
+}> {
+  const markedOverdue = await markOverdue();
+
+  const overdue = await prisma.installment.findMany({
+    where: { status: "OVERDUE" },
+    include: {
+      feePlan: {
+        include: { student: { select: { id: true, name: true, phone: true } } },
+      },
+    },
+    take: 200,
+  });
+
+  let sent = 0;
+  let skipped = 0;
+  for (const installment of overdue) {
+    const student = installment.feePlan.student;
+    const result = await sendTemplate({
+      key: "installment-overdue",
+      to: student.phone ?? "",
+      values: {
+        name: student.name,
+        amount: String(installment.amount - installment.paidAmount),
+        date: formatDate(installment.dueDate, "bn"),
+        institute,
+      },
+      entity: "installment",
+      entityId: installment.id,
+      // Once per instalment, ever: an overdue fee must not become a daily text.
+      dedupeKey: `installment-overdue:${installment.id}`,
+    });
+    if (result.sent) sent += 1;
+    else skipped += 1;
+  }
+
+  return { markedOverdue, sent, skipped };
+}
+
 export async function runReminders(): Promise<ReminderSummary> {
   const settings = await getSiteSettings();
   const institute = settings.general.shortName || settings.general.nameEn;
@@ -144,5 +192,6 @@ export async function runReminders(): Promise<ReminderSummary> {
   return {
     classStarting: await remindClassStarting(institute),
     appointments: await remindAppointments(institute),
+    fees: await remindFees(institute),
   };
 }

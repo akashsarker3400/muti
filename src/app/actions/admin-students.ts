@@ -110,6 +110,16 @@ export async function admitApplication(
       await bumpSeatsFilled(application.batchId, 1);
     }
 
+    // The fee plan comes with the admission: half at the desk and the rest
+    // monthly, which is what the office was going to write down anyway.
+    // A failure here must not undo the admission, so it is caught.
+    try {
+      const { createFeePlan } = await import("@/app/actions/admin-fees");
+      await createFeePlan({ studentId: student.id });
+    } catch (error) {
+      console.error("Could not create the fee plan on admission", error);
+    }
+
     await logActivity(admin.id, "admit", "application", application.id);
     await logActivity(admin.id, "create", "student", student.id);
     revalidatePath("/admin/applications");

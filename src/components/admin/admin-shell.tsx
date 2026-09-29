@@ -37,6 +37,7 @@ import {
   ShieldCheck,
   Trophy,
   Users,
+  Wallet,
   X,
   Upload,
   HeartPulse,
@@ -82,6 +83,7 @@ const NAV: NavGroup[] = [
       { href: "/admin/courses", label: "Courses", icon: BookOpen },
       { href: "/admin/batches", label: "Batches", icon: CalendarRange },
       { href: "/admin/students", label: "Students", icon: GraduationCap },
+      { href: "/admin/fees", label: "Fees", icon: Wallet },
       { href: "/admin/course-book", label: "Course book", icon: BookMarked },
       { href: "/admin/certificates", label: "Certificates", icon: Award },
       {

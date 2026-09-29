@@ -32,7 +32,9 @@ export type TemplateValues = Partial<
     | "serial"
     | "roll"
     | "institute"
-    | "phone",
+    | "phone"
+    | "amount"
+    | "receipt",
     string | null | undefined
   >
 >;

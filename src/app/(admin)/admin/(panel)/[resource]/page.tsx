@@ -10,6 +10,7 @@ import {
   Minus,
   Printer,
   Upload,
+  Wallet,
 } from "lucide-react";
 
 import { deleteResource, setResourceFlag } from "@/app/actions/admin-resource";
@@ -224,6 +225,19 @@ export default async function ResourceListPage({
                                 </Link>
                               </Button>
                             </>
+                          )}
+                          {resource.rowTool === "student-card" && (
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="sm"
+                              className="me-2"
+                            >
+                              <Link href={`/admin/students/${id}/fees`}>
+                                <Wallet className="size-4" aria-hidden="true" />
+                                Fees
+                              </Link>
+                            </Button>
                           )}
                           {resource.rowTool === "student-card" && (
                             <Button
